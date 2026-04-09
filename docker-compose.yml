@@ -1,19 +1,19 @@
 services:
 
-  mysql:
-    image: mysql:8.0
-    container_name: auction-mysql
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: auction-postgres
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USERNAME}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USERNAME}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -70,4 +70,4 @@ services:
         condition: service_healthy
 
 volumes:
-  mysql-data:
+  postgres-data:
