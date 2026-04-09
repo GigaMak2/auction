@@ -1,4 +1,4 @@
-package com.example.auction.domain.user;
+package com.example.auction.domain.user.exception;
 
 import com.example.auction.common.exception.ErrorEnumInterface;
 import lombok.Getter;
