@@ -1,5 +1,7 @@
 package com.example.auction.domain.user.controller;
 
+import com.example.auction.common.config.security.CustomUserDetails;
+import com.example.auction.common.config.security.JwtProvider;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.domain.user.dto.UserLoginRequest;
 import com.example.auction.domain.user.dto.UserLoginResponse;
@@ -10,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final JwtProvider jwtProvider;
 
     @PostMapping("/signup")
     public ResponseEntity<BaseResponse<UserSignupResponse>> signup(@Valid @RequestBody UserSignupRequest request) {
@@ -35,5 +39,14 @@ public class UserController {
     public ResponseEntity<BaseResponse<UserLoginResponse>> refreshToken(@RequestHeader("Refresh-Token") String refreshToken) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "토큰 재발급 요청 성공", userService.refreshToken(refreshToken)));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<BaseResponse<Void>> logout(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestHeader("Authorization") String accessToken
+    ) {
+        userService.logout(userDetails.getUserId(), jwtProvider.resolveToken(accessToken));
+        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "로그아웃 요청 성공", null));
     }
 }

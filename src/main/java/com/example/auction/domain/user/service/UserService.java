@@ -28,6 +28,7 @@ public class UserService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
+    private static final String BLACKLIST_PREFIX = "blacklist:";
 
     @Value("${jwt.refreshExpire}")
     private long refreshTokenExpireTime;
@@ -87,5 +88,18 @@ public class UserService {
         String newAccessToken = jwtProvider.createAccessToken(user.getId(), user.getRole().name());
 
         return new UserLoginResponse(newAccessToken, refreshToken);
+    }
+
+    @Transactional
+    public void logout(Long userId, String accessToken) {
+        redisTemplate.delete(REFRESH_TOKEN_PREFIX + userId);
+
+        long remainingTtl = jwtProvider.getRemainingTtl(accessToken);
+        redisTemplate.opsForValue().set(
+                BLACKLIST_PREFIX + accessToken,
+                "logout",
+                remainingTtl,
+                TimeUnit.MILLISECONDS
+        );
     }
 }
