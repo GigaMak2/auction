@@ -1,10 +1,10 @@
-package com.example.auction.domain.user.dto;
+package com.example.auction.domain.auth.dto;
 
 import com.example.auction.domain.user.enums.UserRole;
 
 import java.time.LocalDateTime;
 
-public record UserSignupResponse(
+public record AuthSignupResponse(
         Long userId,
         String email,
         UserRole role,

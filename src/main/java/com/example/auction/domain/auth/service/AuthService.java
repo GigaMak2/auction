@@ -1,11 +1,12 @@
-package com.example.auction.domain.user.service;
+package com.example.auction.domain.auth.service;
 
 import com.example.auction.common.config.security.JwtProvider;
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.user.dto.UserLoginRequest;
-import com.example.auction.domain.user.dto.UserLoginResponse;
-import com.example.auction.domain.user.dto.UserSignupRequest;
-import com.example.auction.domain.user.dto.UserSignupResponse;
+import com.example.auction.domain.auth.dto.AuthLoginRequest;
+import com.example.auction.domain.auth.dto.AuthLoginResponse;
+import com.example.auction.domain.auth.dto.AuthSignupRequest;
+import com.example.auction.domain.auth.dto.AuthSignupResponse;
+import com.example.auction.domain.auth.exception.AuthErrorEnum;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
@@ -20,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -34,9 +35,9 @@ public class UserService {
     private long refreshTokenExpireTime;
 
     @Transactional
-    public UserSignupResponse signup(UserSignupRequest request) {
+    public AuthSignupResponse signup(AuthSignupRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new ServiceErrorException(UserErrorEnum.DUPLICATED_EMAIL);
+            throw new ServiceErrorException(AuthErrorEnum.DUPLICATED_EMAIL);
         }
 
         String encodedPassword = passwordEncoder.encode(request.password());
@@ -44,16 +45,16 @@ public class UserService {
         User user = User.of(request.email(), encodedPassword, request.role());
         userRepository.save(user);
 
-        return new UserSignupResponse(user.getId(), user.getEmail(), user.getRole(), user.getCreatedAt());
+        return new AuthSignupResponse(user.getId(), user.getEmail(), user.getRole(), user.getCreatedAt());
     }
 
     @Transactional
-    public UserLoginResponse login(UserLoginRequest request) {
+    public AuthLoginResponse login(AuthLoginRequest request) {
         User user = userRepository.findByEmail(request.email()).orElseThrow(
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new ServiceErrorException(UserErrorEnum.INVALID_PASSWORD);
+            throw new ServiceErrorException(AuthErrorEnum.INVALID_PASSWORD);
         }
 
         String accessToken = jwtProvider.createAccessToken(user.getId(), user.getRole().name());
@@ -66,20 +67,20 @@ public class UserService {
                 TimeUnit.MILLISECONDS
         );
 
-        return new UserLoginResponse(accessToken, refreshToken);
+        return new AuthLoginResponse(accessToken, refreshToken);
     }
 
     @Transactional
-    public UserLoginResponse refreshToken(String refreshToken) {
+    public AuthLoginResponse refreshToken(String refreshToken) {
         if (!jwtProvider.validateToken(refreshToken)) {
-            throw new ServiceErrorException(UserErrorEnum.INVALID_TOKEN);
+            throw new ServiceErrorException(AuthErrorEnum.INVALID_TOKEN);
         }
 
         Long userId = jwtProvider.getUserId(refreshToken);
 
         String savedToken = (String) redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + userId);
         if (savedToken == null || !savedToken.equals(refreshToken)) {
-            throw new ServiceErrorException(UserErrorEnum.INVALID_TOKEN);
+            throw new ServiceErrorException(AuthErrorEnum.INVALID_TOKEN);
         }
 
         User user = userRepository.findById(userId).orElseThrow(
@@ -87,7 +88,7 @@ public class UserService {
 
         String newAccessToken = jwtProvider.createAccessToken(user.getId(), user.getRole().name());
 
-        return new UserLoginResponse(newAccessToken, refreshToken);
+        return new AuthLoginResponse(newAccessToken, refreshToken);
     }
 
     @Transactional
