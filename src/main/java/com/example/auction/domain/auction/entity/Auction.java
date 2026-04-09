@@ -57,7 +57,7 @@ public class Auction extends CreatableEntity {
     @Column(name="category", nullable = false)
     private AuctionProductCategory category;
 
-    public static Auction create(
+    public static Auction of(
         @NonNull Long userId,
         String description,
         @NonNull BigDecimal maxPrice,
