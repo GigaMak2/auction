@@ -42,9 +42,7 @@ public class BidQueryService {
 
     // 특정 경매의 입찰조회
     public PageResponse<BidListResponse> getBids(AuthUser authUser, Long auctionId, Pageable pageable) {
-        // todo: 경매 확인
-        //           Auction auction = auctionRepository.findById(auctionId)
-        //                 .orElseThrow(() -> new ServiceErrorException(BidErrorEnum.AUCTION_NOT_FOUND));
+        // todo: 경매 존재 여부 및 상태 확인
 
         Page<BidListResponse> bidPage = bidRepository.findAllByAuctionId(auctionId, pageable)
                 .map(BidListResponse::of);
@@ -56,13 +54,6 @@ public class BidQueryService {
     public BidResponse getWinnerBid(AuthUser authUser, Long auctionId) {
 
         // todo: 경매 존재 여부 및 상태 확인
-        /*
-           Auction auction = auctionRepository.findById(auctionId)
-                 .orElseThrow(() -> new ServiceErrorException(BidErrorEnum.AUCTION_NOT_FOUND));
-         if (!auction.getStatus().equals(AuctionStatus.DONE)) {
-             throw new ServiceErrorException(BidErrorEnum.AUCTION_RESULT_NOT_FOUND);
-
-         */
 
         // 최저가 입찰 1건 조회
         Bid winnerBid = bidRepository.findWinnerBidByAuctionId(auctionId)
