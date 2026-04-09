@@ -67,4 +67,25 @@ public class UserService {
 
         return new UserLoginResponse(accessToken, refreshToken);
     }
+
+    @Transactional
+    public UserLoginResponse refreshToken(String refreshToken) {
+        if (!jwtProvider.validateToken(refreshToken)) {
+            throw new ServiceErrorException(UserErrorEnum.INVALID_TOKEN);
+        }
+
+        Long userId = jwtProvider.getUserId(refreshToken);
+
+        String savedToken = (String) redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + userId);
+        if (savedToken == null || !savedToken.equals(refreshToken)) {
+            throw new ServiceErrorException(UserErrorEnum.INVALID_TOKEN);
+        }
+
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
+
+        String newAccessToken = jwtProvider.createAccessToken(user.getId(), user.getRole().name());
+
+        return new UserLoginResponse(newAccessToken, refreshToken);
+    }
 }
