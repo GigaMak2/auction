@@ -56,7 +56,7 @@ public class UserService {
         }
 
         String accessToken = jwtProvider.createAccessToken(user.getId(), user.getRole().name());
-        String refreshToken = jwtProvider.createRefreshToken();
+        String refreshToken = jwtProvider.createRefreshToken(user.getId());
 
         redisTemplate.opsForValue().set(
                 REFRESH_TOKEN_PREFIX + user.getId(),
