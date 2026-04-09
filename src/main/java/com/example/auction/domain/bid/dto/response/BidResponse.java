@@ -7,7 +7,6 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-// 자신의 입찰 조회, 경매 결과 조회
 @Getter
 public class BidResponse {
 

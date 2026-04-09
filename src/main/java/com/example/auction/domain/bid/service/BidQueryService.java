@@ -14,9 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 // 입찰 조회, 결과 조회, 내입찰조회
 @Service
 @RequiredArgsConstructor
@@ -32,7 +29,7 @@ public class BidQueryService {
 
         // 내 입찰 목록 조회 (페이징)
         Page<BidListResponse> myBidPage = bidRepository.findAllByUserId(userId, pageable)
-                .map(BidListResponse::of);
+                .map(BidListResponse::from);
 
         log.info("[내 입찰 조회] userId={}, page={}, size={}",
                 userId, pageable.getPageNumber(), pageable.getPageSize());
@@ -45,7 +42,7 @@ public class BidQueryService {
         // todo: 경매 존재 여부 및 상태 확인
 
         Page<BidListResponse> bidPage = bidRepository.findAllByAuctionId(auctionId, pageable)
-                .map(BidListResponse::of);
+                .map(BidListResponse::from);
 
         return PageResponse.create(bidPage);
     }
