@@ -66,6 +66,11 @@ public class JwtProvider {
         return getClaims(token).get("role", String.class);
     }
 
+    public long getRemainingTtl(String token) {
+        Date expiration = getClaims(token).getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
+    }
+
     public boolean validateToken(String token) {
         try {
             getClaims(token);
