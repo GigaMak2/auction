@@ -8,13 +8,13 @@ import org.springframework.http.HttpStatus;
 public enum AuctionErrorEnum implements ErrorEnumInterface {
 
     // 경매 관련 에러
-     INVALID_MINIMUM_AUCTION(HttpStatus.BAD_REQUEST, "경매를 찾을 수 없습니다");
+    AUCTION_NOT_FOUND(HttpStatus.NOT_FOUND, "경매를 찾을 수 없습니다");
 
-     private final HttpStatus status;
-     private final String message;
+    private final HttpStatus status;
+    private final String message;
 
-     AuctionErrorEnum(HttpStatus status, String message) {
-         this.status = status;
-         this.message = message;
-     }
- }
+    AuctionErrorEnum(HttpStatus status, String message) {
+        this.status = status;
+        this.message = message;
+    }
+}
