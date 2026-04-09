@@ -1,13 +1,13 @@
-package com.example.auction.domain.user.controller;
+package com.example.auction.domain.auth.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.config.security.JwtProvider;
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.domain.user.dto.UserLoginRequest;
-import com.example.auction.domain.user.dto.UserLoginResponse;
-import com.example.auction.domain.user.dto.UserSignupRequest;
-import com.example.auction.domain.user.dto.UserSignupResponse;
-import com.example.auction.domain.user.service.UserService;
+import com.example.auction.domain.auth.dto.AuthLoginRequest;
+import com.example.auction.domain.auth.dto.AuthLoginResponse;
+import com.example.auction.domain.auth.dto.AuthSignupRequest;
+import com.example.auction.domain.auth.dto.AuthSignupResponse;
+import com.example.auction.domain.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,27 +18,27 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
-public class UserController {
+public class AuthController {
 
-    private final UserService userService;
+    private final AuthService authService;
     private final JwtProvider jwtProvider;
 
     @PostMapping("/signup")
-    public ResponseEntity<BaseResponse<UserSignupResponse>> signup(@Valid @RequestBody UserSignupRequest request) {
+    public ResponseEntity<BaseResponse<AuthSignupResponse>> signup(@Valid @RequestBody AuthSignupRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(BaseResponse.success(
-                HttpStatus.CREATED.name(), "회원가입 요청 성공", userService.signup(request)));
+                HttpStatus.CREATED.name(), "회원가입 요청 성공", authService.signup(request)));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<BaseResponse<UserLoginResponse>> login(@Valid @RequestBody UserLoginRequest request) {
+    public ResponseEntity<BaseResponse<AuthLoginResponse>> login(@Valid @RequestBody AuthLoginRequest request) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "로그인 요청 성공", userService.login(request)));
+                HttpStatus.OK.name(), "로그인 요청 성공", authService.login(request)));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<BaseResponse<UserLoginResponse>> refreshToken(@RequestHeader("Refresh-Token") String refreshToken) {
+    public ResponseEntity<BaseResponse<AuthLoginResponse>> refreshToken(@RequestHeader("Refresh-Token") String refreshToken) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "토큰 재발급 요청 성공", userService.refreshToken(refreshToken)));
+                HttpStatus.OK.name(), "토큰 재발급 요청 성공", authService.refreshToken(refreshToken)));
     }
 
     @PostMapping("/logout")
@@ -46,7 +46,7 @@ public class UserController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestHeader("Authorization") String accessToken
     ) {
-        userService.logout(userDetails.getUserId(), jwtProvider.resolveToken(accessToken));
+        authService.logout(userDetails.getUserId(), jwtProvider.resolveToken(accessToken));
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "로그아웃 요청 성공", null));
     }
 }
