@@ -9,8 +9,10 @@ import com.example.auction.domain.bid.enums.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,32 +21,35 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class BidQueryService {
 
     private final BidRepository bidRepository;
     // 내 입찰 조회
-    public List<BidListResponse> getMyBids(AuthUser authUser, Long auctionId) {
+    public PageResponse<BidListResponse> getMyBids(AuthUser authUser, Pageable pageable) {
 
+        Long userId = authUser.getUserId();
+
+        // 내 입찰 목록 조회 (페이징)
+        Page<BidListResponse> myBidPage = bidRepository.findAllByUserId(userId, pageable)
+                .map(BidListResponse::of);
+
+        log.info("[내 입찰 조회] userId={}, page={}, size={}",
+                userId, pageable.getPageNumber(), pageable.getPageSize());
+
+        return PageResponse.create(myBidPage);
     }
 
     // 특정 경매의 입찰조회
     public PageResponse<BidListResponse> getBids(AuthUser authUser, Long auctionId, Pageable pageable) {
-        Auction auction = getAuction(auctionId);
+        // todo: 경매 확인
+        //           Auction auction = auctionRepository.findById(auctionId)
+        //                 .orElseThrow(() -> new ServiceErrorException(BidErrorEnum.AUCTION_NOT_FOUND));
 
-        return bidRepository.findAllByAuctionIdOrderByCreatedAtDesc(auctionId)
-                .stream()
-                .map(bid -> {
-                        return BidListResponse.builder()
-                                .bidId(bid.getId())
-                                .auctionId(bid.getAuctionId())
-                                .price(null)
-                                .status(bid.getStatus())
-                                .createdAt(bid.getCreatedAt())
-                                .build();
+        Page<BidListResponse> bidPage = bidRepository.findAllByAuctionId(auctionId, pageable)
+                .map(BidListResponse::of);
 
-                    return BidListResponse.from(bid);
-                })
-                .collect(Collectors.toList());
+        return PageResponse.create(bidPage);
     }
 
     // 입찰 결과 조회(1건)
