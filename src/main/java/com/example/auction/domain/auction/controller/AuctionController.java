@@ -35,7 +35,7 @@ public class AuctionController {
     }
 
     @PostMapping("/api/auctions")
-    public ResponseEntity<?> createAuction(
+    public ResponseEntity<BaseResponse<GetAuctionResponse>> createAuction(
             @RequestBody @Valid CreateAuctionRequest req
     ) {
         // TODO: 실제 유저 객체가 생성된 이후 user id를 넣기
