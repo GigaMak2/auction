@@ -1,6 +1,8 @@
 package com.example.auction.domain.user.controller;
 
 import com.example.auction.common.dto.BaseResponse;
+import com.example.auction.domain.user.dto.UserLoginRequest;
+import com.example.auction.domain.user.dto.UserLoginResponse;
 import com.example.auction.domain.user.dto.UserSignupRequest;
 import com.example.auction.domain.user.dto.UserSignupResponse;
 import com.example.auction.domain.user.service.UserService;
@@ -24,5 +26,11 @@ public class UserController {
     public ResponseEntity<BaseResponse<UserSignupResponse>> signup(@Valid @RequestBody UserSignupRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(BaseResponse.success(
                 HttpStatus.CREATED.name(), "회원가입 요청 성공", userService.signup(request)));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<BaseResponse<UserLoginResponse>> login(@Valid @RequestBody UserLoginRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
+                HttpStatus.OK.name(), "로그인 요청 성공", userService.login(request)));
     }
 }
