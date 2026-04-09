@@ -2,29 +2,30 @@ package com.example.auction.domain.bid.dto.response;
 
 import com.example.auction.domain.bid.entity.Bid;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 // 경매별 입찰 조회
 @Getter
+@AllArgsConstructor
 public class BidListResponse {
 
-    private Long bidId;
-    private Long auctionId;
-    private Long price;
+    private final Long bidId;
+    private final Long auctionId;
+    private final Long price;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createdAt;
 
-    public static BidListResponse of(Bid bid) {
-        BidListResponse bidResponse = new BidListResponse();
-        bidResponse.bidId = bid.getId();
-        bidResponse.auctionId = bid.getAuctionId();
-        bidResponse.price = bid.getPrice();
-        bidResponse.createdAt = bid.getCreatedAt();
-
-        return bidResponse;
+    public static BidListResponse from(Bid bid) {
+        return new BidListResponse(
+          bid.getId(),
+          bid.getAuctionId(),
+          bid.getPrice(),
+          bid.getCreatedAt()
+        );
     }
 
 }
