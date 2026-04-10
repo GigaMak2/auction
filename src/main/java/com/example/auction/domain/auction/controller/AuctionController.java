@@ -3,8 +3,10 @@ package com.example.auction.domain.auction.controller;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
@@ -50,10 +52,10 @@ public class AuctionController {
 
     @PostMapping("/api/auctions")
     public ResponseEntity<@NonNull BaseResponse<GetAuctionResponse>> createAuction(
-            @RequestBody @Valid CreateAuctionRequest req
+            @RequestBody @Valid CreateAuctionRequest req,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        // TODO: 실제 유저 객체가 생성된 이후 user id를 넣기
-        GetAuctionResponse res = auctionService.createAuction(0L, req);
+        GetAuctionResponse res = auctionService.createAuction(Long.valueOf(details.getUsername()), req);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success(
