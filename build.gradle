@@ -16,6 +16,13 @@ java {
 
 repositories {
     mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:1.0.0"
+    }
 }
 
 dependencies {
@@ -27,6 +34,9 @@ dependencies {
     implementation 'io.github.openfeign.querydsl:querydsl-core:7.1'
     implementation 'io.github.openfeign.querydsl:querydsl-jpa:7.1'
     annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:7.1:jpa'
+
+    // Spring AI
+    implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
 
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
