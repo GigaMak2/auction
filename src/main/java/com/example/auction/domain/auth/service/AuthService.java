@@ -72,7 +72,7 @@ public class AuthService {
 
     @Transactional
     public AuthLoginResponse refreshToken(String refreshToken) {
-        if (!jwtProvider.validateToken(refreshToken)) {
+        if (!jwtProvider.validateRefreshToken(refreshToken)) {
             throw new ServiceErrorException(AuthErrorEnum.INVALID_TOKEN);
         }
 

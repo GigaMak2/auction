@@ -41,6 +41,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("role", role)
+                .claim("tokenType", "ACCESS")
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + accessTokenExpireTime))
                 .signWith(key)
@@ -52,6 +53,7 @@ public class JwtProvider {
         Date now = new Date();
         return Jwts.builder()
                 .subject(String.valueOf(userId))
+                .claim("tokenType", "REFRESH")
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + refreshTokenExpireTime))
                 .signWith(key)
@@ -71,16 +73,12 @@ public class JwtProvider {
         return expiration.getTime() - System.currentTimeMillis();
     }
 
-    public boolean validateToken(String token) {
-        try {
-            getClaims(token);
-            return true;
-        } catch (ExpiredJwtException e) {
-            log.warn("만료된 JWT 토큰: {}", e.getMessage());
-        } catch (JwtException | IllegalArgumentException e) {
-            log.warn("유효하지 않은 JWT 토큰: {}", e.getMessage());
-        }
-        return false;
+    public boolean validateAccessToken(String token) {
+        return validateToken(token, "ACCESS");
+    }
+
+    public boolean validateRefreshToken(String token) {
+        return validateToken(token, "REFRESH");
     }
 
     public String resolveToken(String token) {
@@ -88,6 +86,18 @@ public class JwtProvider {
             return token.substring(7);
         }
         return null;
+    }
+
+    private boolean validateToken(String token, String tokenType) {
+        try {
+            Claims claims = getClaims(token);
+            return tokenType.equals(claims.get("tokenType", String.class));
+        } catch (ExpiredJwtException e) {
+            log.warn("만료된 JWT 토큰: {}", e.getMessage());
+        } catch (JwtException | IllegalArgumentException e) {
+            log.warn("유효하지 않은 JWT 토큰: {}", e.getMessage());
+        }
+        return false;
     }
 
     private Claims getClaims(String token) {
