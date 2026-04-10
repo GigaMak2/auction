@@ -2,6 +2,7 @@ package com.example.auction.domain.ai.service;
 
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.ai.enums.SseEventType;
+import com.example.auction.domain.ai.exception.AiErrorEnum;
 import java.time.Duration;
 import com.example.auction.domain.chat.entity.ChatMessage;
 import com.example.auction.domain.chat.entity.ChatRoom;
@@ -26,9 +27,13 @@ public class AiService {
     private final ChatRoomRepository chatRoomRepository;
 
     public Flux<ServerSentEvent<String>> streamMessage(Long roomId, Long userId, String content) {
-        // 1. 채팅방 소유자 검증
-        ChatRoom chatRoom = chatRoomRepository.findByIdAndUserId(roomId, userId)
-                .orElseThrow(() -> new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_FORBIDDEN));
+        // 1. 채팅방 존재 확인 + 소유자 검증
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_NOT_FOUND));
+
+        if (!chatRoom.getUserId().equals(userId)) {
+            throw new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_FORBIDDEN);
+        }
 
         // 2. 유저 메시지 저장
         chatMessageRepository.save(ChatMessage.of(roomId, content, MessageRole.USER));
@@ -74,7 +79,7 @@ public class AiService {
                         .build()
         );
 
-        // 6. Fallback — CLAUDE.md: AI 장애 시 안내 메시지
+        // 6. Fallback — AI 장애 시 ERROR 이벤트로 오류 안내 후 DONE으로 스트림 종료
         return tokenStream
                 .concatWith(topicStream)
                 .concatWith(doneEvent)
@@ -82,8 +87,12 @@ public class AiService {
                     log.error("[AiService] 스트리밍 오류: {}", e.getMessage());
                     return Flux.just(
                             ServerSentEvent.<String>builder()
+                                    .event(SseEventType.ERROR.name())
+                                    .data(AiErrorEnum.AI_SERVICE_UNAVAILABLE.getMessage())
+                                    .build(),
+                            ServerSentEvent.<String>builder()
                                     .event(SseEventType.DONE.name())
-                                    .data("AI 서비스가 일시적으로 중단되었습니다")
+                                    .data("")
                                     .build()
                     );
                 });
