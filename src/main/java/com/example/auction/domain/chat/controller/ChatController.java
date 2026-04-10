@@ -2,10 +2,8 @@ package com.example.auction.domain.chat.controller;
 
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.domain.chat.dto.ChatMessageListResponse;
-import com.example.auction.domain.chat.dto.ChatMessageSendRequest;
 import com.example.auction.domain.chat.dto.ChatRoomResponse;
 import com.example.auction.domain.chat.service.ChatService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,12 +71,4 @@ public class ChatController {
                 ));
     }
 
-    // AI 메시지 전송 (SSE 스트리밍) - AI 연동 시 구현
-    @PostMapping("/rooms/{roomId}/messages")
-    public void sendMessage(
-            @PathVariable Long roomId,
-            @RequestBody @Valid ChatMessageSendRequest request
-    ) {
-        // TODO: SSE 스트리밍 구현 예정
-    }
 }
