@@ -44,3 +44,5 @@ application-local.yml
 
 .claude/
 CLAUDE.md
+
+tmp/
