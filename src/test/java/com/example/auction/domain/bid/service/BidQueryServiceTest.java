@@ -7,13 +7,15 @@ import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
-import com.example.auction.domain.bid.enums.BidErrorEnum;
+import com.example.auction.domain.bid.exceptions.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
+@ExtendWith(MockitoExtension .class)
 class BidQueryServiceTest {
 
     @InjectMocks
@@ -133,7 +136,7 @@ class BidQueryServiceTest {
     void getWinnerBid_success() {
         // given
         Bid winnerBid = Bid.of(null, 80_000L, auctionId, 2L, BidAuctionStatus.ACTIVE);
-        given(bidRepository.findWinnerBidByAuctionId(auctionId)).willReturn(Optional.of(winnerBid));
+        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.of(winnerBid));
 
         // when
         BidResponse response = queryService.getWinnerBid(userDetails, auctionId);
@@ -147,7 +150,7 @@ class BidQueryServiceTest {
     @DisplayName("입찰 없으면 예외 발생 - 미종료 또는 유찰 경매")
     void getWinnerBid_notFound() {
         // given
-        given(bidRepository.findWinnerBidByAuctionId(auctionId)).willReturn(Optional.empty());
+        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> queryService.getWinnerBid(userDetails, auctionId))

@@ -6,7 +6,7 @@ import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 import com.example.auction.domain.bid.entity.Bid;
-import com.example.auction.domain.bid.enums.BidErrorEnum;
+import com.example.auction.domain.bid.exceptions.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +54,7 @@ public class BidQueryService {
         // todo: 경매 존재 여부 및 상태 확인
 
         // 최저가 입찰 1건 조회
-        Bid winnerBid = bidRepository.findWinnerBidByAuctionId(auctionId)
+        Bid winnerBid = bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)
                 .orElseThrow(() -> new ServiceErrorException(BidErrorEnum.AUCTION_RESULT_NOT_FOUND));
 
         return BidResponse.of(winnerBid);

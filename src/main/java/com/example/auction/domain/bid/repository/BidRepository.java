@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface BidRepository extends JpaRepository<Bid, Long>, BidCustomRepository {
-    Optional<Bid> findWinnerBidByAuctionId(Long auctionId);
+    Optional<Bid> findFirstByAuctionIdOrderByPriceAsc(Long auctionId);
 
     Page<Bid> findAllByUserId(Long userId, Pageable pageable);
 

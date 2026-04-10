@@ -1,4 +1,4 @@
-package com.example.auction.domain.bid.enums;
+package com.example.auction.domain.bid.exceptions;
 
 import com.example.auction.common.exception.ErrorEnumInterface;
 import lombok.Getter;

@@ -37,6 +37,7 @@ public class Bid extends CreatableEntity {
 
     public static Bid of(String description, Long price, Long auctionId, Long userId, BidAuctionStatus status) {
         Bid bid = new Bid();
+        bid.description = description;
         bid.userId = userId;
         bid.auctionId = auctionId;
         bid.price = price;
