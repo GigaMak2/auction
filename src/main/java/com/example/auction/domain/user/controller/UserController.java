@@ -4,6 +4,7 @@ import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.domain.user.dto.UserChangePasswordRequest;
 import com.example.auction.domain.user.dto.UserGetResponse;
+import com.example.auction.domain.user.dto.UserWithdrawResponse;
 import com.example.auction.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,14 @@ public class UserController {
         userService.changePassword(userId, request);
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "비밀번호 변경 요청 성공", null));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<BaseResponse<UserWithdrawResponse>> withdraw(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUserId();
+        return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
+                HttpStatus.OK.name(), "탈퇴 요청 성공", userService.withdraw(userId)));
     }
 }
