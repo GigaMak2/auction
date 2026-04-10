@@ -26,6 +26,23 @@ public class AiService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
 
+    /**
+     * Streams an AI-generated response to a user's message as Server-Sent Events (SSE).
+     *
+     * <p>This method validates the chat room and ownership, persists the user's message, then
+     * emits a sequence of SSEs representing AI response tokens, optionally a TOPIC event when
+     * the room has no title, and a final DONE event. The accumulated assistant response is
+     * saved when the stream completes (normal, error, or cancellation).</p>
+     *
+     * @param roomId  the identifier of the chat room
+     * @param userId  the identifier of the requesting user
+     * @param content the user's message content to send to the AI
+     * @return a Flux of ServerSentEvent<String> that emits TOKEN events for response tokens,
+     *         optionally a TOPIC event with the generated title (first message only), and a DONE
+     *         event; on AI failure the stream emits an ERROR event with a human-facing message
+     *         followed by DONE
+     * @throws ServiceErrorException if the chat room is not found or the user is not the room owner
+     */
     public Flux<ServerSentEvent<String>> streamMessage(Long roomId, Long userId, String content) {
         // 1. 채팅방 존재 확인 + 소유자 검증
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
