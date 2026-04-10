@@ -34,7 +34,6 @@ class BidQueryServiceTest {
     @Mock
     private BidRepository bidRepository;
 
-    // 현재 없으므로 임시로 id만 가지고 만듬
     private CustomUserDetails userDetails;
     private Long auctionId;
     private Pageable pageable;
