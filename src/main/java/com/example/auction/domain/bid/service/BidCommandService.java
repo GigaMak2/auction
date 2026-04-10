@@ -1,5 +1,6 @@
 package com.example.auction.domain.bid.service;
 
+import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.bid.dto.request.BidRequest;
 import com.example.auction.domain.bid.dto.response.BidResponse;
@@ -23,9 +24,9 @@ public class BidCommandService {
 
     // 입찰 생성
     @Transactional
-    public BidResponse placeBid(AuthUser authUser, Long auctionId, BidRequest request) {
+    public BidResponse placeBid(CustomUserDetails userDetails, Long auctionId, BidRequest request) {
 
-        Long userId = authUser.getUserId();
+        Long userId = userDetails.getUserId();
         Long bidPrice = request.getPrice();
 
         // 경매 존재 여부 확인

@@ -1,5 +1,6 @@
 package com.example.auction.domain.bid.controller;
 
+import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.domain.bid.dto.request.BidRequest;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 
 @RestController
-@RequestMapping("/api/auctions/{auction_Id}/bids")
+@RequestMapping("/api/auctions/{auction_id}/bids")
 @RequiredArgsConstructor
 public class BidController {
 
@@ -28,11 +29,11 @@ public class BidController {
     // 특정 경매에 입찰 생성
     @PostMapping("/v1")
     public ResponseEntity<BaseResponse<BidResponse>> placeBid(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("auction_id") Long auctionId,
             @Valid @RequestBody BidRequest request
     ) {
-        BidResponse data = commandService.placeBid(authUser, auctionId, request);
+        BidResponse data = commandService.placeBid(userDetails, auctionId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success(String.valueOf(HttpStatus.CREATED.value()), "입찰이 완료되었습니다", data));
     }
@@ -40,7 +41,7 @@ public class BidController {
     // 특정 경매의 입찰 조회
     @GetMapping("/v1")
     public ResponseEntity<BaseResponse<PageResponse<BidListResponse>>> getBids(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("auction_id") Long auctionId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -50,7 +51,7 @@ public class BidController {
         Sort.Direction sortDirection = Sort.Direction.fromString(direction);
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
 
-        PageResponse<BidListResponse> data = queryService.getBids(authUser, auctionId, pageable);
+        PageResponse<BidListResponse> data = queryService.getBids(userDetails, auctionId, pageable);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(String.valueOf(HttpStatus.OK.value()), "입찰 내역 조회가 완료되었습니다", data));
     }
@@ -58,10 +59,10 @@ public class BidController {
     // 입찰 결과 조회(1건)
     @GetMapping("/winner/v1")
     public ResponseEntity<BaseResponse<BidResponse>> getWinnerBid(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("auction_id") Long auctionId
     ) {
-        BidResponse data = queryService.getWinnerBid(authUser, auctionId);
+        BidResponse data = queryService.getWinnerBid(userDetails, auctionId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(String.valueOf(HttpStatus.OK.value()), "입찰 결과 조회가 완료되었습니다", data));
     }

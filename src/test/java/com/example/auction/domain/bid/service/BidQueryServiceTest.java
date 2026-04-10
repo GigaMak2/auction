@@ -1,5 +1,6 @@
 package com.example.auction.domain.bid.service;
 
+import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
@@ -34,13 +35,13 @@ class BidQueryServiceTest {
     private BidRepository bidRepository;
 
     // 현재 없으므로 임시로 id만 가지고 만듬
-    private AuthUser authUser;
+    private CustomUserDetails userDetails;
     private Long auctionId;
     private Pageable pageable;
 
     @BeforeEach
     void setUp() {
-        authUser = new AuthUser(1L);
+        userDetails = new CustomUserDetails(1L, "USER");
         auctionId = 10L;
         pageable = PageRequest.of(0, 20);
     }
@@ -63,7 +64,7 @@ class BidQueryServiceTest {
         given(bidRepository.findAllByAuctionId(auctionId, pageable)).willReturn(bidPage);
 
         // when
-        PageResponse<BidListResponse> response = queryService.getBids(authUser, auctionId, pageable);
+        PageResponse<BidListResponse> response = queryService.getBids(userDetails, auctionId, pageable);
 
         // then
         assertThat(response.content()).hasSize(2);
@@ -79,7 +80,7 @@ class BidQueryServiceTest {
         given(bidRepository.findAllByAuctionId(auctionId, pageable)).willReturn(emptyPage);
 
         // when
-        PageResponse<BidListResponse> response = queryService.getBids(authUser, auctionId, pageable);
+        PageResponse<BidListResponse> response = queryService.getBids(userDetails, auctionId, pageable);
 
         // then
         assertThat(response.content()).isEmpty();
@@ -95,15 +96,15 @@ class BidQueryServiceTest {
     void getMyBids_success() {
         // given
         List<Bid> myBids = List.of(
-                Bid.of(null, 100_000L, auctionId, authUser.getUserId(), BidAuctionStatus.ACTIVE),
-                Bid.of(null, 80_000L, 20L, authUser.getUserId(), BidAuctionStatus.ACTIVE)
+                Bid.of(null, 100_000L, auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE),
+                Bid.of(null, 80_000L, 20L, userDetails.getUserId(), BidAuctionStatus.ACTIVE)
         );
         Page<Bid> myBidPage = new PageImpl<>(myBids, pageable, myBids.size());
 
-        given(bidRepository.findAllByUserId(authUser.getUserId(), pageable)).willReturn(myBidPage);
+        given(bidRepository.findAllByUserId(userDetails.getUserId(), pageable)).willReturn(myBidPage);
 
         // when
-        PageResponse<BidListResponse> response = queryService.getMyBids(authUser, pageable);
+        PageResponse<BidListResponse> response = queryService.getMyBids(userDetails, pageable);
 
         // then
         assertThat(response.content()).hasSize(2);
@@ -116,10 +117,10 @@ class BidQueryServiceTest {
     void getMyBids_empty() {
         // given
         Page<Bid> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-        given(bidRepository.findAllByUserId(authUser.getUserId(), pageable)).willReturn(emptyPage);
+        given(bidRepository.findAllByUserId(userDetails.getUserId(), pageable)).willReturn(emptyPage);
 
         // when
-        PageResponse<BidListResponse> response = queryService.getMyBids(authUser, pageable);
+        PageResponse<BidListResponse> response = queryService.getMyBids(userDetails, pageable);
 
         // then
         assertThat(response.content()).isEmpty();
@@ -136,7 +137,7 @@ class BidQueryServiceTest {
         given(bidRepository.findWinnerBidByAuctionId(auctionId)).willReturn(Optional.of(winnerBid));
 
         // when
-        BidResponse response = queryService.getWinnerBid(authUser, auctionId);
+        BidResponse response = queryService.getWinnerBid(userDetails, auctionId);
 
         // then
         assertThat(response.getPrice()).isEqualTo(80_000L);
@@ -150,7 +151,7 @@ class BidQueryServiceTest {
         given(bidRepository.findWinnerBidByAuctionId(auctionId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> queryService.getWinnerBid(authUser, auctionId))
+        assertThatThrownBy(() -> queryService.getWinnerBid(userDetails, auctionId))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.AUCTION_RESULT_NOT_FOUND.getMessage());
 
