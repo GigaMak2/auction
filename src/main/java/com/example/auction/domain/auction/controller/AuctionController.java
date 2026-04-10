@@ -55,7 +55,7 @@ public class AuctionController {
             @RequestBody @Valid CreateAuctionRequest req,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        GetAuctionResponse res = auctionService.createAuction(Long.valueOf(details.getUsername()), req);
+        GetAuctionResponse res = auctionService.createAuction(details.getUserId(), req);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success(

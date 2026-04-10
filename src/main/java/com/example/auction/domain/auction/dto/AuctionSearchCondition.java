@@ -1,7 +1,9 @@
 package com.example.auction.domain.auction.dto;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
@@ -25,7 +27,7 @@ public class AuctionSearchCondition {
     @Positive(message = "최대 금액은 0보다 커야합니다")
     private @Nullable BigDecimal maxPriceMax;
 
-    private @Nullable List<AuctionStatus> status;
+    private @Nullable Set<AuctionStatus> status;
 
     private @Nullable AuctionProductCategory category;
 
@@ -34,4 +36,14 @@ public class AuctionSearchCondition {
 
     @Positive(message = "페이지 크기는 0보다 커야합니다")
     private Integer pageSize = 10;
+
+    public void setDefaultStatusesIfEmpty(AuctionStatus... statuses) {
+        if (this.status == null) {
+            this.status = new HashSet<>();
+        }
+
+        if (this.status.isEmpty()) {
+            this.status.addAll(Arrays.asList(statuses));
+        }
+    }
 }

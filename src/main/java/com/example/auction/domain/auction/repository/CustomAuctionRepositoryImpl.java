@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 @RequiredArgsConstructor
@@ -58,7 +59,7 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
     }
 
     private BooleanExpression statusContains(AuctionSearchCondition condition) {
-        List<AuctionStatus> statuses = condition.getStatus();
+        Set<AuctionStatus> statuses = condition.getStatus();
 
         if (statuses != null && !statuses.isEmpty()) {
             return auction.status.in(statuses);
