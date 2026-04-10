@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
@@ -65,13 +66,13 @@ public class AuctionService {
 
     @Transactional(readOnly = true)
     public PageResponse<GetManyAuctionsResponse> getManyAuctionsMe (
-            Long userId,
+            CustomUserDetails userDetails,
             AuctionSearchCondition condition
     ) {
         AuctionUtil.throwIfSearchConditionNotValid(condition);
 
         Page<@NonNull Auction> auctions = auctionRepository.findByUserIdAndCondition(
-                userId, condition
+                userDetails.getUserId(), condition
         );
 
         Page<@NonNull GetManyAuctionsResponse> auctionsDto = auctions.map(GetManyAuctionsResponse::from);
@@ -81,13 +82,13 @@ public class AuctionService {
 
     @Transactional()
     public GetAuctionResponse createAuction(
-            Long userId,
+            CustomUserDetails userDetails,
             CreateAuctionRequest req
     ) {
         AuctionUtil.throwIfCreateAuctionRequestNotValid(req);
 
         Auction auction = Auction.of(
-                userId, 
+                userDetails.getUserId(), 
                 req.getDescription(),
                 req.getMaxPrice(),
                 req.getItemName(),

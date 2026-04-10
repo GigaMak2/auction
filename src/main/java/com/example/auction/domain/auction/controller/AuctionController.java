@@ -55,7 +55,7 @@ public class AuctionController {
             @ModelAttribute @Valid AuctionSearchCondition conditionDto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        PageResponse<GetManyAuctionsResponse> res = auctionService.getManyAuctionsMe(details.getUserId(), conditionDto);
+        PageResponse<GetManyAuctionsResponse> res = auctionService.getManyAuctionsMe(details, conditionDto);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(
@@ -70,7 +70,7 @@ public class AuctionController {
             @RequestBody @Valid CreateAuctionRequest req,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        GetAuctionResponse res = auctionService.createAuction(details.getUserId(), req);
+        GetAuctionResponse res = auctionService.createAuction(details, req);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success(
