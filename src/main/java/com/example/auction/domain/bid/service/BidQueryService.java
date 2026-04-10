@@ -1,5 +1,6 @@
 package com.example.auction.domain.bid.service;
 
+import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
@@ -23,9 +24,9 @@ public class BidQueryService {
 
     private final BidRepository bidRepository;
     // 내 입찰 조회
-    public PageResponse<BidListResponse> getMyBids(AuthUser authUser, Pageable pageable) {
+    public PageResponse<BidListResponse> getMyBids(CustomUserDetails userDetails, Pageable pageable) {
 
-        Long userId = authUser.getUserId();
+        Long userId = userDetails.getUserId();
 
         // 내 입찰 목록 조회 (페이징)
         Page<BidListResponse> myBidPage = bidRepository.findAllByUserId(userId, pageable)
@@ -38,7 +39,7 @@ public class BidQueryService {
     }
 
     // 특정 경매의 입찰조회
-    public PageResponse<BidListResponse> getBids(AuthUser authUser, Long auctionId, Pageable pageable) {
+    public PageResponse<BidListResponse> getBids(CustomUserDetails userDetails, Long auctionId, Pageable pageable) {
         // todo: 경매 존재 여부 및 상태 확인
 
         Page<BidListResponse> bidPage = bidRepository.findAllByAuctionId(auctionId, pageable)
@@ -48,7 +49,7 @@ public class BidQueryService {
     }
 
     // 입찰 결과 조회(1건)
-    public BidResponse getWinnerBid(AuthUser authUser, Long auctionId) {
+    public BidResponse getWinnerBid(CustomUserDetails userDetails, Long auctionId) {
 
         // todo: 경매 존재 여부 및 상태 확인
 

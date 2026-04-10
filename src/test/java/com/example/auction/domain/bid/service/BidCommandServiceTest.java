@@ -1,5 +1,6 @@
 package com.example.auction.domain.bid.service;
 
+import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.bid.dto.request.BidRequest;
 import com.example.auction.domain.bid.dto.response.BidResponse;
@@ -33,12 +34,12 @@ class BidCommandServiceTest {
     @Mock
     private BidRepository bidRepository;
 
-    private AuthUser authUser;
+    private CustomUserDetails userDetails;
     private Long auctionId;
 
     @BeforeEach
     void setUp() {
-        authUser = new AuthUser(1L);  // 입찰자(판매자) userId = 1
+        userDetails = new CustomUserDetails(1L, "USER");  // 입찰자(판매자) userId = 1
         auctionId = 10L;
     }
 
@@ -50,13 +51,13 @@ class BidCommandServiceTest {
     void firstBid_success() {
         // given
         BidRequest request = new BidRequest(150_000L, null);
-        Bid savedBid = Bid.of(null, 150_000L, auctionId, authUser.getUserId(), BidAuctionStatus.ACTIVE);
+        Bid savedBid = Bid.of(null, 150_000L, auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
 
         given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.empty());
         given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
 
         // when
-        BidResponse response = commandService.placeBid(authUser, auctionId, request);
+        BidResponse response = commandService.placeBid(userDetails, auctionId, request);
 
         // then
         assertThat(response).isNotNull();
@@ -71,13 +72,13 @@ class BidCommandServiceTest {
         Long currentMinPrice = 150_000L;
         Long newBidPrice = 100_000L;  // 현재 최저가보다 낮음
         BidRequest request = new BidRequest(newBidPrice, null);
-        Bid savedBid = Bid.of(null, newBidPrice, auctionId, authUser.getUserId(), BidAuctionStatus.ACTIVE);
+        Bid savedBid = Bid.of(null, newBidPrice, auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
 
         given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.of(currentMinPrice));
         given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
 
         // when
-        BidResponse response = commandService.placeBid(authUser, auctionId, request);
+        BidResponse response = commandService.placeBid(userDetails, auctionId, request);
 
         // then
         assertThat(response.getPrice()).isEqualTo(newBidPrice);
@@ -98,7 +99,7 @@ class BidCommandServiceTest {
         given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.of(currentMinPrice));
 
         // when & then
-        assertThatThrownBy(() -> commandService.placeBid(authUser, auctionId, request))
+        assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.BID_PRICE_NOT_LOWER.getMessage());
     }
@@ -113,7 +114,7 @@ class BidCommandServiceTest {
         given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.of(currentMinPrice));
 
         // when & then
-        assertThatThrownBy(() -> commandService.placeBid(authUser, auctionId, request))
+        assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.BID_PRICE_NOT_LOWER.getMessage());
     }
