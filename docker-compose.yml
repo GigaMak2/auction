@@ -70,5 +70,14 @@ services:
       redis:
         condition: service_healthy
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: auction-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
 volumes:
   postgres-data:
+  ollama-data:

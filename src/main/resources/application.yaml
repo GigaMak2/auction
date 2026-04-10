@@ -27,10 +27,10 @@ spring:
     bootstrap-servers: ${KAFKA_HOST:localhost}:9092
   ai:
     ollama:
-          base-url: http://localhost:11434
-          chat:
-            options:
-              model: llama3.2
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: llama3.2
 
 
 jwt:
