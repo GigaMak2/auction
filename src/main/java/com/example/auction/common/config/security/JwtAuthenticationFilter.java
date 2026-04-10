@@ -38,6 +38,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (isValid && !blacklisted) {
+            request.setAttribute("accessToken", token);
+
             Long userId = jwtProvider.getUserId(token);
             String role = jwtProvider.getRole(token);
 

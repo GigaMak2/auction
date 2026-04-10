@@ -1,13 +1,13 @@
 package com.example.auction.domain.auth.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
-import com.example.auction.common.config.security.JwtProvider;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.domain.auth.dto.AuthLoginRequest;
 import com.example.auction.domain.auth.dto.AuthLoginResponse;
 import com.example.auction.domain.auth.dto.AuthSignupRequest;
 import com.example.auction.domain.auth.dto.AuthSignupResponse;
 import com.example.auction.domain.auth.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtProvider jwtProvider;
 
     @PostMapping("/signup")
     public ResponseEntity<BaseResponse<AuthSignupResponse>> signup(@Valid @RequestBody AuthSignupRequest request) {
@@ -44,9 +43,10 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<BaseResponse<Void>> logout(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestHeader("Authorization") String accessToken
+            HttpServletRequest request
     ) {
-        authService.logout(userDetails.getUserId(), jwtProvider.resolveToken(accessToken));
+        String accessToken = (String) request.getAttribute("accessToken");
+        authService.logout(userDetails.getUserId(), accessToken);
         return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "로그아웃 요청 성공", null));
     }
 }
