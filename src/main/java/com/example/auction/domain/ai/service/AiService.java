@@ -2,6 +2,7 @@ package com.example.auction.domain.ai.service;
 
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.ai.enums.SseEventType;
+import java.time.Duration;
 import com.example.auction.domain.chat.entity.ChatMessage;
 import com.example.auction.domain.chat.entity.ChatRoom;
 import com.example.auction.domain.chat.entity.MessageRole;
@@ -45,15 +46,19 @@ public class AiService {
                 .user(content)
                 .stream()
                 .content()
+                .timeout(Duration.ofSeconds(40)) // 40초 내 응답 없으면 Fallback으로 처리
                 .doOnNext(fullResponse::append)
                 .map(token -> ServerSentEvent.<String>builder()
                         .event(SseEventType.TOKEN.name())
                         .data(token)
                         .build())
-                .doOnComplete(() ->
+                .doFinally(signalType -> {
+                    // 정상 완료 / 에러 / 취소 모든 경우에 누적된 응답 저장
+                    if (!fullResponse.isEmpty()) {
                         chatMessageRepository.save(
-                                ChatMessage.of(roomId, fullResponse.toString(), MessageRole.ASSISTANT))
-                );
+                                ChatMessage.of(roomId, fullResponse.toString(), MessageRole.ASSISTANT));
+                    }
+                });
 
         // 4. TOPIC 이벤트 — 첫 메시지일 때만 채팅방 title 생성
         // Flux.defer: tokenStream 완료 후 구독 시점에 실행 (즉시 실행 방지)
@@ -86,7 +91,7 @@ public class AiService {
 
     // Chapter 2의 call().content() 패턴 — 채팅방 title 동기 생성
     private Flux<ServerSentEvent<String>> generateTitle(ChatRoom chatRoom, String content) {
-        String title = chatClient.prompt()
+        String rawTitle = chatClient.prompt()
                 .system("""
                         사용자의 첫 메시지를 보고 채팅방 제목을 10자 이내로 생성하세요.
                         제목만 반환하세요.
@@ -95,13 +100,19 @@ public class AiService {
                 .call()
                 .content();
 
-        chatRoom.updateTitle(title);
+        // AI 응답 정제 — 프롬프트만으로는 길이/null 보장 불가
+        String trimmed = (rawTitle != null) ? rawTitle.trim() : "";
+        String safeTitle = !trimmed.isBlank()
+                ? trimmed.substring(0, Math.min(trimmed.length(), 10))
+                : "새 채팅";
+
+        chatRoom.updateTitle(safeTitle);
         chatRoomRepository.save(chatRoom);
 
         return Flux.just(
                 ServerSentEvent.<String>builder()
                         .event(SseEventType.TOPIC.name())
-                        .data(title)
+                        .data(safeTitle)
                         .build()
         );
     }

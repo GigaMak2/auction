@@ -1,11 +1,13 @@
 package com.example.auction.domain.ai.controller;
 
+import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.domain.ai.dto.AiMessageSendRequest;
 import com.example.auction.domain.ai.service.AiService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
@@ -22,10 +24,10 @@ public class AiController {
             produces = MediaType.TEXT_EVENT_STREAM_VALUE
     )
     public Flux<ServerSentEvent<String>> sendMessage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long roomId,
             @RequestBody @Valid AiMessageSendRequest request
     ) {
-        // TODO: userId from security context
-        return aiService.streamMessage(roomId, 0L, request.content());
+        return aiService.streamMessage(roomId, userDetails.getUserId(), request.content());
     }
 }
