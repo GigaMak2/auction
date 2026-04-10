@@ -24,7 +24,6 @@ public class Auction extends CreatableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO: 나중에 user 테이블이 생길 경우 JoinColumn으로 변경
     @Column(name="user_id", nullable = false)
     private Long userId;
 
