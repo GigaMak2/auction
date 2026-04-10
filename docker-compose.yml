@@ -78,7 +78,7 @@ services:
       OLLAMA_MODEL: llama3.2
     depends_on:
       ollama:
-        condition: service_started
+        condition: service_healthy  # API 준비 완료 후 app 시작 (service_started → service_healthy)
 
   ollama:
     image: ollama/ollama:latest
@@ -87,6 +87,13 @@ services:
       - "11434:11434"
     volumes:
       - ollama-data:/root/.ollama
+    # API 준비 여부 확인 후 app이 연결하도록 healthcheck 추가
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   postgres-data:
