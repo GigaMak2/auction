@@ -44,3 +44,6 @@ application-local.yml
 
 .claude/
 CLAUDE.md
+
+### local docs ###
+docs/
