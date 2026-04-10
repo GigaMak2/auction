@@ -50,7 +50,7 @@ public class AuthService {
 
     @Transactional
     public AuthLoginResponse login(AuthLoginRequest request) {
-        User user = userRepository.findByEmail(request.email()).orElseThrow(
+        User user = userRepository.findByEmailAndDeletedFalse(request.email()).orElseThrow(
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
@@ -83,7 +83,7 @@ public class AuthService {
             throw new ServiceErrorException(AuthErrorEnum.INVALID_TOKEN);
         }
 
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findByIdAndDeletedFalse(userId).orElseThrow(
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
         String newAccessToken = jwtProvider.createAccessToken(user.getId(), user.getRole().name());
