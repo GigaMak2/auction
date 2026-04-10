@@ -29,6 +29,7 @@ public class User extends DeletableEntity {
     @Column(nullable = false)
     private UserRole role;
 
+    @Column(precision = 2, scale = 1)
     private BigDecimal rating;
 
     public static User of(String email, String encodedPassword, UserRole role) {
@@ -39,5 +40,9 @@ public class User extends DeletableEntity {
         user.rating = null;
 
         return user;
+    }
+
+    public void changePassword(String encodedNewPassword) {
+        this.password = encodedNewPassword;
     }
 }
