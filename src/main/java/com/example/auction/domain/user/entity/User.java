@@ -40,4 +40,8 @@ public class User extends DeletableEntity {
 
         return user;
     }
+
+    public void changePassword(String encodedNewPassword) {
+        this.password = encodedNewPassword;
+    }
 }

@@ -1,11 +1,14 @@
 package com.example.auction.domain.user.service;
 
 import com.example.auction.common.exception.ServiceErrorException;
+import com.example.auction.domain.auth.exception.AuthErrorEnum;
+import com.example.auction.domain.user.dto.UserChangePasswordRequest;
 import com.example.auction.domain.user.dto.UserGetResponse;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public UserGetResponse myPage(Long userId) {
@@ -26,5 +30,22 @@ public class UserService {
                 user.getRating(),
                 user.getRole()
         );
+    }
+
+    @Transactional
+    public void changePassword(Long userId, UserChangePasswordRequest request) {
+        User user = userRepository.findByIdAndDeletedFalse(userId).orElseThrow(
+                () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
+
+        if (request.newPassword().equals(request.oldPassword())) {
+            throw new ServiceErrorException(AuthErrorEnum.SAME_AS_OLD_PASSWORD);
+        }
+
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
+            throw new ServiceErrorException(AuthErrorEnum.INVALID_PASSWORD);
+        }
+
+        String encodedNewPassword = passwordEncoder.encode(request.newPassword());
+        user.changePassword(encodedNewPassword);
     }
 }
