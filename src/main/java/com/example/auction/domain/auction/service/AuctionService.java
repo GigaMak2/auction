@@ -84,7 +84,7 @@ public class AuctionService {
             Long userId,
             CreateAuctionRequest req
     ) {
-        // TODO: auction 값이 valid한지 check
+        AuctionUtil.throwIfCreateAuctionRequestNotValid(req);
 
         Auction auction = Auction.of(
                 userId, 
