@@ -17,6 +17,8 @@ import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.auction.util.AuctionUtil;
+import com.example.auction.domain.user.repository.UserRepository;
+import com.example.auction.domain.user.exception.UserErrorEnum;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuctionService {
     private final AuctionRepository auctionRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public GetAuctionResponse getAuction(Long auctionId) {
@@ -85,6 +88,10 @@ public class AuctionService {
             CustomUserDetails userDetails,
             CreateAuctionRequest req
     ) {
+        userRepository.findById(userDetails.getUserId()).orElseThrow(()->
+            new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND)
+        );
+
         AuctionUtil.throwIfCreateAuctionRequestNotValid(req);
 
         Auction auction = Auction.of(
