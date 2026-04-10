@@ -1,8 +1,11 @@
 package com.example.auction.domain.review.service;
 
+import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.review.dto.ReviewCreateRequest;
 import com.example.auction.domain.review.dto.ReviewCreateResponse;
+import com.example.auction.domain.review.dto.ReviewListGetResponse;
+import com.example.auction.domain.review.dto.ReviewSearchCondition;
 import com.example.auction.domain.review.entity.Review;
 import com.example.auction.domain.review.exception.ReviewErrorEnum;
 import com.example.auction.domain.review.repository.ReviewRepository;
@@ -10,6 +13,8 @@ import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,5 +67,17 @@ public class ReviewService {
                 review.getDescription(),
                 review.getCreatedAt()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<ReviewListGetResponse> getReviewList(Long userId, ReviewSearchCondition condition) {
+        Page<ReviewListGetResponse> reviewList = reviewRepository.findReviewsWithConditions(
+                userId,
+                PageRequest.of(condition.getPage(), condition.getSize()),
+                condition.getStartDate(),
+                condition.getEndDate()
+        );
+
+        return PageResponse.create(reviewList);
     }
 }
