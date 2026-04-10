@@ -32,7 +32,7 @@ public enum AuctionErrorEnum implements ErrorEnumInterface {
     ),
     AUCTION_CREATE_ENDED_AT_BEFORE_STARTED_AT(
             HttpStatus.BAD_REQUEST,
-            "경매 종료 시간은 경매 종료 시간 이후여야 합니다"
+            "경매 종료 시간은 경매 시작 시간 이후여야 합니다"
     );
 
     private final HttpStatus status;
