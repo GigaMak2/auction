@@ -10,6 +10,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -30,6 +31,22 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
     public Page<@NonNull Auction> findByCondition(
             AuctionSearchCondition condition
     ) {
+        return findByConditionImpl(null, condition);
+    }
+
+    @Override
+    public Page<@NonNull Auction> findByUserIdAndCondition(
+            Long userId,
+            AuctionSearchCondition condition
+    ) {
+        return findByConditionImpl(userId, condition);
+    }
+
+
+    private Page<@NonNull Auction> findByConditionImpl(
+            @Nullable Long userId,
+            AuctionSearchCondition condition
+    ) {
         PageRequest pageRequest = PageRequest.of(
             condition.getPage(),
             condition.getPageSize()
@@ -39,6 +56,7 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
                 statusContains(condition),
                 inMaxPriceRange(condition),
                 hasCategory(condition),
+                isOwnedBy(userId),
                 hasKeyword(condition)
         };
 
@@ -89,6 +107,14 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
     private BooleanExpression hasCategory(AuctionSearchCondition condition) {
         if (condition.getCategory() != null) {
             return auction.category.eq(condition.getCategory());
+        }
+
+        return null;
+    }
+
+    private BooleanExpression isOwnedBy(@Nullable Long userId) {
+        if (userId != null) {
+            return auction.userId.eq(userId);
         }
 
         return null;

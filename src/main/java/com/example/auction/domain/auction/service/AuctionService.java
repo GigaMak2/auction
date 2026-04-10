@@ -15,6 +15,7 @@ import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
+import com.example.auction.domain.auction.util.AuctionUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +34,7 @@ public class AuctionService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<GetManyAuctionsResponse> getManyAuctions(
+    public PageResponse<GetManyAuctionsResponse> getManyAuctionsPublic (
             AuctionSearchCondition condition
     ) {
         // 조회하고 싶은 status가 없는 경우 READY, ACTIVE한 경매만 조회하기
@@ -51,16 +52,26 @@ public class AuctionService {
             );
         }
 
-        // 검색 조건중 최소금액이 최대 금액 보다 클경우 에러를 던지기
-        if (
-                condition.getMaxPriceMax() != null &&
-                condition.getMaxPriceMax().compareTo(condition.getMaxPriceMin()) < 0
-        ) {
-            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_SEARCH_INVLID_PRICE_RANGE);
-        }
+        AuctionUtil.throwIfSearchConditionNotValid(condition);
 
         Page<@NonNull Auction> auctions = auctionRepository.findByCondition(
                 condition
+        );
+
+        Page<@NonNull GetManyAuctionsResponse> auctionsDto = auctions.map(GetManyAuctionsResponse::from);
+        
+        return PageResponse.create(auctionsDto);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<GetManyAuctionsResponse> getManyAuctionsMe (
+            Long userId,
+            AuctionSearchCondition condition
+    ) {
+        AuctionUtil.throwIfSearchConditionNotValid(condition);
+
+        Page<@NonNull Auction> auctions = auctionRepository.findByUserIdAndCondition(
+                userId, condition
         );
 
         Page<@NonNull GetManyAuctionsResponse> auctionsDto = auctions.map(GetManyAuctionsResponse::from);

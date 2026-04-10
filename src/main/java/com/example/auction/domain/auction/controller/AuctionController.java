@@ -37,10 +37,25 @@ public class AuctionController {
     }
 
     @GetMapping("/api/auctions")
-    public ResponseEntity<@NonNull BaseResponse<PageResponse<GetManyAuctionsResponse>>> getManyAuctions(
+    public ResponseEntity<@NonNull BaseResponse<PageResponse<GetManyAuctionsResponse>>> getManyAuctionsPublic(
             @ModelAttribute @Valid AuctionSearchCondition conditionDto
     ) {
-        PageResponse<GetManyAuctionsResponse> res = auctionService.getManyAuctions(conditionDto);
+        PageResponse<GetManyAuctionsResponse> res = auctionService.getManyAuctionsPublic(conditionDto);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(BaseResponse.success(
+                        HttpStatus.OK.name(),
+                        "경매 전체 조회를 하였습니다",
+                        res
+                ));
+    }
+
+    @GetMapping("/api/me/auctions")
+    public ResponseEntity<@NonNull BaseResponse<PageResponse<GetManyAuctionsResponse>>> getManyAuctionsMe(
+            @ModelAttribute @Valid AuctionSearchCondition conditionDto,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        PageResponse<GetManyAuctionsResponse> res = auctionService.getManyAuctionsMe(details.getUserId(), conditionDto);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(
