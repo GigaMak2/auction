@@ -1,5 +1,6 @@
 package com.example.auction.domain.review.repository;
 
+import com.example.auction.domain.review.dto.ReviewListByAuctionGetResponse;
 import com.example.auction.domain.review.dto.ReviewListGetResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -50,6 +51,23 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
         if (total == null) total = 0L;
 
         return new PageImpl<>(list, pageable, total);
+    }
+
+    @Override
+    public List<ReviewListByAuctionGetResponse> findByAuctionId(Long auctionId) {
+        // TODO 경매 결과 연동되면 구매자 리뷰 상위에, 판매자 리뷰 하위에 노출
+        return queryFactory
+                .select(Projections.constructor(ReviewListByAuctionGetResponse.class,
+                        review.id,
+                        review.reviewerId,
+                        review.revieweeId,
+                        review.score,
+                        review.createdAt,
+                        review.modifiedAt))
+                .from(review)
+                .where(review.auctionId.eq(auctionId))
+                .orderBy(review.createdAt.desc())
+                .fetch();
     }
 
     private BooleanExpression dateBetween(LocalDate startDate, LocalDate endDate) {
