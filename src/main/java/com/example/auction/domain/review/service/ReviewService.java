@@ -112,6 +112,15 @@ public class ReviewService {
 
         review.modify(request);
 
+        if (request.score() != null) {
+            User reviewee = userRepository.findByIdAndDeletedFalse(review.getRevieweeId()).orElseThrow(
+                    () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
+
+            Double avgScore = reviewRepository.findAvgScoreByRevieweeId(reviewee.getId());
+            BigDecimal rating = BigDecimal.valueOf(avgScore).setScale(1, RoundingMode.HALF_UP);
+            reviewee.updateRating(rating);
+        }
+
         return new ReviewModifyResponse(
                 review.getId(),
                 review.getScore(),
