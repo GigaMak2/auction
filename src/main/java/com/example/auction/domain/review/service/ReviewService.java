@@ -129,4 +129,25 @@ public class ReviewService {
                 review.getModifiedAt()
         );
     }
+
+    @Transactional
+    public void deleteReview(Long userId, Long reviewId) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(
+                () -> new ServiceErrorException(ReviewErrorEnum.REVIEW_NOT_FOUND));
+
+        if (!review.getReviewerId().equals(userId)) {
+            throw new ServiceErrorException(ReviewErrorEnum.REVIEW_FORBIDDEN);
+        }
+
+        Long revieweeId = review.getRevieweeId();
+
+        reviewRepository.delete(review);
+
+        User reviewee = userRepository.findByIdAndDeletedFalse(revieweeId).orElseThrow(
+                () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
+
+        Double avgScore = reviewRepository.findAvgScoreByRevieweeId(reviewee.getId());
+        BigDecimal rating = BigDecimal.valueOf(avgScore).setScale(1, RoundingMode.HALF_UP);
+        reviewee.updateRating(rating);
+    }
 }

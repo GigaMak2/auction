@@ -68,4 +68,14 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "리뷰 수정 요청 성공", reviewService.modifyReview(userId, reviewId, request)));
     }
+
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<BaseResponse<Void>> deleteReview(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long reviewId
+    ) {
+        Long userId = userDetails.getUserId();
+        reviewService.deleteReview(userId, reviewId);
+        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "리뷰 삭제 요청 성공", null));
+    }
 }
