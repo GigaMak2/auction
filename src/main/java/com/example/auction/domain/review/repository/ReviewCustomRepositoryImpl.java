@@ -63,6 +63,7 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
                         review.reviewerId,
                         review.revieweeId,
                         review.score,
+                        review.description,
                         review.createdAt,
                         review.modifiedAt))
                 .from(review)

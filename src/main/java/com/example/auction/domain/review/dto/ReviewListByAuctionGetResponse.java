@@ -7,6 +7,7 @@ public record ReviewListByAuctionGetResponse(
         Long reviewerId,
         Long revieweeId,
         int score,
+        String description,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {}
