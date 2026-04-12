@@ -28,7 +28,8 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
                         review.id,
                         review.auctionId,
                         review.revieweeId,
-                        review.createdAt))
+                        review.createdAt,
+                        review.modifiedAt))
                 .from(review)
                 .where(
                         review.reviewerId.eq(userId),

@@ -6,5 +6,6 @@ public record ReviewListGetResponse(
         Long reviewId,
         Long auctionId,
         Long revieweeId,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt
 ) {}
