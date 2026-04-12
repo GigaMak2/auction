@@ -147,7 +147,7 @@ public class ReviewService {
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
         Double avgScore = reviewRepository.findAvgScoreByRevieweeId(reviewee.getId());
-        BigDecimal rating = BigDecimal.valueOf(avgScore).setScale(1, RoundingMode.HALF_UP);
+        BigDecimal rating = avgScore != null ? BigDecimal.valueOf(avgScore).setScale(1, RoundingMode.HALF_UP) : null;
         reviewee.updateRating(rating);
     }
 }
