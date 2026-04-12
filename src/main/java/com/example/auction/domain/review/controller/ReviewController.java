@@ -3,10 +3,7 @@ package com.example.auction.domain.review.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
-import com.example.auction.domain.review.dto.ReviewCreateRequest;
-import com.example.auction.domain.review.dto.ReviewCreateResponse;
-import com.example.auction.domain.review.dto.ReviewListGetResponse;
-import com.example.auction.domain.review.dto.ReviewSearchCondition;
+import com.example.auction.domain.review.dto.*;
 import com.example.auction.domain.review.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +37,13 @@ public class ReviewController {
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "리뷰 목록 조회 요청 성공", reviewService.getReviewList(userId, condition)));
+    }
+
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<BaseResponse<ReviewGetResponse>> getReview(
+            @PathVariable Long reviewId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
+                HttpStatus.OK.name(), "리뷰 조회 요청 성공", reviewService.getReview(reviewId)));
     }
 }

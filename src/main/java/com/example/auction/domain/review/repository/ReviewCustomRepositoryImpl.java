@@ -1,7 +1,6 @@
 package com.example.auction.domain.review.repository;
 
 import com.example.auction.domain.review.dto.ReviewListGetResponse;
-import com.example.auction.domain.review.entity.Review;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;

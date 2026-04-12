@@ -2,10 +2,7 @@ package com.example.auction.domain.review.service;
 
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.review.dto.ReviewCreateRequest;
-import com.example.auction.domain.review.dto.ReviewCreateResponse;
-import com.example.auction.domain.review.dto.ReviewListGetResponse;
-import com.example.auction.domain.review.dto.ReviewSearchCondition;
+import com.example.auction.domain.review.dto.*;
 import com.example.auction.domain.review.entity.Review;
 import com.example.auction.domain.review.exception.ReviewErrorEnum;
 import com.example.auction.domain.review.repository.ReviewRepository;
@@ -79,5 +76,22 @@ public class ReviewService {
         );
 
         return PageResponse.create(reviewList);
+    }
+
+    @Transactional(readOnly = true)
+    public ReviewGetResponse getReview(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(
+                () -> new ServiceErrorException(ReviewErrorEnum.REVIEW_NOT_FOUND));
+
+        return new ReviewGetResponse(
+                review.getId(),
+                review.getAuctionId(),
+                review.getReviewerId(),
+                review.getRevieweeId(),
+                review.getScore(),
+                review.getDescription(),
+                review.getCreatedAt(),
+                review.getModifiedAt()
+        );
     }
 }
