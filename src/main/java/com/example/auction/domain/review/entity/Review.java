@@ -1,6 +1,9 @@
 package com.example.auction.domain.review.entity;
 
 import com.example.auction.common.entity.ModifiableEntity;
+import com.example.auction.common.exception.ServiceErrorException;
+import com.example.auction.domain.review.dto.ReviewModifyRequest;
+import com.example.auction.domain.review.exception.ReviewErrorEnum;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -39,5 +42,17 @@ public class Review extends ModifiableEntity {
         review.description = description;
 
         return review;
+    }
+
+    public void modify(ReviewModifyRequest request) {
+        if (request.score() == null && request.description() == null) {
+            throw new ServiceErrorException(ReviewErrorEnum.REVIEW_MODIFY_NO_CONTENT);
+        }
+        if (request.score() != null) {
+            this.score = request.score();
+        }
+        if (request.description() != null) {
+            this.description = request.description();
+        }
     }
 }

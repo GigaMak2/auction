@@ -100,4 +100,24 @@ public class ReviewService {
     public List<ReviewListByAuctionGetResponse> getReviewListByAuction(Long auctionId) {
         return reviewRepository.findByAuctionId(auctionId);
     }
+
+    @Transactional
+    public ReviewModifyResponse modifyReview(Long userId, Long reviewId, ReviewModifyRequest request) {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(
+                () -> new ServiceErrorException(ReviewErrorEnum.REVIEW_NOT_FOUND));
+
+        if (!review.getReviewerId().equals(userId)) {
+            throw new ServiceErrorException(ReviewErrorEnum.REVIEW_FORBIDDEN);
+        }
+
+        review.modify(request);
+
+        return new ReviewModifyResponse(
+                review.getId(),
+                review.getScore(),
+                review.getDescription(),
+                review.getCreatedAt(),
+                review.getModifiedAt()
+        );
+    }
 }

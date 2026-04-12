@@ -56,4 +56,15 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "경매별 리뷰 목록 조회 요청 성공", reviewService.getReviewListByAuction(auctionId)));
     }
+
+    @PatchMapping("/{reviewId}")
+    public ResponseEntity<BaseResponse<ReviewModifyResponse>> modifyReview(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long reviewId,
+            @Valid @RequestBody ReviewModifyRequest request
+    ) {
+        Long userId = userDetails.getUserId();
+        return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
+                HttpStatus.OK.name(), "리뷰 수정 요청 성공", reviewService.modifyReview(userId, reviewId, request)));
+    }
 }
