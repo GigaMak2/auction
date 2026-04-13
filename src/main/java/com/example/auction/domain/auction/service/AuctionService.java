@@ -1,10 +1,14 @@
 package com.example.auction.domain.auction.service;
 
 import org.jspecify.annotations.NonNull;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
@@ -16,6 +20,8 @@ import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.auction.util.AuctionUtil;
+import com.example.auction.domain.user.repository.UserRepository;
+import com.example.auction.domain.user.exception.UserErrorEnum;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,8 +29,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuctionService {
     private final AuctionRepository auctionRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(
+        cacheNames =  {"getAuction"},
+        key = "#auctionId"
+    )
     public GetAuctionResponse getAuction(Long auctionId) {
         Auction auction = auctionRepository.findById(auctionId).orElseThrow(
                 () -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND)
@@ -34,6 +45,11 @@ public class AuctionService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(
+        cacheNames = {"getManyAuctionsPublic"},
+        key = "@auctionCacheService.getManyAuctionsPublicCacheKey(#condition)",
+        condition = "@auctionCacheService.shouldCacheGetManyAuctionsPublic(#condition)"
+    )
     public PageResponse<GetManyAuctionsResponse> getManyAuctionsPublic (
             AuctionSearchCondition condition
     ) {
@@ -65,13 +81,13 @@ public class AuctionService {
 
     @Transactional(readOnly = true)
     public PageResponse<GetManyAuctionsResponse> getManyAuctionsMe (
-            Long userId,
+            CustomUserDetails userDetails,
             AuctionSearchCondition condition
     ) {
         AuctionUtil.throwIfSearchConditionNotValid(condition);
 
         Page<@NonNull Auction> auctions = auctionRepository.findByUserIdAndCondition(
-                userId, condition
+                userDetails.getUserId(), condition
         );
 
         Page<@NonNull GetManyAuctionsResponse> auctionsDto = auctions.map(GetManyAuctionsResponse::from);
@@ -80,14 +96,26 @@ public class AuctionService {
     }
 
     @Transactional()
+    @CachePut(
+        cacheNames = {"getAuction"},
+        key = "#result.getId()"
+    )
+    @CacheEvict(
+        cacheNames = {"getManyAuctionsPublic"},
+        allEntries = true
+    )
     public GetAuctionResponse createAuction(
-            Long userId,
+            CustomUserDetails userDetails,
             CreateAuctionRequest req
     ) {
-        // TODO: auction 값이 valid한지 check
+        userRepository.findById(userDetails.getUserId()).orElseThrow(()->
+            new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND)
+        );
+
+        AuctionUtil.throwIfCreateAuctionRequestNotValid(req);
 
         Auction auction = Auction.of(
-                userId, 
+                userDetails.getUserId(), 
                 req.getDescription(),
                 req.getMaxPrice(),
                 req.getItemName(),

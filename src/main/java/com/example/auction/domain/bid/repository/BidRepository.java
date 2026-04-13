@@ -1,6 +1,7 @@
 package com.example.auction.domain.bid.repository;
 
 import com.example.auction.domain.bid.entity.Bid;
+import com.example.auction.domain.bid.enums.BidAuctionStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +20,6 @@ public interface BidRepository extends JpaRepository<Bid, Long>, BidCustomReposi
 
     @Query("SELECT MIN(b.price) FROM Bid b WHERE b.auctionId = :auctionId")
     Optional<BigDecimal> findMinPriceByAuctionId(@Param("auctionId") Long auctionId);
+
+    boolean existsByUserIdAndStatus(Long userId, BidAuctionStatus bidAuctionStatus);
 }

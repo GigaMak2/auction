@@ -15,4 +15,5 @@ public interface AuctionRepository extends
     List<Auction> findAllByStatusAndStartedAtBefore(AuctionStatus auctionStatus, LocalDateTime now);
 
     List<Auction> findAllByStatusAndEndedAtBefore(AuctionStatus auctionStatus, LocalDateTime now);
+    boolean existsByUserIdAndStatusIn(Long userId, List<AuctionStatus> auctionStatuses);
 }
