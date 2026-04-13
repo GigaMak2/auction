@@ -22,10 +22,7 @@ public class AuctionCacheService {
         }
 
         // 만약에 가격의 범위를 포함해 검색한다면 skip
-        if (!(
-                condition.getMaxPriceMin().compareTo(BigDecimal.ZERO) == 0 &&
-                condition.getMaxPriceMax() == null
-        )) {
+        if (!(condition.getMaxPriceMin() == null && condition.getMaxPriceMax() == null)) {
             return false;
         }
 
