@@ -67,7 +67,7 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ReviewListGetResponse> getReviewList(Long userId, ReviewSearchCondition condition) {
+    public PageResponse<ReviewListGetResponse> getWrittenReviewList(Long userId, ReviewSearchCondition condition) {
         Page<ReviewListGetResponse> reviewList = reviewRepository.findReviewsWithConditions(
                 userId,
                 PageRequest.of(condition.getPage(), condition.getSize()),

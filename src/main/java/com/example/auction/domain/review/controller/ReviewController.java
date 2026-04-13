@@ -29,14 +29,14 @@ public class ReviewController {
                 HttpStatus.CREATED.name(), "리뷰 생성 요청 성공", reviewService.createReview(userId, request)));
     }
 
-    @GetMapping
-    public ResponseEntity<BaseResponse<PageResponse<ReviewListGetResponse>>> getReviewList(
+    @GetMapping("/written")
+    public ResponseEntity<BaseResponse<PageResponse<ReviewListGetResponse>>> getWrittenReviewList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @ModelAttribute ReviewSearchCondition condition
     ) {
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "리뷰 목록 조회 요청 성공", reviewService.getReviewList(userId, condition)));
+                HttpStatus.OK.name(), "작성한 리뷰 목록 조회 요청 성공", reviewService.getWrittenReviewList(userId, condition)));
     }
 
     @GetMapping("/{reviewId}")
@@ -44,7 +44,7 @@ public class ReviewController {
             @PathVariable Long reviewId
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "리뷰 조회 요청 성공", reviewService.getReview(reviewId)));
+                HttpStatus.OK.name(), "리뷰 상세 조회 요청 성공", reviewService.getReview(reviewId)));
     }
 
     @PatchMapping("/{reviewId}")
