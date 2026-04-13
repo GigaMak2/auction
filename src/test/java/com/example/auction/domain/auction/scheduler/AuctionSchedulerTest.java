@@ -4,6 +4,9 @@ import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionProductCategory;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.repository.AuctionRepository;
+import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
+import com.example.auction.domain.bid.entity.Bid;
+import com.example.auction.domain.bid.enums.BidAuctionStatus;
 import com.example.auction.domain.bid.repository.BidRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +36,9 @@ class AuctionSchedulerTest {
 
     @Mock
     private BidRepository bidRepository;
+
+    @Mock
+    private AuctionResultRepository resultRepository;
 
     private Auction makeAuction(AuctionStatus status, LocalDateTime startedAt, LocalDateTime endedAt) {
         return Auction.of(
@@ -90,8 +96,11 @@ class AuctionSchedulerTest {
         given(auctionRepository.findAllByStatusAndEndedAtBefore(
                 eq(AuctionStatus.ACTIVE), any(LocalDateTime.class)))
                 .willReturn(List.of(auction));
-        given(bidRepository.findMinPriceByAuctionId(any()))
-                .willReturn(Optional.of(BigDecimal.valueOf(50_000))); // 입찰 있음
+        Bid winnerBid = Bid.of(
+                null, BigDecimal.valueOf(50_000), auction.getId(), 2L, BidAuctionStatus.ACTIVE);
+
+        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(any()))
+                .willReturn(Optional.of(winnerBid));
 
         // when
         auctionScheduler.endAuctions();
@@ -111,8 +120,8 @@ class AuctionSchedulerTest {
         given(auctionRepository.findAllByStatusAndEndedAtBefore(
                 eq(AuctionStatus.ACTIVE), any(LocalDateTime.class)))
                 .willReturn(List.of(auction));
-        given(bidRepository.findMinPriceByAuctionId(any()))
-                .willReturn(Optional.empty()); // 입찰 없음
+        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(any()))
+                .willReturn(Optional.empty());
 
         // when
         auctionScheduler.endAuctions();
