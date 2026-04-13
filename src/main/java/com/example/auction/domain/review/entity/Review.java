@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "reviews")
+@Table(name = "reviews", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"auction_id", "reviewer_id"})
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Review extends ModifiableEntity {
 
