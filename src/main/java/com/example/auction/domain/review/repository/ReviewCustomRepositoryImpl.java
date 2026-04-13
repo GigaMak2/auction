@@ -22,6 +22,8 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
 
     @Override
     public Page<ReviewListGetResponse> findWrittenReviewsWithConditions(Long userId, Pageable pageable, LocalDate startDate, LocalDate endDate) {
+        BooleanExpression dateCondition = dateBetween(startDate, endDate);
+
         List<ReviewListGetResponse> list = queryFactory
                 .select(Projections.constructor(ReviewListGetResponse.class,
                         review.id,
@@ -32,7 +34,7 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
                 .from(review)
                 .where(
                         review.reviewerId.eq(userId),
-                        dateBetween(startDate, endDate)
+                        dateCondition
                 )
                 .orderBy(review.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -44,7 +46,7 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
                 .from(review)
                 .where(
                         review.reviewerId.eq(userId),
-                        dateBetween(startDate, endDate)
+                        dateCondition
                 )
                 .fetchOne();
 
@@ -55,6 +57,8 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
 
     @Override
     public Page<ReviewListGetResponse> findReceivedReviewsWithConditions(Long userId, Pageable pageable, LocalDate startDate, LocalDate endDate) {
+        BooleanExpression dateCondition = dateBetween(startDate, endDate);
+
         List<ReviewListGetResponse> list = queryFactory
                 .select(Projections.constructor(ReviewListGetResponse.class,
                         review.id,
@@ -65,7 +69,7 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
                 .from(review)
                 .where(
                         review.revieweeId.eq(userId),
-                        dateBetween(startDate, endDate)
+                        dateCondition
                 )
                 .orderBy(review.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -77,7 +81,7 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
                 .from(review)
                 .where(
                         review.revieweeId.eq(userId),
-                        dateBetween(startDate, endDate)
+                        dateCondition
                 )
                 .fetchOne();
 
@@ -87,8 +91,9 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
     }
 
     private BooleanExpression dateBetween(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate != null ? startDate.atTime(0, 0, 0) : LocalDateTime.now().minusMonths(6);
-        LocalDateTime end = endDate != null ? endDate.atTime(23, 59, 59) : LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start = startDate != null ? startDate.atTime(0, 0, 0) : now.minusMonths(6);
+        LocalDateTime end = endDate != null ? endDate.atTime(23, 59, 59) : now;
         return review.createdAt.between(start, end);
     }
 }
