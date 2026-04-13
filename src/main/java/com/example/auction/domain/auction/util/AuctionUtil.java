@@ -1,6 +1,8 @@
 package com.example.auction.domain.auction.util;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
@@ -15,6 +17,7 @@ public class AuctionUtil {
     ) {
         // 검색 조건중 최소금액이 최대 금액 보다 클경우 에러를 던지기
         if (
+                condition.getMaxPriceMin() != null &&
                 condition.getMaxPriceMax() != null &&
                 condition.getMaxPriceMax().compareTo(condition.getMaxPriceMin()) < 0
         ) {
