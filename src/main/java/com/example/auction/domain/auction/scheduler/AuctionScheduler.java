@@ -27,7 +27,7 @@ public class AuctionScheduler {
      */
     @Scheduled(fixedDelay = 10000)
     @Transactional
-    public void toActiveAuctions() {
+    public void startAuctions() {
         LocalDateTime now = LocalDateTime.now();
 
         List<Auction> readyAuctions = auctionRepository.findAllByStatusAndStartedAtBefore(
