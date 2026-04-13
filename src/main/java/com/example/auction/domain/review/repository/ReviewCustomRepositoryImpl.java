@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import static com.example.auction.domain.review.entity.QReview.review;
@@ -92,8 +93,8 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
 
     private BooleanExpression dateBetween(LocalDate startDate, LocalDate endDate) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = startDate != null ? startDate.atTime(0, 0, 0) : now.minusMonths(6);
-        LocalDateTime end = endDate != null ? endDate.atTime(23, 59, 59) : now;
+        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : now.toLocalDate().minusMonths(6).atStartOfDay();
+        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : now;
         return review.createdAt.between(start, end);
     }
 }
