@@ -1,6 +1,8 @@
 package com.example.auction.domain.auction.service;
 
 import org.jspecify.annotations.NonNull;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,10 @@ public class AuctionService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(
+        cacheNames =  {"auctionGetOne"},
+        key = "#auctionId"
+    )
     public GetAuctionResponse getAuction(Long auctionId) {
         Auction auction = auctionRepository.findById(auctionId).orElseThrow(
                 () -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND)
@@ -84,6 +90,10 @@ public class AuctionService {
     }
 
     @Transactional()
+    @CachePut(
+        cacheNames = {"auctionGetOne"},
+        key = "#result.getId()"
+    )
     public GetAuctionResponse createAuction(
             CustomUserDetails userDetails,
             CreateAuctionRequest req

@@ -44,6 +44,8 @@ public class RedisCacheConfig {
 
         cacheConfigs.put("auctionSearch", defaultConfig.entryTtl(Duration.ofMinutes(10)));
 
+        cacheConfigs.put("auctionGetOne", defaultConfig.entryTtl(Duration.ofMinutes(10)));
+
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(cacheConfigs)
