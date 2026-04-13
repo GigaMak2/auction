@@ -63,7 +63,9 @@ public class UserIntegrationTest {
     void cleanUpRedis() {
         var factory = redisTemplate.getConnectionFactory();
         if (factory != null) {
-            factory.getConnection().serverCommands().flushDb();
+            try (var connection = factory.getConnection()) {
+                connection.serverCommands().flushDb();
+            }
         }
     }
 
