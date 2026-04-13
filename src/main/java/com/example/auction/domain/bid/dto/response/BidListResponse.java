@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 // 경매별 입찰 조회
@@ -14,7 +15,7 @@ public class BidListResponse {
 
     private final Long bidId;
     private final Long auctionId;
-    private final Long price;
+    private final BigDecimal price;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createdAt;

@@ -3,22 +3,32 @@ package com.example.auction.domain.bid.service;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
+import com.example.auction.domain.auction.entity.Auction;
+import com.example.auction.domain.auction.enums.AuctionProductCategory;
+import com.example.auction.domain.auction.exception.AuctionErrorEnum;
+import com.example.auction.domain.auction.repository.AuctionRepository;
+import com.example.auction.domain.auction.result.entity.AuctionResult;
+import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
-import com.example.auction.domain.bid.enums.BidErrorEnum;
+import com.example.auction.domain.bid.exceptions.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
+@ExtendWith(MockitoExtension.class)
 class BidQueryServiceTest {
 
     @InjectMocks
@@ -34,15 +45,50 @@ class BidQueryServiceTest {
     @Mock
     private BidRepository bidRepository;
 
+    @Mock
+    private AuctionRepository auctionRepository;
+
+    @Mock
+    private AuctionResultRepository resultRepository;
+
     private CustomUserDetails userDetails;
     private Long auctionId;
     private Pageable pageable;
+    private Auction activeAuction;
+    private Auction doneAuction;
+    private Auction cancelledAuction;
 
     @BeforeEach
     void setUp() {
         userDetails = new CustomUserDetails(1L, "USER");
         auctionId = 10L;
         pageable = PageRequest.of(0, 20);
+
+
+        activeAuction = Auction.of(
+                99L, "진행중 경매", BigDecimal.valueOf(200_000), "상품",
+                LocalDateTime.now().minusHours(1),
+                LocalDateTime.now().plusHours(1),
+                AuctionProductCategory.ELECTRONICS
+        );
+        activeAuction.activate();
+
+        doneAuction = Auction.of(
+                99L, "낙찰 경매", BigDecimal.valueOf(200_000), "상품",
+                LocalDateTime.now().minusHours(2),
+                LocalDateTime.now().minusHours(1),
+                AuctionProductCategory.ELECTRONICS
+        );
+        doneAuction.activate();
+        doneAuction.close();
+
+        cancelledAuction = Auction.of(
+                99L, "취소 경매", BigDecimal.valueOf(200_000), "상품",
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(2),
+                AuctionProductCategory.ELECTRONICS
+        );
+        cancelledAuction.cancel();
     }
 
 
@@ -55,14 +101,15 @@ class BidQueryServiceTest {
     void getBids_success() {
         // given
         List<Bid> bids = List.of(
-                Bid.of(null, 100_000L, auctionId, 2L, BidAuctionStatus.ACTIVE),
-                Bid.of(null, 150_000L, auctionId, 3L, BidAuctionStatus.ACTIVE)
+                Bid.of(null, BigDecimal.valueOf(100_000), auctionId, 2L, BidAuctionStatus.ACTIVE),
+                Bid.of(null, BigDecimal.valueOf(150_000), auctionId, 3L, BidAuctionStatus.ACTIVE)
         );
         Page<Bid> bidPage = new PageImpl<>(bids, pageable, bids.size());
 
         given(bidRepository.findAllByAuctionId(auctionId, pageable)).willReturn(bidPage);
 
         // when
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
         PageResponse<BidListResponse> response = queryService.getBids(userDetails, auctionId, pageable);
 
         // then
@@ -79,11 +126,37 @@ class BidQueryServiceTest {
         given(bidRepository.findAllByAuctionId(auctionId, pageable)).willReturn(emptyPage);
 
         // when
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
         PageResponse<BidListResponse> response = queryService.getBids(userDetails, auctionId, pageable);
 
         // then
         assertThat(response.content()).isEmpty();
         assertThat(response.totalElements()).isEqualTo(0);
+    }
+
+
+    @Test
+    @DisplayName("존재하지 않는 경매 입찰 목록 조회 시 실패")
+    void getBids_auctionNotFound_fail() {
+        // given
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> queryService.getBids(userDetails, auctionId, pageable))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("취소된 경매 입찰 목록 조회 시 실패")
+    void getBids_cancelledAuction_fail() {
+        // given
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(cancelledAuction));
+
+        // when & then
+        assertThatThrownBy(() -> queryService.getBids(userDetails, auctionId, pageable))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
     }
 
 
@@ -95,8 +168,8 @@ class BidQueryServiceTest {
     void getMyBids_success() {
         // given
         List<Bid> myBids = List.of(
-                Bid.of(null, 100_000L, auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE),
-                Bid.of(null, 80_000L, 20L, userDetails.getUserId(), BidAuctionStatus.ACTIVE)
+                Bid.of(null, BigDecimal.valueOf(100_000), auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE),
+                Bid.of(null, BigDecimal.valueOf(80_000), 20L, userDetails.getUserId(), BidAuctionStatus.ACTIVE)
         );
         Page<Bid> myBidPage = new PageImpl<>(myBids, pageable, myBids.size());
 
@@ -132,27 +205,77 @@ class BidQueryServiceTest {
     @DisplayName("입찰 결과 조회 성공 - 최저가 입찰 반환")
     void getWinnerBid_success() {
         // given
-        Bid winnerBid = Bid.of(null, 80_000L, auctionId, 2L, BidAuctionStatus.ACTIVE);
-        given(bidRepository.findWinnerBidByAuctionId(auctionId)).willReturn(Optional.of(winnerBid));
+        AuctionResult auctionResult = AuctionResult.of(
+                BigDecimal.valueOf(80_000), auctionId, 99L, 2L, 100L
+        );
+        Bid winnerBid = Bid.of(null, BigDecimal.valueOf(80_000), auctionId, 2L, BidAuctionStatus.ACTIVE);
+
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(doneAuction));
+        given(resultRepository.findByAuctionId(auctionId)).willReturn(Optional.of(auctionResult));
+        given(bidRepository.findById(100L)).willReturn(Optional.of(winnerBid));
 
         // when
         BidResponse response = queryService.getWinnerBid(userDetails, auctionId);
 
         // then
-        assertThat(response.getPrice()).isEqualTo(80_000L);
+        assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(80_000));
         assertThat(response.getAuctionId()).isEqualTo(auctionId);
+    }
+    @Test
+    @DisplayName("존재하지 않는 경매 결과 조회 시 실패")
+    void getWinnerBid_auctionNotFound_fail() {
+        // given
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> queryService.getWinnerBid(userDetails, auctionId))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
     }
 
     @Test
-    @DisplayName("입찰 없으면 예외 발생 - 미종료 또는 유찰 경매")
-    void getWinnerBid_notFound() {
+    @DisplayName("DONE이 아닌 경매 결과 조회 시 실패 - ACTIVE")
+    void getWinnerBid_notDone_active_fail() {
         // given
-        given(bidRepository.findWinnerBidByAuctionId(auctionId)).willReturn(Optional.empty());
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when & then
         assertThatThrownBy(() -> queryService.getWinnerBid(userDetails, auctionId))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.AUCTION_RESULT_NOT_FOUND.getMessage());
+    }
 
+    @Test
+    @DisplayName("DONE이 아닌 경매 결과 조회 시 실패 - NO_BID")
+    void getWinnerBid_notDone_noBid_fail() {
+        // given
+        Auction noBidAuction = Auction.of(
+                99L, "유찰 경매", BigDecimal.valueOf(200_000), "상품",
+                LocalDateTime.now().minusHours(2),
+                LocalDateTime.now().minusHours(1),
+                AuctionProductCategory.ELECTRONICS
+        );
+        noBidAuction.activate();
+        noBidAuction.noBid();
+
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(noBidAuction));
+
+        // when & then
+        assertThatThrownBy(() -> queryService.getWinnerBid(userDetails, auctionId))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(BidErrorEnum.AUCTION_RESULT_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("AuctionResult 없으면 실패")
+    void getWinnerBid_resultNotFound_fail() {
+        // given
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(doneAuction));
+        given(resultRepository.findByAuctionId(auctionId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> queryService.getWinnerBid(userDetails, auctionId))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(BidErrorEnum.AUCTION_RESULT_NOT_FOUND.getMessage());
     }
 }
