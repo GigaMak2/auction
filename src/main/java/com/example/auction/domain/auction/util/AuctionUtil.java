@@ -17,6 +17,7 @@ public class AuctionUtil {
     ) {
         // 검색 조건중 최소금액이 최대 금액 보다 클경우 에러를 던지기
         if (
+                condition.getMaxPriceMin() != null &&
                 condition.getMaxPriceMax() != null &&
                 condition.getMaxPriceMax().compareTo(condition.getMaxPriceMin()) < 0
         ) {
