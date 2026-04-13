@@ -42,9 +42,9 @@ public class RedisCacheConfig {
         // 캐시별 설정 (검색)
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
 
-        cacheConfigs.put("auctionSearch", defaultConfig.entryTtl(Duration.ofMinutes(10)));
+        cacheConfigs.put("getManyAuctionsPublic", defaultConfig.entryTtl(Duration.ofMinutes(10)));
 
-        cacheConfigs.put("auctionGetOne", defaultConfig.entryTtl(Duration.ofMinutes(10)));
+        cacheConfigs.put("getAuction", defaultConfig.entryTtl(Duration.ofMinutes(10)));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)

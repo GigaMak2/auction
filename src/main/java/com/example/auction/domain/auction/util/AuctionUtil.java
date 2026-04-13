@@ -1,6 +1,8 @@
 package com.example.auction.domain.auction.util;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
