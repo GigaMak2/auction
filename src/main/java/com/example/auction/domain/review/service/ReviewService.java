@@ -2,6 +2,9 @@ package com.example.auction.domain.review.service;
 
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
+import com.example.auction.domain.auction.result.entity.AuctionResult;
+import com.example.auction.domain.auction.result.exception.AuctionResultErrorEnum;
+import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
 import com.example.auction.domain.review.dto.*;
 import com.example.auction.domain.review.entity.Review;
 import com.example.auction.domain.review.exception.ReviewErrorEnum;
@@ -24,28 +27,27 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final AuctionResultRepository auctionResultRepository;
 
     @Transactional
     public ReviewCreateResponse createReview(Long userId, ReviewCreateRequest request) {
-        // TODO auctionId로 경매 결과 조회
-        // TODO 리뷰 작성자가 구매자인지 판매자인지 확인 후 revieweeId 결정
-        /*
+        AuctionResult auctionResult = auctionResultRepository.findByAuctionId(request.auctionId()).orElseThrow(
+                () -> new ServiceErrorException(AuctionResultErrorEnum.AUCTION_RESULT_NOT_FOUND));
+
         Long revieweeId;
-        if (auctionResult.getBuyerId.equals(userId)) {
-            revieweeId = actionResult.getSellerId;
-        } else if (auctionResult.getSellerId.equals(userId)) {
-            revieweeId = auctionResult.getBuyerId;
+        if (auctionResult.getBuyerId().equals(userId)) {
+            revieweeId = auctionResult.getSellerId();
+        } else if (auctionResult.getSellerId().equals(userId)) {
+            revieweeId = auctionResult.getBuyerId();
         } else {
-            throw new 예외 던지기
+            throw new ServiceErrorException(ReviewErrorEnum.REVIEW_NOT_ALLOWED);
         }
-         */
 
         if (reviewRepository.existsByAuctionIdAndReviewerId(request.auctionId(), userId)) {
             throw new ServiceErrorException(ReviewErrorEnum.ALREADY_REVIEWED);
         }
 
-        // TODO 경매 결과 연동되면 request.revieweeId() → revieweeId 로 수정
-        User reviewee = userRepository.findByIdAndDeletedFalse(request.revieweeId()).orElseThrow(
+        User reviewee = userRepository.findByIdAndDeletedFalse(revieweeId).orElseThrow(
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
         Review review = Review.of(request.auctionId(), userId, reviewee.getId(), request.score(), request.description());
