@@ -12,6 +12,7 @@ import com.example.auction.domain.auth.dto.AuthSignupResponse;
 import com.example.auction.domain.auth.exception.AuthErrorEnum;
 import com.example.auction.domain.auth.service.AuthService;
 import com.example.auction.domain.user.enums.UserRole;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,11 @@ class AuthControllerTest {
 
     @MockitoBean
     private CustomAccessDeniedHandler customAccessDeniedHandler;
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
 
     // ========================
     // 회원가입
