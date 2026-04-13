@@ -32,7 +32,7 @@ public class ReviewController {
     @GetMapping("/written")
     public ResponseEntity<BaseResponse<PageResponse<ReviewListGetResponse>>> getWrittenReviewList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @ModelAttribute ReviewSearchCondition condition
+            @Valid @ModelAttribute ReviewSearchCondition condition
     ) {
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
@@ -42,7 +42,7 @@ public class ReviewController {
     @GetMapping("/received")
     public ResponseEntity<BaseResponse<PageResponse<ReviewListGetResponse>>> getReceivedReviewList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @ModelAttribute ReviewSearchCondition condition
+            @Valid @ModelAttribute ReviewSearchCondition condition
     ) {
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
