@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -94,11 +93,6 @@ public class ReviewService {
                 review.getCreatedAt(),
                 review.getModifiedAt()
         );
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReviewListByAuctionGetResponse> getReviewListByAuction(Long auctionId) {
-        return reviewRepository.findByAuctionId(auctionId);
     }
 
     @Transactional

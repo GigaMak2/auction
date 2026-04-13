@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/reviews")
@@ -47,15 +45,6 @@ public class ReviewController {
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "리뷰 조회 요청 성공", reviewService.getReview(reviewId)));
-    }
-
-    // TODO 리뷰 조회와 경로 충돌 → auction 도메인으로 이동
-    @GetMapping("/{auctionId}")
-    public ResponseEntity<BaseResponse<List<ReviewListByAuctionGetResponse>>> getReviewListByAuction(
-            @PathVariable Long auctionId
-    ) {
-        return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "경매별 리뷰 목록 조회 요청 성공", reviewService.getReviewListByAuction(auctionId)));
     }
 
     @PatchMapping("/{reviewId}")
