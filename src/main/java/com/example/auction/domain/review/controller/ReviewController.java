@@ -39,6 +39,16 @@ public class ReviewController {
                 HttpStatus.OK.name(), "작성한 리뷰 목록 조회 요청 성공", reviewService.getWrittenReviewList(userId, condition)));
     }
 
+    @GetMapping("/received")
+    public ResponseEntity<BaseResponse<PageResponse<ReviewListGetResponse>>> getReceivedReviewList(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @ModelAttribute ReviewSearchCondition condition
+    ) {
+        Long userId = userDetails.getUserId();
+        return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
+                HttpStatus.OK.name(), "받은 리뷰 목록 조회 요청 성공", reviewService.getReceivedReviewList(userId, condition)));
+    }
+
     @GetMapping("/{reviewId}")
     public ResponseEntity<BaseResponse<ReviewGetResponse>> getReview(
             @PathVariable Long reviewId

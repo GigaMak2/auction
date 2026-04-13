@@ -21,7 +21,7 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<ReviewListGetResponse> findReviewsWithConditions(Long userId, Pageable pageable, LocalDate startDate, LocalDate endDate) {
+    public Page<ReviewListGetResponse> findWrittenReviewsWithConditions(Long userId, Pageable pageable, LocalDate startDate, LocalDate endDate) {
         List<ReviewListGetResponse> list = queryFactory
                 .select(Projections.constructor(ReviewListGetResponse.class,
                         review.id,
@@ -44,6 +44,39 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
                 .from(review)
                 .where(
                         review.reviewerId.eq(userId),
+                        dateBetween(startDate, endDate)
+                )
+                .fetchOne();
+
+        if (total == null) total = 0L;
+
+        return new PageImpl<>(list, pageable, total);
+    }
+
+    @Override
+    public Page<ReviewListGetResponse> findReceivedReviewsWithConditions(Long userId, Pageable pageable, LocalDate startDate, LocalDate endDate) {
+        List<ReviewListGetResponse> list = queryFactory
+                .select(Projections.constructor(ReviewListGetResponse.class,
+                        review.id,
+                        review.auctionId,
+                        review.reviewerId,
+                        review.createdAt,
+                        review.modifiedAt))
+                .from(review)
+                .where(
+                        review.revieweeId.eq(userId),
+                        dateBetween(startDate, endDate)
+                )
+                .orderBy(review.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long total = queryFactory
+                .select(review.count())
+                .from(review)
+                .where(
+                        review.revieweeId.eq(userId),
                         dateBetween(startDate, endDate)
                 )
                 .fetchOne();

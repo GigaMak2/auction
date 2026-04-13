@@ -68,7 +68,19 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public PageResponse<ReviewListGetResponse> getWrittenReviewList(Long userId, ReviewSearchCondition condition) {
-        Page<ReviewListGetResponse> reviewList = reviewRepository.findReviewsWithConditions(
+        Page<ReviewListGetResponse> reviewList = reviewRepository.findWrittenReviewsWithConditions(
+                userId,
+                PageRequest.of(condition.getPage(), condition.getSize()),
+                condition.getStartDate(),
+                condition.getEndDate()
+        );
+
+        return PageResponse.create(reviewList);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<ReviewListGetResponse> getReceivedReviewList(Long userId, ReviewSearchCondition condition) {
+        Page<ReviewListGetResponse> reviewList = reviewRepository.findReceivedReviewsWithConditions(
                 userId,
                 PageRequest.of(condition.getPage(), condition.getSize()),
                 condition.getStartDate(),

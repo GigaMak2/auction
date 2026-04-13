@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public record ReviewListGetResponse(
         Long reviewId,
         Long auctionId,
-        Long revieweeId,
+        Long counterpartId,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {}
