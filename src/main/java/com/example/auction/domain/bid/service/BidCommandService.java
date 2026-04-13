@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 // 입찰 생성
 @Service
 @RequiredArgsConstructor
@@ -26,15 +28,15 @@ public class BidCommandService {
     public BidResponse placeBid(CustomUserDetails userDetails, Long auctionId, BidRequest request) {
 
         Long userId = userDetails.getUserId();
-        Long bidPrice = request.getPrice();
+        BigDecimal bidPrice = request.getPrice();
 
         // 경매 존재 여부 확인
         // 경매 상태 검증
         // 본인 경매 입찰 금지(경매의 유저아이디 == 입찰의 유저아이디)
         // 경매의 최대가격 초과 방지
-        Long currentMinPrice = bidRepository.findMinPriceByAuctionId(auctionId).orElse(null);
+        BigDecimal currentMinPrice = bidRepository.findMinPriceByAuctionId(auctionId).orElse(null);
 
-        if (currentMinPrice != null && bidPrice >= currentMinPrice) {
+        if (currentMinPrice != null && bidPrice.compareTo(currentMinPrice) >= 0) {
             log.warn("[입찰 실패] auctionId={}, userId={}, bidPrice={}, currentMinPrice={}",
                     auctionId, userId, bidPrice, currentMinPrice);
             throw new ServiceErrorException(BidErrorEnum.BID_PRICE_NOT_LOWER);

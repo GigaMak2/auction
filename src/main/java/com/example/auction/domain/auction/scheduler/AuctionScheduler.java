@@ -40,6 +40,7 @@ public class AuctionScheduler {
     }
 
     // active -> done/nobid 처리
+    // 경매결과(auctionResult) 생성 및 저장
     @Scheduled(fixedDelay = 10000)
     @Transactional
     public void endAuctions() {

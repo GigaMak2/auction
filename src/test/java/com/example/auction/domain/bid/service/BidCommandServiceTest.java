@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,8 +49,8 @@ class BidCommandServiceTest {
     @DisplayName("첫 입찰 - 현재 입찰 없을 때 max_price 이하면 성공")
     void firstBid_success() {
         // given
-        BidRequest request = new BidRequest(150_000L, null);
-        Bid savedBid = Bid.of(null, 150_000L, auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
+        BidRequest request = new BidRequest(BigDecimal.valueOf(150_000), null);
+        Bid savedBid = Bid.of(null, BigDecimal.valueOf(150_000), auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
 
         given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.empty());
         given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
@@ -59,7 +60,7 @@ class BidCommandServiceTest {
 
         // then
         assertThat(response).isNotNull();
-        assertThat(response.getPrice()).isEqualTo(150_000L);
+        assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(150_000));
         assertThat(response.getAuctionId()).isEqualTo(auctionId);
     }
 
@@ -67,8 +68,8 @@ class BidCommandServiceTest {
     @DisplayName("현재 최저가보다 낮은 가격으로 입찰 성공")
     void bidLowerThanCurrentMin_success() {
         // given
-        Long currentMinPrice = 150_000L;
-        Long newBidPrice = 100_000L;  // 현재 최저가보다 낮음
+        BigDecimal currentMinPrice = BigDecimal.valueOf(150000);
+        BigDecimal newBidPrice = BigDecimal.valueOf(100000);  // 현재 최저가보다 낮음
         BidRequest request = new BidRequest(newBidPrice, null);
         Bid savedBid = Bid.of(null, newBidPrice, auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
 
@@ -91,7 +92,7 @@ class BidCommandServiceTest {
     @DisplayName("현재 최저가와 같은 가격으로 입찰 시 실패")
     void bidSameAsCurrentMin_fail() {
         // given
-        Long currentMinPrice = 150_000L;
+        BigDecimal currentMinPrice = BigDecimal.valueOf(150_000);
         BidRequest request = new BidRequest(currentMinPrice, null);
 
         given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.of(currentMinPrice));
@@ -106,8 +107,8 @@ class BidCommandServiceTest {
     @DisplayName("현재 최저가보다 높은 가격으로 입찰 시 실패")
     void bidHigherThanCurrentMin_fail() {
         // given
-        Long currentMinPrice = 150_000L;
-        BidRequest request = new BidRequest(200_000L, null);  // 최저가보다 높음
+        BigDecimal currentMinPrice = BigDecimal.valueOf(150000);
+        BidRequest request = new BidRequest(BigDecimal.valueOf(200_000), null);  // 최저가보다 높음
 
         given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.of(currentMinPrice));
 

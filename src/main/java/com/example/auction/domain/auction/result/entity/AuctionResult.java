@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 @Getter
 @Entity
-@Table(name = "auctions")
+@Table(name = "auction_results")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AuctionResult extends ModifiableEntity {
     @Id

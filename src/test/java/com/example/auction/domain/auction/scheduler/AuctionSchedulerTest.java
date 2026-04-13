@@ -91,7 +91,7 @@ class AuctionSchedulerTest {
                 eq(AuctionStatus.ACTIVE), any(LocalDateTime.class)))
                 .willReturn(List.of(auction));
         given(bidRepository.findMinPriceByAuctionId(any()))
-                .willReturn(Optional.of(50_000L)); // 입찰 있음
+                .willReturn(Optional.of(BigDecimal.valueOf(50_000))); // 입찰 있음
 
         // when
         auctionScheduler.endAuctions();

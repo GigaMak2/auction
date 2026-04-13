@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Getter
 @Entity
 @Table(name = "bids")
@@ -23,7 +25,7 @@ public class Bid extends CreatableEntity {
     private String description;
 
     @Column(nullable = false)
-    private Long price;
+    private BigDecimal price;
 
     @Column(nullable = false, name = "auction_id")
     private Long auctionId;
@@ -35,7 +37,7 @@ public class Bid extends CreatableEntity {
     @Column(nullable = false)
     private BidAuctionStatus status;
 
-    public static Bid of(String description, Long price, Long auctionId, Long userId, BidAuctionStatus status) {
+    public static Bid of(String description, BigDecimal price, Long auctionId, Long userId, BidAuctionStatus status) {
         Bid bid = new Bid();
         bid.description = description;
         bid.userId = userId;

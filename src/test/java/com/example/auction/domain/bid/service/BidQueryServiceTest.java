@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,8 +59,8 @@ class BidQueryServiceTest {
     void getBids_success() {
         // given
         List<Bid> bids = List.of(
-                Bid.of(null, 100_000L, auctionId, 2L, BidAuctionStatus.ACTIVE),
-                Bid.of(null, 150_000L, auctionId, 3L, BidAuctionStatus.ACTIVE)
+                Bid.of(null, BigDecimal.valueOf(100_000), auctionId, 2L, BidAuctionStatus.ACTIVE),
+                Bid.of(null, BigDecimal.valueOf(150_000), auctionId, 3L, BidAuctionStatus.ACTIVE)
         );
         Page<Bid> bidPage = new PageImpl<>(bids, pageable, bids.size());
 
@@ -98,8 +99,8 @@ class BidQueryServiceTest {
     void getMyBids_success() {
         // given
         List<Bid> myBids = List.of(
-                Bid.of(null, 100_000L, auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE),
-                Bid.of(null, 80_000L, 20L, userDetails.getUserId(), BidAuctionStatus.ACTIVE)
+                Bid.of(null, BigDecimal.valueOf(100_000), auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE),
+                Bid.of(null, BigDecimal.valueOf(80_000), 20L, userDetails.getUserId(), BidAuctionStatus.ACTIVE)
         );
         Page<Bid> myBidPage = new PageImpl<>(myBids, pageable, myBids.size());
 
@@ -135,14 +136,14 @@ class BidQueryServiceTest {
     @DisplayName("입찰 결과 조회 성공 - 최저가 입찰 반환")
     void getWinnerBid_success() {
         // given
-        Bid winnerBid = Bid.of(null, 80_000L, auctionId, 2L, BidAuctionStatus.ACTIVE);
+        Bid winnerBid = Bid.of(null, BigDecimal.valueOf(80_000), auctionId, 2L, BidAuctionStatus.ACTIVE);
         given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.of(winnerBid));
 
         // when
         BidResponse response = queryService.getWinnerBid(userDetails, auctionId);
 
         // then
-        assertThat(response.getPrice()).isEqualTo(80_000L);
+        assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(80_000));
         assertThat(response.getAuctionId()).isEqualTo(auctionId);
     }
 
