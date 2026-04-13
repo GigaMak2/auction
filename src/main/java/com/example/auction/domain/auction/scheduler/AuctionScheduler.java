@@ -3,6 +3,9 @@ package com.example.auction.domain.auction.scheduler;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.repository.AuctionRepository;
+import com.example.auction.domain.auction.result.entity.AuctionResult;
+import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
+import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.repository.BidRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +23,13 @@ public class AuctionScheduler {
 
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
+    private final AuctionResultRepository resultRepository;
 
     /*
      startedAt 이 지난 경매 시작 처리(READY -> ACTIVE)
      10초마다 실행
      */
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelayString = "${scheduler.auction.delay}")
     @Transactional
     public void startAuctions() {
         LocalDateTime now = LocalDateTime.now();
@@ -41,7 +45,7 @@ public class AuctionScheduler {
 
     // active -> done/nobid 처리
     // 경매결과(auctionResult) 생성 및 저장
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelayString = "${scheduler.auction.delay}")
     @Transactional
     public void endAuctions() {
 
@@ -52,12 +56,20 @@ public class AuctionScheduler {
         for (Auction auction : activeAuctions) {
             Long auctionId = auction.getId();
 
-            // 입찰 존재 여부 확인
-            boolean hasBid = bidRepository.findMinPriceByAuctionId(auctionId).isPresent();
+            // 최저가 입찰 찾기
+            Bid winnerBid = bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId).orElse(null);
 
-            if (hasBid) {
-                // 낙찰
+            if (winnerBid != null) {
+                // 낙찰시 경매결과 생성 및 저장
                 auction.close();
+                AuctionResult auctionResult = AuctionResult.of(
+                        winnerBid.getPrice(),
+                        auctionId,
+                        auction.getUserId(), // 구매자 (경매 생성자)
+                        winnerBid.getUserId(), // 판매자 (낙찰 입찰자)
+                        winnerBid.getId()
+                );
+                resultRepository.save(auctionResult);
                 log.info("[경매 낙찰] auctionId={}", auctionId);
             } else {
                 // 유찰
