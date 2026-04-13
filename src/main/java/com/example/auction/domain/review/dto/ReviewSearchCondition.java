@@ -1,5 +1,6 @@
 package com.example.auction.domain.review.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
@@ -19,4 +20,9 @@ public class ReviewSearchCondition {
 
     private LocalDate startDate;
     private LocalDate endDate;
+
+    @AssertTrue(message = "시작일은 종료일보다 이후일 수 없습니다")
+    private boolean isValidDateRange() {
+        return startDate == null || endDate == null || !startDate.isAfter(endDate);
+    }
 }
