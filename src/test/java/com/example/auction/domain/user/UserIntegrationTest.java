@@ -61,8 +61,10 @@ public class UserIntegrationTest {
 
     @AfterEach
     void cleanUpRedis() {
-        redisTemplate.keys("refresh:*").forEach(redisTemplate::delete);
-        redisTemplate.keys("blacklist:*").forEach(redisTemplate::delete);
+        var factory = redisTemplate.getConnectionFactory();
+        if (factory != null) {
+            factory.getConnection().serverCommands().flushDb();
+        }
     }
 
     // ========================
