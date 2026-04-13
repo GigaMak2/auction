@@ -8,5 +8,5 @@ public record UserGetResponse(
         Long userId,
         String email,
         BigDecimal rating,
-        UserRole userRole
+        UserRole role
 ) {}
