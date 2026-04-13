@@ -13,6 +13,7 @@ import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,11 @@ public class ReviewService {
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
         Review review = Review.of(request.auctionId(), userId, reviewee.getId(), request.score(), request.description());
-        reviewRepository.save(review);
+        try {
+            reviewRepository.save(review);
+        } catch (DataIntegrityViolationException e) {
+            throw new ServiceErrorException(ReviewErrorEnum.ALREADY_REVIEWED);
+        }
 
         Double avgScore = reviewRepository.findAvgScoreByRevieweeId(reviewee.getId());
         BigDecimal rating = BigDecimal.valueOf(avgScore).setScale(1, RoundingMode.HALF_UP);
