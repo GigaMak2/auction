@@ -231,6 +231,25 @@ class AuthServiceTest {
                 .hasMessage(AuthErrorEnum.INVALID_TOKEN.getMessage());
     }
 
+    @Test
+    @DisplayName("토큰 재발급 실패 - 유저 없음(탈퇴)")
+    void refreshToken_fail_userNotFound() {
+        // given
+        String refreshToken = "validRefreshToken";
+        Long userId = 1L;
+
+        given(jwtProvider.validateRefreshToken(refreshToken)).willReturn(true);
+        given(jwtProvider.getUserId(refreshToken)).willReturn(userId);
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(valueOperations.get("refresh:" + userId)).willReturn(refreshToken);
+        given(userRepository.findByIdAndDeletedFalse(userId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> authService.refreshToken(refreshToken))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(UserErrorEnum.USER_NOT_FOUND.getMessage());
+    }
+
 
     // ========================
     // 로그아웃
