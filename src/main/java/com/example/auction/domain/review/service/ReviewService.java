@@ -31,6 +31,10 @@ public class ReviewService {
 
     @Transactional
     public ReviewCreateResponse createReview(Long userId, ReviewCreateRequest request) {
+        if (reviewRepository.existsByAuctionIdAndReviewerId(request.auctionId(), userId)) {
+            throw new ServiceErrorException(ReviewErrorEnum.ALREADY_REVIEWED);
+        }
+
         AuctionResult auctionResult = auctionResultRepository.findByAuctionId(request.auctionId()).orElseThrow(
                 () -> new ServiceErrorException(AuctionResultErrorEnum.AUCTION_RESULT_NOT_FOUND));
 
@@ -41,10 +45,6 @@ public class ReviewService {
             revieweeId = auctionResult.getBuyerId();
         } else {
             throw new ServiceErrorException(ReviewErrorEnum.REVIEW_NOT_ALLOWED);
-        }
-
-        if (reviewRepository.existsByAuctionIdAndReviewerId(request.auctionId(), userId)) {
-            throw new ServiceErrorException(ReviewErrorEnum.ALREADY_REVIEWED);
         }
 
         User reviewee = userRepository.findByIdAndDeletedFalse(revieweeId).orElseThrow(
