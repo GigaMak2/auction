@@ -208,6 +208,7 @@ class BidQueryServiceTest {
         AuctionResult auctionResult = AuctionResult.of(
                 BigDecimal.valueOf(80_000), auctionId, 99L, 2L, 100L
         );
+        // buyer: 입찰 주최자, seller: 입찰 참여자
         Bid winnerBid = Bid.of(null, BigDecimal.valueOf(80_000), auctionId, 2L, BidAuctionStatus.ACTIVE);
 
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(doneAuction));
