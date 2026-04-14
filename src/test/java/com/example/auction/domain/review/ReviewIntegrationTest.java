@@ -286,8 +286,9 @@ public class ReviewIntegrationTest {
     private void signup(String email, String password) throws Exception {
         AuthSignupRequest request = new AuthSignupRequest(email, password, UserRole.USER);
         mockMvc.perform(post("/api/auth/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
     }
 
     private String getAccessToken(String email, String password) throws Exception {
@@ -295,6 +296,7 @@ public class ReviewIntegrationTest {
         String response = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).path("data").path("accessToken").asString();
     }
@@ -305,6 +307,7 @@ public class ReviewIntegrationTest {
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).path("data").path("reviewId").asLong();
     }
