@@ -1,7 +1,6 @@
 package com.example.auction.domain.ai.service;
 
 import com.example.auction.domain.review.entity.Review;
-import com.example.auction.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
@@ -22,7 +21,6 @@ public class ReviewEmbeddingService {
     private static final double SIMILARITY_THRESHOLD = 0.4; // 최소 유사도 점수 (0~1)
 
     private final VectorStore vectorStore;
-    private final ReviewRepository reviewRepository;
 
     // 후기 1건을 벡터로 변환해 pgvector에 저장 — 리뷰 생성 시 호출
     public void embed(Review review) {
@@ -39,26 +37,6 @@ public class ReviewEmbeddingService {
                 )
         );
         vectorStore.add(List.of(document));
-    }
-
-    // 기존 후기 전체 배치 임베딩 — RAG 도입 시 최초 1회 실행
-    public void embedAll() {
-        List<Document> documents = reviewRepository.findAll().stream()
-                .filter(r -> r.getDescription() != null && !r.getDescription().isBlank())
-                .map(r -> new Document(
-                        r.getDescription(),
-                        Map.of(
-                                "sellerId", r.getRevieweeId(),
-                                "score", r.getScore(),
-                                "reviewId", r.getId()
-                        )
-                ))
-                .toList();
-
-        if (!documents.isEmpty()) {
-            vectorStore.add(documents);
-            log.info("[ReviewEmbeddingService] 후기 {}건 임베딩 완료", documents.size());
-        }
     }
 
     // sellerId 필터 + 의미 유사도 기반 후기 텍스트 검색 — LLM 컨텍스트 주입용
