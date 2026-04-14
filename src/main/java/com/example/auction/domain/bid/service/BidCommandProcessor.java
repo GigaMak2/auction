@@ -43,12 +43,8 @@ public class BidCommandProcessor {
                 .orElseThrow(() -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));
 
         // 경매 상태 검증 (ACTIVE만 입찰 가능)
+        // todo: 경매 시작시간, 종료시간과 스케줄러 돌아가는 차이가 있는데 입찰을 어떻게 받을지
         if (auction.getStatus() != AuctionStatus.ACTIVE) {
-            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_INVALID_STATUS);
-        }
-
-        // 경매 종료 시간 검증 (스케줄러 타이밍 오차 방지)
-        if (auction.getEndedAt().isBefore(LocalDateTime.now())) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_INVALID_STATUS);
         }
 
