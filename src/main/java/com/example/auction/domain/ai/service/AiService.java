@@ -3,6 +3,7 @@ package com.example.auction.domain.ai.service;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.ai.enums.SseEventType;
 import com.example.auction.domain.ai.exception.AiErrorEnum;
+import com.example.auction.domain.ai.tool.AuctionTools;
 import java.time.Duration;
 import com.example.auction.domain.chat.entity.ChatMessage;
 import com.example.auction.domain.chat.entity.ChatRoom;
@@ -25,6 +26,7 @@ public class AiService {
     private final ChatClient chatClient;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final AuctionTools auctionTools; // LLM이 호출할 Tool 묶음
 
     public Flux<ServerSentEvent<String>> streamMessage(Long roomId, Long userId, String content) {
         // 1. 채팅방 존재 확인 + 소유자 검증
@@ -41,7 +43,7 @@ public class AiService {
         boolean isFirstMessage = chatRoom.getTitle() == null;
         StringBuilder fullResponse = new StringBuilder();
 
-        // 3. TOKEN 스트리밍 — Chapter 2의 stream().content() 패턴
+        // 3. TOKEN 스트리밍 — Tool Calling 포함, Chapter 2의 stream().content() 패턴
         Flux<ServerSentEvent<String>> tokenStream = chatClient.prompt()
                 .system("""
                         당신은 중고물품 역경매 플랫폼의 AI 상담사입니다.
@@ -49,6 +51,7 @@ public class AiService {
                         한국어로 답변하세요.
                         """)
                 .user(content)
+                .tools(auctionTools)  // LLM이 필요 시 경매 데이터 조회 Tool 호출
                 .stream()
                 .content()
                 .timeout(Duration.ofSeconds(40)) // 40초 내 응답 없으면 Fallback으로 처리

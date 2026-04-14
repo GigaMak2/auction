@@ -79,4 +79,13 @@ public class AuctionController {
                         res
                 ));
     }
+
+    @DeleteMapping("/api/auctions/{auctionId}")
+    public ResponseEntity<Void> cancelAuction(
+            @PathVariable Long auctionId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        auctionService.cancelAuction(auctionId, details);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }
