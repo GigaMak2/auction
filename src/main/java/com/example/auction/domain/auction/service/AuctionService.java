@@ -174,7 +174,7 @@ public class AuctionService {
 
         // 경매 주인이 아니라면 에러를 던지기
         if (!auction.getUserId().equals(details.getUserId())) {
-            throw new ServiceErrorException(AuctionErrorEnum.AUCITON_FORBIDDEN_FROM_CANCEL);
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_FORBIDDEN_FROM_CANCEL);
         }
 
         // 경매가 이미 취소되어 있다면 noop
@@ -184,7 +184,7 @@ public class AuctionService {
 
         // 경매가 준비 상태가 아니라면 에러를 던지기
         if (!auction.getStatus().equals(AuctionStatus.READY)) {
-            throw new ServiceErrorException(AuctionErrorEnum.AUCITON_STATUS_NOT_CACELLABLE);
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_STATUS_NOT_CANCELLABLE);
         }
 
         // 경매를 취소하기 너무 늦었다면 에러를 던지기

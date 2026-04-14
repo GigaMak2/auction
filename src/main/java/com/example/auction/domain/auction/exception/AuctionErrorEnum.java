@@ -13,13 +13,13 @@ public enum AuctionErrorEnum implements ErrorEnumInterface {
             "경매를 찾을 수 없습니다"
     ),
 
-    AUCITON_STATUS_NOT_CACELLABLE(
+    AUCTION_STATUS_NOT_CANCELLABLE(
             HttpStatus.CONFLICT,
             "경매를 취소할 수 있는 상태가 아닙니다"
     ),
-    AUCITON_FORBIDDEN_FROM_CANCEL(
+    AUCTION_FORBIDDEN_FROM_CANCEL(
             HttpStatus.FORBIDDEN,
-            "경매를 취소 할 수 있는 권한이 없습니다"
+            "경매를 취소할 수 있는 권한이 없습니다"
     ),
     AUCTION_TOO_LATE_TO_CANCEL(
             HttpStatus.CONFLICT,
