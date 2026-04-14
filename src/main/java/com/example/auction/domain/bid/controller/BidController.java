@@ -67,4 +67,15 @@ public class BidController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(String.valueOf(HttpStatus.OK.value()), "입찰 결과 조회가 완료되었습니다", data));
     }
+
+    // (경매 진행중) 현재 최저가입찰 조회
+    @GetMapping("/current/v1")
+    public ResponseEntity<BaseResponse<BidResponse>> getCurrentMinBid(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("auction_id") Long auctionId
+    ) {
+        BidResponse data = queryService.getCurrentMinBid(userDetails, auctionId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.value()), "현재 최저가 입찰 조회가 완료되었습니다", data));
+    }
 }
