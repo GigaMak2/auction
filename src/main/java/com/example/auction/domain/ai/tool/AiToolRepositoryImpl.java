@@ -48,7 +48,9 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 ))
                 .from(auctionResult)
                 .join(auction).on(auctionResult.auctionId.eq(auction.id))
-                .where(auction.itemName.containsIgnoreCase(itemName))
+                .where(itemName != null && !itemName.isBlank()
+                        ? auction.itemName.containsIgnoreCase(itemName)
+                        : null)
                 .orderBy(auctionResult.createdAt.desc())
                 .limit(10)
                 .fetch();
