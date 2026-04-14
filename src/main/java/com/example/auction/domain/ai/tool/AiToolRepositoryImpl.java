@@ -3,6 +3,7 @@ package com.example.auction.domain.ai.tool;
 import com.example.auction.domain.ai.tool.dto.AuctionBidInfo;
 import com.example.auction.domain.ai.tool.dto.AuctionResultInfo;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -52,7 +53,7 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 .from(auctionResult)
                 .join(auction).on(auctionResult.auctionId.eq(auction.id))
                 .where(itemName != null && !itemName.isBlank()
-                        ? auction.itemName.containsIgnoreCase(itemName)
+                        ? auction.itemName.containsIgnoreCase(itemName.trim())
                         : null)
                 .orderBy(auction.endedAt.desc())
                 .limit(10)
@@ -78,7 +79,8 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 .from(review)
                 .where(
                         review.revieweeId.eq(sellerId),
-                        review.description.isNotNull()  // 텍스트 없는 별점만 있는 후기 제외
+                        review.description.isNotNull(),  // 텍스트 없는 별점만 있는 후기 제외
+                        Expressions.stringTemplate("trim({0})", review.description).ne("")  // 공백만 있는 후기 제외
                 )
                 .orderBy(review.createdAt.desc())
                 .limit(5)
