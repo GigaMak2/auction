@@ -22,6 +22,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String BLACKLIST_PREFIX = "blacklist:";
 
+    // async dispatch(SSE 스트리밍) 시에도 JWT 필터를 재실행해 SecurityContext 유지
+    @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = jwtProvider.resolveToken(request.getHeader("Authorization"));
