@@ -84,7 +84,23 @@ public class BidQueryService {
         // todo: 현재 auctionResult의 id를 가지고 bidRepository에 다시 가서 찾아오고 있음(사유: description 등 내용이 다름) -> 고도화 과정에서 재검토 필요
         return bidRepository.findById(auctionResult.getBidId())
                 .map(BidResponse::of)
-                .orElseThrow(() -> new ServiceErrorException(BidErrorEnum.INVALID_BID));
+                .orElseThrow(() -> new ServiceErrorException(BidErrorEnum.BID_NOT_FOUND));
 
+    }
+
+    public BidResponse getCurrentMinBid(CustomUserDetails userDetails, Long auctionId) {
+        // 경매 존재 여부 및 상태 확인
+        Auction auction = auctionRepository.findById(auctionId)
+                .orElseThrow(() -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));
+
+        // 진행 중이 아니면 조회 불가
+        if (auction.getStatus() != AuctionStatus.ACTIVE) {
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND);
+        }
+
+        Bid currentMin = bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)
+                .orElseThrow(() -> new ServiceErrorException(BidErrorEnum.BID_NOT_FOUND));
+
+        return BidResponse.of(currentMin);
     }
 }

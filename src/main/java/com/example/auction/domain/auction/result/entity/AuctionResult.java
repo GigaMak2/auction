@@ -22,10 +22,10 @@ public class AuctionResult extends ModifiableEntity {
     @Column(name = "auction_id", nullable = false)
     private Long auctionId;
 
-    @Column(name = "buyer_id", nullable = false)
+    @Column(name = "buyer_id", nullable = false) // 입찰 주최자
     private Long buyerId;
 
-    @Column(name = "seller_id", nullable = false)
+    @Column(name = "seller_id", nullable = false) // 입찰 참여자
     private Long sellerId;
 
     @Column(name = "bid_id", nullable = false)

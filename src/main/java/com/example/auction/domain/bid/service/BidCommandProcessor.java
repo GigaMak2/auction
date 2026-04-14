@@ -15,21 +15,24 @@ import com.example.auction.domain.bid.repository.BidRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-// 입찰 생성
+// 입찰 생성- @Transactional
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class BidCommandService {
+public class BidCommandProcessor {
+
 
     private final BidRepository bidRepository;
     private final AuctionRepository auctionRepository;
 
-    // 입찰 생성
-    @Transactional
+    // requires_new를 붙여야 메서드가 끝날 때 커밋이 확정되어서 커밋 -> 락해제 순서가 보장됨
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public BidResponse placeBid(CustomUserDetails userDetails, Long auctionId, BidRequest request) {
 
         Long userId = userDetails.getUserId();
@@ -40,13 +43,9 @@ public class BidCommandService {
                 .orElseThrow(() -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));
 
         // 경매 상태 검증 (ACTIVE만 입찰 가능)
+        // todo: 경매 시작시간, 종료시간과 스케줄러 돌아가는 차이가 있는데 입찰을 어떻게 받을지
         if (auction.getStatus() != AuctionStatus.ACTIVE) {
-            throw new ServiceErrorException(BidErrorEnum.AUCTION_NOT_ACTIVE);
-        }
-
-        // 경매 종료 시간 검증 (스케줄러 타이밍 오차 방지)
-        if (auction.getEndedAt().isBefore(java.time.LocalDateTime.now())) {
-            throw new ServiceErrorException(BidErrorEnum.AUCTION_NOT_ACTIVE);
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_INVALID_STATUS);
         }
 
         // 본인 경매 입찰 금지
@@ -83,6 +82,5 @@ public class BidCommandService {
 
         return BidResponse.of(savedBid);
     }
-
 
 }
