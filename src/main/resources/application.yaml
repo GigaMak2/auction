@@ -38,3 +38,6 @@ jwt:
     key: ${JWT_SECRET}
   expiration: 1800000
   refreshExpire: 604800000
+scheduler:
+  auction:
+    delay: 60000  # 60초

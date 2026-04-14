@@ -5,6 +5,7 @@ import com.example.auction.domain.bid.enums.BidAuctionStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -12,7 +13,7 @@ public class BidResponse {
 
     private Long bidId;
     private Long auctionId;
-    private Long price;
+    private BigDecimal price;
     private String description;
     private BidAuctionStatus status;
 

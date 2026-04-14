@@ -81,4 +81,35 @@ public class Auction extends CreatableEntity {
 
         return auction;
     }
+
+    // auction 상태 변경 메서드들
+    // READY -> ACTIVE (경매 시작)
+    public void activate() {
+        if(this.status == AuctionStatus.READY) {
+            this.status = AuctionStatus.ACTIVE;
+        }
+    }
+
+    // ACTIVE -> DONE (낙찰)
+    public void close() {
+        if(this.status == AuctionStatus.ACTIVE) {
+            this.status = AuctionStatus.DONE;
+        }
+    }
+
+    // ACTIVE -> NO_BID (유찰)
+    public void noBid() {
+        if(this.status == AuctionStatus.ACTIVE) {
+            this.status = AuctionStatus.NO_BID;
+        }
+    }
+
+    // READY -> CANCELLED (취소)
+    public void cancel() {
+        if(this.status == AuctionStatus.READY) {
+            this.status = AuctionStatus.CANCELLED;
+            this.cancelledAt = LocalDateTime.now();
+        }
+    }
+
 }

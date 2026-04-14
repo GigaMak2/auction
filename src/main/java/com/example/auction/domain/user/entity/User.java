@@ -45,4 +45,8 @@ public class User extends DeletableEntity {
     public void changePassword(String encodedNewPassword) {
         this.password = encodedNewPassword;
     }
+
+    public void updateRating(BigDecimal rating) {
+        this.rating = rating;
+    }
 }

@@ -97,7 +97,7 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
 
          } else if (condition.getMaxPriceMax() != null) {
 
-            return auction.maxPrice.goe(condition.getMaxPriceMax());
+            return auction.maxPrice.loe(condition.getMaxPriceMax());
 
          } else {
             return null;

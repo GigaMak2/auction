@@ -1,6 +1,9 @@
 package com.example.auction.domain.auction.service;
 
 import org.jspecify.annotations.NonNull;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,10 @@ public class AuctionService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(
+        cacheNames =  {"getAuction"},
+        key = "#auctionId"
+    )
     public GetAuctionResponse getAuction(Long auctionId) {
         Auction auction = auctionRepository.findById(auctionId).orElseThrow(
                 () -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND)
@@ -38,6 +45,11 @@ public class AuctionService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(
+        cacheNames = {"getManyAuctionsPublic"},
+        key = "@auctionCacheService.getManyAuctionsPublicCacheKey(#condition)",
+        condition = "@auctionCacheService.shouldCacheGetManyAuctionsPublic(#condition)"
+    )
     public PageResponse<GetManyAuctionsResponse> getManyAuctionsPublic (
             AuctionSearchCondition condition
     ) {
@@ -84,6 +96,14 @@ public class AuctionService {
     }
 
     @Transactional()
+    @CachePut(
+        cacheNames = {"getAuction"},
+        key = "#result.getId()"
+    )
+    @CacheEvict(
+        cacheNames = {"getManyAuctionsPublic"},
+        allEntries = true
+    )
     public GetAuctionResponse createAuction(
             CustomUserDetails userDetails,
             CreateAuctionRequest req

@@ -44,13 +44,14 @@ public class BidController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("auction_id") Long auctionId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "price") String sort,
-            @RequestParam(defaultValue = "asc") String direction
+            @RequestParam(defaultValue = "20") int size
     ) {
-        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
-
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.ASC, "price")
+                        .and(Sort.by(Sort.Direction.DESC, "createdAt"))
+        );
         PageResponse<BidListResponse> data = queryService.getBids(userDetails, auctionId, pageable);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(String.valueOf(HttpStatus.OK.value()), "입찰 내역 조회가 완료되었습니다", data));

@@ -23,7 +23,7 @@ public class AuctionSearchCondition {
     private @Nullable String keyword;
 
     @PositiveOrZero(message = "최소 금액은 0 이상이어야 합니다")
-    private BigDecimal maxPriceMin = BigDecimal.ZERO;
+    private @Nullable BigDecimal maxPriceMin;
     @Positive(message = "최대 금액은 0보다 커야합니다")
     private @Nullable BigDecimal maxPriceMax;
 
