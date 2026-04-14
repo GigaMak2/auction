@@ -14,6 +14,7 @@ import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -59,7 +61,11 @@ public class ReviewService {
         } catch (DataIntegrityViolationException e) {
             throw new ServiceErrorException(ReviewErrorEnum.ALREADY_REVIEWED);
         }
-        reviewEmbeddingService.embed(review); // 후기 텍스트 pgvector 임베딩 저장 (RAG용)
+        try {
+            reviewEmbeddingService.embed(review); // 후기 텍스트 pgvector 임베딩 저장 (RAG용)
+        } catch (Exception e) {
+            log.warn("[ReviewService] 임베딩 저장 실패 — 리뷰 생성은 정상 처리됨. reviewId={}, error={}", review.getId(), e.getMessage());
+        }
 
         Double avgScore = reviewRepository.findAvgScoreByRevieweeId(reviewee.getId());
         BigDecimal rating = BigDecimal.valueOf(avgScore).setScale(1, RoundingMode.HALF_UP);

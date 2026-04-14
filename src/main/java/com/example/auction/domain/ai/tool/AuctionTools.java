@@ -41,6 +41,9 @@ public class AuctionTools {
         if (sellerId == null) {
             throw new IllegalArgumentException("sellerId는 필수입니다.");
         }
+        if (query == null || query.isBlank()) {
+            throw new IllegalArgumentException("query는 필수입니다.");
+        }
         return reviewEmbeddingService.search(sellerId, query);
     }
 

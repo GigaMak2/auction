@@ -79,6 +79,8 @@ services:
     depends_on:
       ollama:
         condition: service_healthy  # API 준비 완료 후 app 시작 (service_started → service_healthy)
+      ollama-init:
+        condition: service_completed_successfully  # 모델 pull 완료 후 app 시작
 
   ollama:
     image: ollama/ollama:latest
