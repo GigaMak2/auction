@@ -119,7 +119,7 @@ class BidConcurrencyTest {
         log.info("====================================");
 
         // v1은 중복이 발생할 수 있음을 확인 (1건 초과 가능)
-        assertThat(bids.size()).isGreaterThan(0);
+        assertThat(bids.size()).isGreaterThan(1);
     }
 
     @Test
