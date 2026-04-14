@@ -187,11 +187,11 @@ public class ReviewIntegrationTest {
 
 
     // ========================
-    // 리뷰 단건 조회
+    // 리뷰 상세 조회
     // ========================
 
     @Test
-    @DisplayName("리뷰 단건 조회 성공")
+    @DisplayName("리뷰 상세 조회 성공")
     void getReview_success() throws Exception {
         // given
         Long reviewId = createReview(buyerToken, auctionId, 5, "좋아요");
