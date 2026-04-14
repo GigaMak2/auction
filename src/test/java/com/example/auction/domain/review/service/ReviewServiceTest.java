@@ -227,7 +227,7 @@ class ReviewServiceTest {
         PageResponse<ReviewListGetResponse> response = reviewService.getWrittenReviewList(userId, condition);
 
         // then
-        assertThat(response.content()).hasSize(11);
+        assertThat(response.content()).hasSize(10);
         assertThat(response.totalPages()).isEqualTo(2);
         assertThat(response.totalElements()).isEqualTo(11);
         assertThat(response.currentPage()).isEqualTo(0);
@@ -291,7 +291,7 @@ class ReviewServiceTest {
         PageResponse<ReviewListGetResponse> response = reviewService.getReceivedReviewList(userId, condition);
 
         // then
-        assertThat(response.content()).hasSize(11);
+        assertThat(response.content()).hasSize(10);
         assertThat(response.totalPages()).isEqualTo(2);
         assertThat(response.totalElements()).isEqualTo(11);
         assertThat(response.currentPage()).isEqualTo(0);
