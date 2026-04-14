@@ -182,7 +182,7 @@ class BidCommandServiceTest {
         // when & then
         assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
-                .hasMessage(BidErrorEnum.AUCTION_INVALID_STATUS.getMessage());
+                .hasMessage(AuctionErrorEnum.AUCTION_INVALID_STATUS.getMessage());
     }
 
     @Test
@@ -203,7 +203,7 @@ class BidCommandServiceTest {
         // when & then
         assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
-                .hasMessage(BidErrorEnum.AUCTION_INVALID_STATUS.getMessage());
+                .hasMessage(AuctionErrorEnum.AUCTION_INVALID_STATUS.getMessage());
     }
 
     @Test
@@ -223,7 +223,7 @@ class BidCommandServiceTest {
         // when & then
         assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
-                .hasMessage(BidErrorEnum.AUCTION_INVALID_STATUS.getMessage());
+                .hasMessage(AuctionErrorEnum.AUCTION_INVALID_STATUS.getMessage());
     }
 
     @Test

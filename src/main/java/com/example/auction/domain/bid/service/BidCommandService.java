@@ -41,12 +41,12 @@ public class BidCommandService {
 
         // 경매 상태 검증 (ACTIVE만 입찰 가능)
         if (auction.getStatus() != AuctionStatus.ACTIVE) {
-            throw new ServiceErrorException(BidErrorEnum.AUCTION_INVALID_STATUS);
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_INVALID_STATUS);
         }
 
         // 경매 종료 시간 검증 (스케줄러 타이밍 오차 방지)
         if (auction.getEndedAt().isBefore(java.time.LocalDateTime.now())) {
-            throw new ServiceErrorException(BidErrorEnum.AUCTION_INVALID_STATUS);
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_INVALID_STATUS);
         }
 
         // 본인 경매 입찰 금지
