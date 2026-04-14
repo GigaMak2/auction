@@ -35,7 +35,7 @@ public enum AuctionErrorEnum implements ErrorEnumInterface {
             "경매 종료 시간은 경매 시작 시간 이후여야 합니다"
     ),
     AUCTION_INVALID_STATUS(
-            HttpStatus.BAD_REQUEST,
+            HttpStatus.CONFLICT,
             "경매 상태가 유효하지 않습니다"
     );
 

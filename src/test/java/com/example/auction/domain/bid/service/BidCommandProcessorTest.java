@@ -30,10 +30,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class BidCommandServiceTest {
+class BidCommandProcessorTest {
 
     @InjectMocks
-    private BidCommandService commandService;
+    private BidCommandFacade commandService;
 
     @Mock
     private BidRepository bidRepository;

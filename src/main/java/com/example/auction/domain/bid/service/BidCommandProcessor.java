@@ -15,21 +15,24 @@ import com.example.auction.domain.bid.repository.BidRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-// 입찰 생성
+// 입찰 생성- @Transactional
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class BidCommandService {
+public class BidCommandProcessor {
+
 
     private final BidRepository bidRepository;
     private final AuctionRepository auctionRepository;
 
-    // 입찰 생성
-    @Transactional
+    // requires_new를 붙여야 메서드가 끝날 때 커밋이 확정되어서 커밋 -> 락해제 순서가 보장됨
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public BidResponse placeBid(CustomUserDetails userDetails, Long auctionId, BidRequest request) {
 
         Long userId = userDetails.getUserId();
@@ -45,7 +48,7 @@ public class BidCommandService {
         }
 
         // 경매 종료 시간 검증 (스케줄러 타이밍 오차 방지)
-        if (auction.getEndedAt().isBefore(java.time.LocalDateTime.now())) {
+        if (auction.getEndedAt().isBefore(LocalDateTime.now())) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_INVALID_STATUS);
         }
 
@@ -83,6 +86,5 @@ public class BidCommandService {
 
         return BidResponse.of(savedBid);
     }
-
 
 }
