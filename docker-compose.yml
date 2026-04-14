@@ -95,6 +95,18 @@ services:
       retries: 5
       start_period: 30s
 
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: auction-ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy  # ollama API 준비 완료 후 실행
+    environment:
+      OLLAMA_HOST: http://ollama:11434  # 같은 네트워크의 ollama 서비스로 연결
+    command: >
+      sh -c "ollama pull llama3.2 && ollama pull nomic-embed-text"
+    restart: "no"  # 모델 pull 완료 후 종료, 재시작 없음
+
 volumes:
   postgres-data:
   ollama-data:

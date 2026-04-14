@@ -2,6 +2,7 @@ package com.example.auction.domain.review.service;
 
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
+import com.example.auction.domain.ai.service.ReviewEmbeddingService;
 import com.example.auction.domain.auction.result.entity.AuctionResult;
 import com.example.auction.domain.auction.result.exception.AuctionResultErrorEnum;
 import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
@@ -29,6 +30,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final AuctionResultRepository auctionResultRepository;
+    private final ReviewEmbeddingService reviewEmbeddingService;
 
     @Transactional
     public ReviewCreateResponse createReview(Long userId, ReviewCreateRequest request) {
@@ -57,6 +59,7 @@ public class ReviewService {
         } catch (DataIntegrityViolationException e) {
             throw new ServiceErrorException(ReviewErrorEnum.ALREADY_REVIEWED);
         }
+        reviewEmbeddingService.embed(review); // 후기 텍스트 pgvector 임베딩 저장 (RAG용)
 
         Double avgScore = reviewRepository.findAvgScoreByRevieweeId(reviewee.getId());
         BigDecimal rating = BigDecimal.valueOf(avgScore).setScale(1, RoundingMode.HALF_UP);

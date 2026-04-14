@@ -37,6 +37,7 @@ dependencies {
 
     // Spring AI
     implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector' // RAG용 pgvector 벡터 저장소
 
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'

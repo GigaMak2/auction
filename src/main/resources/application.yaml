@@ -31,6 +31,9 @@ spring:
       chat:
         options:
           model: ${OLLAMA_MODEL:llama3.2}
+      embedding:
+        options:
+          model: nomic-embed-text # 텍스트 → 벡터 변환 전용 임베딩 모델 (RAG용)
 
 
 jwt:
