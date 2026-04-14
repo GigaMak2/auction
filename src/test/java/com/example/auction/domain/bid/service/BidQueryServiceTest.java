@@ -107,9 +107,9 @@ class BidQueryServiceTest {
         Page<Bid> bidPage = new PageImpl<>(bids, pageable, bids.size());
 
         given(bidRepository.findAllByAuctionId(auctionId, pageable)).willReturn(bidPage);
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when
-        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
         PageResponse<BidListResponse> response = queryService.getBids(userDetails, auctionId, pageable);
 
         // then
@@ -124,9 +124,9 @@ class BidQueryServiceTest {
         // given
         Page<Bid> emptyPage = new PageImpl<>(List.of(), pageable, 0);
         given(bidRepository.findAllByAuctionId(auctionId, pageable)).willReturn(emptyPage);
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when
-        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
         PageResponse<BidListResponse> response = queryService.getBids(userDetails, auctionId, pageable);
 
         // then
@@ -208,7 +208,7 @@ class BidQueryServiceTest {
         AuctionResult auctionResult = AuctionResult.of(
                 BigDecimal.valueOf(80_000), auctionId, 99L, 2L, 100L
         );
-        // buyer: 입찰 주최자, seller: 입찰 참여자
+        // buyer: 입찰 주최자(구매자), seller: 입찰 참여자(판매자)
         Bid winnerBid = Bid.of(null, BigDecimal.valueOf(80_000), auctionId, 2L, BidAuctionStatus.ACTIVE);
 
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(doneAuction));

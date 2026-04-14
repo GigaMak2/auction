@@ -4,6 +4,7 @@ import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionProductCategory;
+import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.bid.dto.request.BidRequest;
 import com.example.auction.domain.bid.dto.response.BidResponse;
@@ -83,6 +84,29 @@ class BidCommandServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(150_000));
         assertThat(response.getAuctionId()).isEqualTo(auctionId);
+    }
+
+    @Test
+    @DisplayName("최대 가격과 정확히 같은 금액으로 입찰 시 성공")
+    void bidEqualsMaxPrice_success() {
+
+        // given
+        BidRequest request = new BidRequest(BigDecimal.valueOf(150_000), null);
+        Bid savedBid = Bid.of(null, BigDecimal.valueOf(150_000), auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
+
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
+        given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.empty());
+        given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
+
+        // when
+        BidResponse response = commandService.placeBid(userDetails, auctionId, request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(150_000));
+        assertThat(response.getAuctionId()).isEqualTo(auctionId);
+
+
     }
 
     @Test
@@ -233,6 +257,17 @@ class BidCommandServiceTest {
         assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.BID_PRICE_EXCEEDS_MAX.getMessage());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 경매에 입찰 시 실패")
+    void auctionNotFound_fail() {
+        BidRequest request = new BidRequest(BigDecimal.valueOf(150_000), null);
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
     }
 
 }
