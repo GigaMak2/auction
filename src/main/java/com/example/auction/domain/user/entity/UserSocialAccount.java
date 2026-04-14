@@ -27,4 +27,13 @@ public class UserSocialAccount {
 
     @Column(nullable = false)
     private String providerId;
+
+    public static UserSocialAccount of(Long userId, AuthProvider provider, String providerId) {
+        UserSocialAccount socialAccount = new UserSocialAccount();
+        socialAccount.userId = userId;
+        socialAccount.provider = provider;
+        socialAccount.providerId = providerId;
+
+        return socialAccount;
+    }
 }
