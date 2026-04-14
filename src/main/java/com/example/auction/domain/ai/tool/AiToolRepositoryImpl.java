@@ -19,6 +19,8 @@ import static com.example.auction.domain.review.entity.QReview.review;
 @RequiredArgsConstructor
 public class AiToolRepositoryImpl implements AiToolRepository {
 
+    private static final int MAX_BIDS_FOR_TOOL = 50;
+
     private final JPAQueryFactory queryFactory;
 
     // bids 테이블 단순 조회 — 입찰가 오름차순 정렬로 최저가 우선 확인
@@ -33,7 +35,8 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 ))
                 .from(bid)
                 .where(bid.auctionId.eq(auctionId))
-                .orderBy(bid.price.asc())
+                .orderBy(bid.price.asc(), bid.createdAt.asc(), bid.id.asc())
+                .limit(MAX_BIDS_FOR_TOOL)
                 .fetch();
     }
 
@@ -51,7 +54,7 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 .where(itemName != null && !itemName.isBlank()
                         ? auction.itemName.containsIgnoreCase(itemName)
                         : null)
-                .orderBy(auctionResult.createdAt.desc())
+                .orderBy(auction.endedAt.desc())
                 .limit(10)
                 .fetch();
     }

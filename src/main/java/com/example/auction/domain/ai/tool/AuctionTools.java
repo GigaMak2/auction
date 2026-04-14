@@ -21,6 +21,9 @@ public class AuctionTools {
     // 특정 경매의 입찰 목록과 최저가를 조회 — 경쟁 입찰 분석에 활용
     @Tool(description = "특정 경매 ID로 입찰 목록을 조회합니다. 입찰가 오름차순으로 정렬되어 최저가를 확인할 수 있습니다.")
     public List<AuctionBidInfo> getBidsByAuctionId(Long auctionId) {
+        if (auctionId == null) {
+            throw new IllegalArgumentException("auctionId는 필수입니다.");
+        }
         return aiToolRepository.findBidsByAuctionId(auctionId);
     }
 
@@ -33,6 +36,9 @@ public class AuctionTools {
     // 판매자의 낙찰 횟수, 평균 평점, 최근 후기를 종합 조회 — 판매자 신뢰도 분석에 활용
     @Tool(description = "판매자 ID로 총 낙찰 횟수, 평균 평점, 최근 후기를 조회합니다. 판매자 신뢰도 분석에 활용됩니다.")
     public SellerStatsInfo getSellerStats(Long sellerId) {
+        if (sellerId == null) {
+            throw new IllegalArgumentException("sellerId는 필수입니다.");
+        }
         long totalSales = aiToolRepository.countSellerSales(sellerId);
         Double avgScore = reviewRepository.findAvgScoreByRevieweeId(sellerId); // 리뷰 없으면 null
         List<String> recentReviews = aiToolRepository.findRecentReviewTextsBySellerId(sellerId);
