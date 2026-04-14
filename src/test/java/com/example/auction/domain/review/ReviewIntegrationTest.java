@@ -64,8 +64,10 @@ public class ReviewIntegrationTest {
         sellerToken = getAccessToken("seller@test.com", "password123");
 
         // userId 조회
-        Long buyerId = userRepository.findByEmailAndDeletedFalse("buyer@test.com").get().getId();
-        Long sellerId = userRepository.findByEmailAndDeletedFalse("seller@test.com").get().getId();
+        Long buyerId = userRepository.findByEmailAndDeletedFalse("buyer@test.com").orElseThrow(
+                () -> new IllegalStateException("buyer 유저 없음")).getId();
+        Long sellerId = userRepository.findByEmailAndDeletedFalse("seller@test.com").orElseThrow(
+                () -> new IllegalStateException("seller 유저 없음")).getId();
 
         // 경매 결과 저장
         auctionId = 1L;
@@ -139,7 +141,8 @@ public class ReviewIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.success").value(false));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("경매 결과를 찾을 수 없습니다"));
     }
 
 
