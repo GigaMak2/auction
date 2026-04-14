@@ -1,9 +1,13 @@
 package com.example.auction.domain.auction.service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 import org.jspecify.annotations.NonNull;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,6 +112,7 @@ public class AuctionService {
             CustomUserDetails userDetails,
             CreateAuctionRequest req
     ) {
+        // 경매 생성은 중요한 작업이기 때문에 JWT만을 믿지 않고 DB에 유저가 있는지 확인
         userRepository.findById(userDetails.getUserId()).orElseThrow(()->
             new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND)
         );
@@ -127,5 +132,70 @@ public class AuctionService {
         auction = auctionRepository.saveAndFlush(auction);
 
         return GetAuctionResponse.from(auction);
+    }
+
+    @Transactional()
+    @Caching(
+        evict = {
+            @CacheEvict(
+                cacheNames = {"getManyAuctionsPublic"},
+                allEntries = true
+            ),
+            @CacheEvict(
+                cacheNames = {"getAuction"},
+                key = "#auctionId"
+            ),
+        }
+    )
+    public void cancelAuction(
+            Long auctionId,
+            CustomUserDetails details
+    ) {
+        // 경매를 취소 할 때 비관적 락을 걸지 않고 select를 합니다.
+        //
+        // 일단 저희가 경매 시작 직전에 취소를 막기 때문에 동시성 문제가 발생할 일이 없고
+        // 또 여러 사람이 같은 경매를 취소 할 일이 없기 때문입니다. 
+        //
+        // (현재 경매는 본인만 취소가 가능합니다.
+        // 그리고 설령 저희가 나중에 관리자가 남의 경매를 취소하게 변경하더라도 
+        // 경매자와 고객이 동시에 취소 할려고
+        // 해서 동시성 문제가 발생 할 거라 생각 하지는 않습니다)
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // 경매 취소는 중요한 작업이기 때문에 JWT만을 믿지 않고 DB에 유저가 있는지 확인
+        userRepository.findById(details.getUserId()).orElseThrow(()->
+            new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND)
+        );
+
+        Auction auction = auctionRepository.findById(auctionId).orElseThrow(
+                () -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND)
+        );
+
+        // 경매 주인이 아니라면 에러를 던지기
+        if (!auction.getUserId().equals(details.getUserId())) {
+            throw new ServiceErrorException(AuctionErrorEnum.AUCITON_FORBIDDEN_FROM_CANCEL);
+        }
+
+        // 경매가 이미 취소되어 있다면 noop
+        if (auction.getStatus().equals(AuctionStatus.CANCELLED)) {
+            return;
+        }
+
+        // 경매가 준비 상태가 아니라면 에러를 던지기
+        if (!auction.getStatus().equals(AuctionStatus.READY)) {
+            throw new ServiceErrorException(AuctionErrorEnum.AUCITON_STATUS_NOT_CACELLABLE);
+        }
+
+        // 경매를 취소하기 너무 늦었다면 에러를 던지기
+        LocalDateTime canCancelAfter = auction.getStartedAt().minus(Duration.ofMinutes(10));
+
+        if (!now.isBefore(canCancelAfter)) {
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_TOO_LATE_TO_CANCEL);
+        }
+
+        auction.cancel();
+
+        auctionRepository.saveAndFlush(auction);
     }
 }
