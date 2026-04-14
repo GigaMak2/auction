@@ -91,8 +91,8 @@ class BidCommandProcessorTest {
     void bidEqualsMaxPrice_success() {
 
         // given
-        BidRequest request = new BidRequest(BigDecimal.valueOf(150_000), null);
-        Bid savedBid = Bid.of(null, BigDecimal.valueOf(150_000), auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
+        BidRequest request = new BidRequest(BigDecimal.valueOf(200_000), null);
+        Bid savedBid = Bid.of(null, BigDecimal.valueOf(200_000), auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
 
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
         given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.empty());
@@ -103,7 +103,7 @@ class BidCommandProcessorTest {
 
         // then
         assertThat(response).isNotNull();
-        assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(150_000));
+        assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(200_000));
         assertThat(response.getAuctionId()).isEqualTo(auctionId);
 
 
