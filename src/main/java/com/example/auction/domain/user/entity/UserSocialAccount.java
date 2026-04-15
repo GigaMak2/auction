@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Table(name = "user_social_accounts", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "provider"})
+        @UniqueConstraint(columnNames = {"user_id", "provider"}),
+        @UniqueConstraint(columnNames = {"provider", "provider_id"})
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserSocialAccount {
