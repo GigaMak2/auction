@@ -64,7 +64,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 authAttributes.getProvider(), authAttributes.getProviderId());
 
         if (socialAccount.isPresent()) {
-            return userRepository.findById(socialAccount.get().getUserId()).orElseThrow(
+            return userRepository.findByIdAndDeletedFalse(socialAccount.get().getUserId()).orElseThrow(
                     () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
         }
 
