@@ -1,7 +1,6 @@
 package com.example.auction.common.config.security;
 
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.common.exception.ServiceErrorException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

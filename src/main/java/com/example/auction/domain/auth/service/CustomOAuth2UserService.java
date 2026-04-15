@@ -1,6 +1,5 @@
 package com.example.auction.domain.auth.service;
 
-import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auth.dto.OAuthAttributes;
 import com.example.auction.domain.auth.exception.AuthErrorEnum;
 import com.example.auction.domain.user.entity.User;
