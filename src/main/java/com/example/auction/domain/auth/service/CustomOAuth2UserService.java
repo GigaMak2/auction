@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -66,11 +67,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         if (socialAccount.isPresent()) {
             return userRepository.findByIdAndDeletedFalse(socialAccount.get().getUserId()).orElseThrow(
-                    () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
+                    () -> new OAuth2AuthenticationException(new OAuth2Error(
+                            UserErrorEnum.USER_NOT_FOUND.getStatus().name()),
+                            UserErrorEnum.USER_NOT_FOUND.getMessage()));
         }
 
         if (userRepository.existsByEmail(authAttributes.getEmail())) {
-            throw new ServiceErrorException(AuthErrorEnum.SOCIAL_LOGIN_EMAIL_CONFLICT);
+            throw new OAuth2AuthenticationException(new OAuth2Error(
+                    AuthErrorEnum.SOCIAL_LOGIN_EMAIL_CONFLICT.getStatus().name()),
+                    AuthErrorEnum.SOCIAL_LOGIN_EMAIL_CONFLICT.getMessage());
         }
 
         try {
@@ -87,11 +92,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
             if (existing.isPresent()) {
                 return userRepository.findByIdAndDeletedFalse(existing.get().getUserId()).orElseThrow(
-                        () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
+                        () -> new OAuth2AuthenticationException(new OAuth2Error(
+                                UserErrorEnum.USER_NOT_FOUND.getStatus().name()),
+                                UserErrorEnum.USER_NOT_FOUND.getMessage()));
             }
 
             if (userRepository.existsByEmail(authAttributes.getEmail())) {
-                throw new ServiceErrorException(AuthErrorEnum.SOCIAL_LOGIN_EMAIL_CONFLICT);
+                throw new OAuth2AuthenticationException(new OAuth2Error(
+                        AuthErrorEnum.SOCIAL_LOGIN_EMAIL_CONFLICT.getStatus().name()),
+                        AuthErrorEnum.SOCIAL_LOGIN_EMAIL_CONFLICT.getMessage());
             }
 
             throw e;
