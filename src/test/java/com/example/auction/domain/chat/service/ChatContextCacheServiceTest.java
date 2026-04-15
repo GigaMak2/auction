@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -96,7 +97,7 @@ class ChatContextCacheServiceTest {
         assertThat(result.get(1).role()).isEqualTo("ASSISTANT");
 
         ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
-        verify(valueOperations).set(eq(KEY), jsonCaptor.capture(), any());
+        verify(valueOperations).set(eq(KEY), jsonCaptor.capture(), eq(Duration.ofHours(24)));
 
         List<ChatMessageCacheDto> saved = objectMapper.readValue(jsonCaptor.getValue(), new TypeReference<>() {});
         assertThat(saved).hasSize(2);
@@ -141,7 +142,7 @@ class ChatContextCacheServiceTest {
 
         // then — 기존 2개 + 신규 2개 = 4개, 순서 확인
         ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
-        verify(valueOperations).set(eq(KEY), jsonCaptor.capture(), any());
+        verify(valueOperations).set(eq(KEY), jsonCaptor.capture(), eq(Duration.ofHours(24)));
 
         List<ChatMessageCacheDto> saved = objectMapper.readValue(jsonCaptor.getValue(), new TypeReference<>() {});
         assertThat(saved).hasSize(4);
@@ -163,7 +164,7 @@ class ChatContextCacheServiceTest {
 
         // then
         ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
-        verify(valueOperations).set(eq(KEY), jsonCaptor.capture(), any());
+        verify(valueOperations).set(eq(KEY), jsonCaptor.capture(), eq(Duration.ofHours(24)));
 
         List<ChatMessageCacheDto> saved = objectMapper.readValue(jsonCaptor.getValue(), new TypeReference<>() {});
         assertThat(saved).hasSize(2);
@@ -188,7 +189,7 @@ class ChatContextCacheServiceTest {
 
         // then — 20개 유지, 가장 오래된 "메시지0" 제거, 마지막이 새 메시지
         ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
-        verify(valueOperations).set(eq(KEY), jsonCaptor.capture(), any());
+        verify(valueOperations).set(eq(KEY), jsonCaptor.capture(), eq(Duration.ofHours(24)));
 
         List<ChatMessageCacheDto> saved = objectMapper.readValue(jsonCaptor.getValue(), new TypeReference<>() {});
         assertThat(saved).hasSize(20);

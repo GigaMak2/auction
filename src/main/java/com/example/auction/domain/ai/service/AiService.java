@@ -77,8 +77,8 @@ public class AiService {
                         .data(token)
                         .build())
                 .doFinally(signalType -> {
-                    // 정상 완료 / 에러 / 취소 모든 경우에 누적된 응답 저장
-                    if (!fullResponse.isEmpty()) {
+                    // 정상 완료(ON_COMPLETE)일 때만 저장 — 에러/취소 시 부분 응답이 다음 턴 컨텍스트 오염 방지
+                    if (signalType == reactor.core.publisher.SignalType.ON_COMPLETE && !fullResponse.isEmpty()) {
                         chatMessageRepository.save(
                                 ChatMessage.of(roomId, fullResponse.toString(), MessageRole.ASSISTANT));
                         // 유저 메시지 + AI 응답을 캐시에 추가 (다음 턴 컨텍스트에 활용)
