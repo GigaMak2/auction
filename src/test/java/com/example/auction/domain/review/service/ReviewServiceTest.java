@@ -219,7 +219,7 @@ class ReviewServiceTest {
                 new ReviewListGetResponse(10L, 19L, 11L, LocalDateTime.now(), LocalDateTime.now()),
                 new ReviewListGetResponse(11L, 20L, 12L, LocalDateTime.now(), LocalDateTime.now())
         );
-        Page<ReviewListGetResponse> page = new PageImpl<>(reviewList, PageRequest.of(0, 10), 11);
+        Page<ReviewListGetResponse> page = new PageImpl<>(reviewList.subList(0, 10), PageRequest.of(0, 10), 11);
 
         given(reviewRepository.findWrittenReviewsWithConditions(eq(userId), any(Pageable.class), any(), any())).willReturn(page);
 
@@ -283,7 +283,7 @@ class ReviewServiceTest {
                 new ReviewListGetResponse(10L, 19L, 11L, LocalDateTime.now(), LocalDateTime.now()),
                 new ReviewListGetResponse(11L, 20L, 12L, LocalDateTime.now(), LocalDateTime.now())
         );
-        Page<ReviewListGetResponse> page = new PageImpl<>(reviewList, PageRequest.of(0, 10), 11);
+        Page<ReviewListGetResponse> page = new PageImpl<>(reviewList.subList(0, 10), PageRequest.of(0, 10), 11);
 
         given(reviewRepository.findReceivedReviewsWithConditions(eq(userId), any(Pageable.class), any(), any())).willReturn(page);
 

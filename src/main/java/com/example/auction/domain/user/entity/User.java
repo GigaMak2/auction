@@ -22,7 +22,7 @@ public class User extends DeletableEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -36,6 +36,16 @@ public class User extends DeletableEntity {
         User user = new User();
         user.email = email;
         user.password = encodedPassword;
+        user.role = role;
+        user.rating = null;
+
+        return user;
+    }
+
+    public static User ofSocial(String email, UserRole role) {
+        User user = new User();
+        user.email = email;
+        user.password = null;
         user.role = role;
         user.rating = null;
 
