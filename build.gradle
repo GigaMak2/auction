@@ -59,6 +59,9 @@ dependencies {
     // Social Login
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
+    //redisson
+    implementation 'org.redisson:redisson:3.45.0'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'

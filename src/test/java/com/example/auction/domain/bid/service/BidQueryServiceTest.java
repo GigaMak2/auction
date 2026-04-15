@@ -107,9 +107,9 @@ class BidQueryServiceTest {
         Page<Bid> bidPage = new PageImpl<>(bids, pageable, bids.size());
 
         given(bidRepository.findAllByAuctionId(auctionId, pageable)).willReturn(bidPage);
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when
-        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
         PageResponse<BidListResponse> response = queryService.getBids(userDetails, auctionId, pageable);
 
         // then
@@ -124,9 +124,9 @@ class BidQueryServiceTest {
         // given
         Page<Bid> emptyPage = new PageImpl<>(List.of(), pageable, 0);
         given(bidRepository.findAllByAuctionId(auctionId, pageable)).willReturn(emptyPage);
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when
-        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
         PageResponse<BidListResponse> response = queryService.getBids(userDetails, auctionId, pageable);
 
         // then
@@ -208,6 +208,7 @@ class BidQueryServiceTest {
         AuctionResult auctionResult = AuctionResult.of(
                 BigDecimal.valueOf(80_000), auctionId, 99L, 2L, 100L
         );
+        // buyer: 입찰 주최자(구매자), seller: 입찰 참여자(판매자)
         Bid winnerBid = Bid.of(null, BigDecimal.valueOf(80_000), auctionId, 2L, BidAuctionStatus.ACTIVE);
 
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(doneAuction));
@@ -277,5 +278,76 @@ class BidQueryServiceTest {
         assertThatThrownBy(() -> queryService.getWinnerBid(userDetails, auctionId))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.AUCTION_RESULT_NOT_FOUND.getMessage());
+    }
+
+
+    // ========================
+    // 현재 최저가 입찰 조회
+    // ========================
+
+    @Test
+    @DisplayName("현재 최저가 입찰 조회 성공")
+    void getCurrentMinBid_success() {
+        // given
+        Bid minBid = Bid.of(null, BigDecimal.valueOf(80_000), auctionId, 2L, BidAuctionStatus.ACTIVE);
+
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
+        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.of(minBid));
+
+        // when
+        BidResponse response = queryService.getCurrentMinBid(userDetails, auctionId);
+
+        // then
+        assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(80_000));
+        assertThat(response.getAuctionId()).isEqualTo(auctionId);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 경매 최저가 조회 시 실패")
+    void getCurrentMinBid_auctionNotFound_fail() {
+        // given
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> queryService.getCurrentMinBid(userDetails, auctionId))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("ACTIVE가 아닌 경매 최저가 조회 시 실패 - DONE")
+    void getCurrentMinBid_notActive_done_fail() {
+        // given
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(doneAuction));
+
+        // when & then
+        assertThatThrownBy(() -> queryService.getCurrentMinBid(userDetails, auctionId))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("ACTIVE가 아닌 경매 최저가 조회 시 실패 - CANCELLED")
+    void getCurrentMinBid_notActive_cancelled_fail() {
+        // given
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(cancelledAuction));
+
+        // when & then
+        assertThatThrownBy(() -> queryService.getCurrentMinBid(userDetails, auctionId))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("입찰이 없으면 최저가 조회 실패")
+    void getCurrentMinBid_noBid_fail() {
+        // given
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
+        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> queryService.getCurrentMinBid(userDetails, auctionId))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(BidErrorEnum.BID_NOT_FOUND.getMessage());
     }
 }

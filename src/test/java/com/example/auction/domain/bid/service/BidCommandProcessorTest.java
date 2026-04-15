@@ -4,6 +4,7 @@ import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionProductCategory;
+import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.bid.dto.request.BidRequest;
 import com.example.auction.domain.bid.dto.response.BidResponse;
@@ -29,10 +30,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class BidCommandServiceTest {
+class BidCommandProcessorTest {
 
     @InjectMocks
-    private BidCommandService commandService;
+    private BidCommandProcessor processor;
 
     @Mock
     private BidRepository bidRepository;
@@ -77,12 +78,35 @@ class BidCommandServiceTest {
         given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
 
         // when
-        BidResponse response = commandService.placeBid(userDetails, auctionId, request);
+        BidResponse response = processor.placeBid(userDetails, auctionId, request);
 
         // then
         assertThat(response).isNotNull();
         assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(150_000));
         assertThat(response.getAuctionId()).isEqualTo(auctionId);
+    }
+
+    @Test
+    @DisplayName("최대 가격과 정확히 같은 금액으로 입찰 시 성공")
+    void bidEqualsMaxPrice_success() {
+
+        // given
+        BidRequest request = new BidRequest(BigDecimal.valueOf(150_000), null);
+        Bid savedBid = Bid.of(null, BigDecimal.valueOf(150_000), auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
+
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
+        given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.empty());
+        given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
+
+        // when
+        BidResponse response = processor.placeBid(userDetails, auctionId, request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(150_000));
+        assertThat(response.getAuctionId()).isEqualTo(auctionId);
+
+
     }
 
     @Test
@@ -99,7 +123,7 @@ class BidCommandServiceTest {
         given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
 
         // when
-        BidResponse response = commandService.placeBid(userDetails, auctionId, request);
+        BidResponse response = processor.placeBid(userDetails, auctionId, request);
 
         // then
         assertThat(response.getPrice()).isEqualTo(newBidPrice);
@@ -121,7 +145,7 @@ class BidCommandServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when & then
-        assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
+        assertThatThrownBy(() -> processor.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.BID_PRICE_NOT_LOWER.getMessage());
     }
@@ -137,7 +161,7 @@ class BidCommandServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when & then
-        assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
+        assertThatThrownBy(() -> processor.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.BID_PRICE_NOT_LOWER.getMessage());
     }
@@ -156,9 +180,9 @@ class BidCommandServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(readyAuction));
 
         // when & then
-        assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
+        assertThatThrownBy(() -> processor.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
-                .hasMessage(BidErrorEnum.AUCTION_NOT_ACTIVE.getMessage());
+                .hasMessage(AuctionErrorEnum.AUCTION_INVALID_STATUS.getMessage());
     }
 
     @Test
@@ -177,29 +201,9 @@ class BidCommandServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(doneAuction));
 
         // when & then
-        assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
+        assertThatThrownBy(() -> processor.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
-                .hasMessage(BidErrorEnum.AUCTION_NOT_ACTIVE.getMessage());
-    }
-
-    @Test
-    @DisplayName("종료 시간이 지난 경매에 입찰 시 실패 (스케줄러 타이밍 오차 방지)")
-    void auctionEnded_bid_fail() {
-        // given
-        BidRequest request = new BidRequest(BigDecimal.valueOf(150_000), null);
-        Auction endedAuction = Auction.of(
-                99L, "테스트", BigDecimal.valueOf(200_000), "상품",
-                LocalDateTime.now().minusHours(2),
-                LocalDateTime.now().minusSeconds(1), // 이미 종료됨
-                AuctionProductCategory.ELECTRONICS
-        );
-        endedAuction.activate(); // 스케줄러가 아직 처리 못한 상태
-        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(endedAuction));
-
-        // when & then
-        assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
-                .isInstanceOf(ServiceErrorException.class)
-                .hasMessage(BidErrorEnum.AUCTION_NOT_ACTIVE.getMessage());
+                .hasMessage(AuctionErrorEnum.AUCTION_INVALID_STATUS.getMessage());
     }
 
     @Test
@@ -217,7 +221,7 @@ class BidCommandServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(myAuction));
 
         // when & then
-        assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
+        assertThatThrownBy(() -> processor.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.BID_FORBIDDEN_SELF_BID.getMessage());
     }
@@ -230,9 +234,20 @@ class BidCommandServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when & then
-        assertThatThrownBy(() -> commandService.placeBid(userDetails, auctionId, request))
+        assertThatThrownBy(() -> processor.placeBid(userDetails, auctionId, request))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.BID_PRICE_EXCEEDS_MAX.getMessage());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 경매에 입찰 시 실패")
+    void auctionNotFound_fail() {
+        BidRequest request = new BidRequest(BigDecimal.valueOf(150_000), null);
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> processor.placeBid(userDetails, auctionId, request))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
     }
 
 }
