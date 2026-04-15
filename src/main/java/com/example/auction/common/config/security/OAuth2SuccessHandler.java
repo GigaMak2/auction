@@ -37,9 +37,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String email = oAuth2User.getAttribute("email");
 
-        User user = userRepository.findByEmailAndDeletedFalse(email).orElseThrow(
+        Number userId = oAuth2User.getAttribute("userId");
+        User user = userRepository.findByIdAndDeletedFalse(userId.longValue()).orElseThrow(
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
         String accessToken = jwtProvider.createAccessToken(user.getId(), user.getRole().name());

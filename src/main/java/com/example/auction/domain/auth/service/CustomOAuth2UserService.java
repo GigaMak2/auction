@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -47,9 +49,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         User user = saveOrLoad(authAttributes);
 
+        Map<String, Object> principalAttributes = new HashMap<>(oAuth2User.getAttributes());
+        principalAttributes.put("userId", user.getId());
+
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(user.getRole().name())),
-                oAuth2User.getAttributes(),
+                principalAttributes,
                 authAttributes.getNameAttributeKey()
         );
     }
