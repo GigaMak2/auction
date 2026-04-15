@@ -50,7 +50,7 @@ public class UserService {
             throw new ServiceErrorException(AuthErrorEnum.SAME_AS_OLD_PASSWORD);
         }
 
-        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
+        if (user.getPassword() == null || !passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
             throw new ServiceErrorException(AuthErrorEnum.INVALID_PASSWORD);
         }
 

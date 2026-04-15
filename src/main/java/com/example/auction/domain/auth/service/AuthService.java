@@ -53,7 +53,7 @@ public class AuthService {
         User user = userRepository.findByEmailAndDeletedFalse(request.email()).orElseThrow(
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+        if (user.getPassword() == null || !passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new ServiceErrorException(AuthErrorEnum.INVALID_PASSWORD);
         }
 
