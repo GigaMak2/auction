@@ -2,6 +2,7 @@ package com.example.auction.domain.review.service;
 
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
+import com.example.auction.domain.ai.service.ReviewEmbeddingService;
 import com.example.auction.domain.auction.result.entity.AuctionResult;
 import com.example.auction.domain.auction.result.exception.AuctionResultErrorEnum;
 import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
@@ -13,6 +14,7 @@ import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -29,6 +32,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final AuctionResultRepository auctionResultRepository;
+    private final ReviewEmbeddingService reviewEmbeddingService;
 
     @Transactional
     public ReviewCreateResponse createReview(Long userId, ReviewCreateRequest request) {
@@ -56,6 +60,11 @@ public class ReviewService {
             reviewRepository.save(review);
         } catch (DataIntegrityViolationException e) {
             throw new ServiceErrorException(ReviewErrorEnum.ALREADY_REVIEWED);
+        }
+        try {
+            reviewEmbeddingService.embed(review); // 후기 텍스트 pgvector 임베딩 저장 (RAG용)
+        } catch (Exception e) {
+            log.warn("[ReviewService] 임베딩 저장 실패 — 리뷰 생성은 정상 처리됨. reviewId={}, error={}", review.getId(), e.getMessage());
         }
 
         Double avgScore = reviewRepository.findAvgScoreByRevieweeId(reviewee.getId());
