@@ -1,6 +1,7 @@
 package com.example.auction.domain.chat.service;
 
 import com.example.auction.common.exception.ServiceErrorException;
+import com.example.auction.domain.ai.service.ChatContextCacheService;
 import com.example.auction.domain.chat.dto.ChatMessageListResponse;
 import com.example.auction.domain.chat.dto.ChatMessageResponse;
 import com.example.auction.domain.chat.dto.ChatRoomResponse;
@@ -21,6 +22,7 @@ public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatContextCacheService chatContextCacheService;
 
     // 채팅방 생성
     @Transactional
@@ -37,12 +39,13 @@ public class ChatService {
                 .toList();
     }
 
-    // 채팅방 삭제 (소유자 검증 + 메시지 cascade 하드딜리트)
+    // 채팅방 삭제 (소유자 검증 + 메시지 cascade 하드딜리트 + Redis 캐시 evict)
     @Transactional
     public void deleteRoom(Long roomId, Long userId) {
         validateRoomOwner(roomId, userId);
         chatMessageRepository.deleteAllByRoomId(roomId);
         chatRoomRepository.deleteById(roomId);
+        chatContextCacheService.evict(roomId); // 채팅방 삭제 시 컨텍스트 캐시도 함께 제거
     }
 
     // 메시지 목록 조회 (커서 기반 페이징)
