@@ -10,6 +10,7 @@ import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 import com.example.auction.domain.user.repository.UserSocialAccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -72,12 +73,16 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             throw new ServiceErrorException(AuthErrorEnum.SOCIAL_LOGIN_EMAIL_CONFLICT);
         }
 
-        User newUser = User.ofSocial(authAttributes.getEmail(), UserRole.USER);
-        userRepository.save(newUser);
+        try {
+            User newUser = User.ofSocial(authAttributes.getEmail(), UserRole.USER);
+            userRepository.save(newUser);
 
-        UserSocialAccount newSocialAccount = UserSocialAccount.of(newUser.getId(), authAttributes.getProvider(), authAttributes.getProviderId());
-        userSocialAccountRepository.save(newSocialAccount);
+            UserSocialAccount newSocialAccount = UserSocialAccount.of(newUser.getId(), authAttributes.getProvider(), authAttributes.getProviderId());
+            userSocialAccountRepository.save(newSocialAccount);
 
-        return newUser;
+            return newUser;
+        } catch (DataIntegrityViolationException e) {
+            throw new ServiceErrorException(AuthErrorEnum.SOCIAL_LOGIN_EMAIL_CONFLICT);
+        }
     }
 }
