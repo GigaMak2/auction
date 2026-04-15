@@ -38,7 +38,6 @@ out/
 
 ### yml ###
 application-local.yml
-application.yaml
 
 ### env ###
 .env
