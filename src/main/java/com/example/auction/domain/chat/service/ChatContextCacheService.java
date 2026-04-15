@@ -1,10 +1,10 @@
-package com.example.auction.domain.ai.service;
+package com.example.auction.domain.chat.service;
 
-import com.example.auction.domain.ai.dto.ChatMessageCacheDto;
+import com.example.auction.domain.chat.dto.ChatMessageCacheDto;
 import com.example.auction.domain.chat.repository.ChatMessageRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -75,7 +75,7 @@ public class ChatContextCacheService {
     private void save(String key, List<ChatMessageCacheDto> messages) {
         try {
             stringRedisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(messages), TTL);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("[ChatContextCacheService] 캐시 저장 실패 key={}", key, e);
         }
     }
@@ -84,7 +84,7 @@ public class ChatContextCacheService {
     private List<ChatMessageCacheDto> deserialize(String json) {
         try {
             return objectMapper.readValue(json, new TypeReference<>() {});
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("[ChatContextCacheService] 캐시 역직렬화 실패, 빈 컨텍스트로 대체", e);
             return List.of();
         }

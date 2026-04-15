@@ -1,11 +1,11 @@
-package com.example.auction.domain.ai.service;
+package com.example.auction.domain.chat.service;
 
-import com.example.auction.domain.ai.dto.ChatMessageCacheDto;
+import com.example.auction.domain.chat.dto.ChatMessageCacheDto;
 import com.example.auction.domain.chat.entity.ChatMessage;
 import com.example.auction.domain.chat.entity.MessageRole;
 import com.example.auction.domain.chat.repository.ChatMessageRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,7 +95,6 @@ class ChatContextCacheServiceTest {
         assertThat(result.get(0).role()).isEqualTo("USER");
         assertThat(result.get(1).role()).isEqualTo("ASSISTANT");
 
-        // Redis 저장 호출 확인
         ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
         verify(valueOperations).set(eq(KEY), jsonCaptor.capture(), any());
 
@@ -132,13 +131,15 @@ class ChatContextCacheServiceTest {
                 new ChatMessageCacheDto("USER", "이전 질문"),
                 new ChatMessageCacheDto("ASSISTANT", "이전 답변")
         );
+        String existingJson = objectMapper.writeValueAsString(existing); // given() 밖에서 먼저 직렬화
+
         given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
-        given(valueOperations.get(KEY)).willReturn(objectMapper.writeValueAsString(existing));
+        given(valueOperations.get(KEY)).willReturn(existingJson);
 
         // when
         chatContextCacheService.appendMessages(ROOM_ID, "새 질문", "새 답변");
 
-        // then — 기존 2개 + 신규 2개 = 4개, 마지막이 새 메시지
+        // then — 기존 2개 + 신규 2개 = 4개, 순서 확인
         ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
         verify(valueOperations).set(eq(KEY), jsonCaptor.capture(), any());
 
@@ -177,9 +178,10 @@ class ChatContextCacheServiceTest {
         List<ChatMessageCacheDto> existing = IntStream.range(0, 19)
                 .mapToObj(i -> new ChatMessageCacheDto(i % 2 == 0 ? "USER" : "ASSISTANT", "메시지" + i))
                 .toList();
+        String existingJson = objectMapper.writeValueAsString(existing); // given() 밖에서 먼저 직렬화
 
         given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
-        given(valueOperations.get(KEY)).willReturn(objectMapper.writeValueAsString(existing));
+        given(valueOperations.get(KEY)).willReturn(existingJson);
 
         // when
         chatContextCacheService.appendMessages(ROOM_ID, "새 질문", "새 답변");

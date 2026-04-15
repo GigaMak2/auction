@@ -1,7 +1,7 @@
 package com.example.auction.domain.ai.service;
 
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.ai.dto.ChatMessageCacheDto;
+import com.example.auction.domain.chat.service.ChatContextCacheService;
 import com.example.auction.domain.ai.enums.SseEventType;
 import com.example.auction.domain.ai.exception.AiErrorEnum;
 import com.example.auction.domain.ai.tool.AuctionTools;

@@ -1,7 +1,6 @@
 package com.example.auction.domain.chat.service;
 
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.ai.service.ChatContextCacheService;
 import com.example.auction.domain.chat.dto.ChatMessageListResponse;
 import com.example.auction.domain.chat.dto.ChatMessageResponse;
 import com.example.auction.domain.chat.dto.ChatRoomResponse;
