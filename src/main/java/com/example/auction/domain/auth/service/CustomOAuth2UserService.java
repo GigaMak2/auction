@@ -82,7 +82,19 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
             return newUser;
         } catch (DataIntegrityViolationException e) {
-            throw new ServiceErrorException(AuthErrorEnum.SOCIAL_LOGIN_EMAIL_CONFLICT);
+            Optional<UserSocialAccount> existing = userSocialAccountRepository.findByProviderAndProviderId(
+                    authAttributes.getProvider(), authAttributes.getProviderId());
+
+            if (existing.isPresent()) {
+                return userRepository.findByIdAndDeletedFalse(existing.get().getUserId()).orElseThrow(
+                        () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
+            }
+
+            if (userRepository.existsByEmail(authAttributes.getEmail())) {
+                throw new ServiceErrorException(AuthErrorEnum.SOCIAL_LOGIN_EMAIL_CONFLICT);
+            }
+
+            throw e;
         }
     }
 }
