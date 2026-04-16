@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class CategoryController {
@@ -39,5 +41,11 @@ public class CategoryController {
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "카테고리 이동 요청 성공", categoryService.moveCategory(categoryId, request)));
+    }
+
+    @GetMapping("/api/categories")
+    public ResponseEntity<BaseResponse<List<CategoryListGetResponse>>> getCategoryList() {
+        return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
+                HttpStatus.OK.name(), "카테고리 목록 조회 요청 성공", categoryService.getCategoryList()));
     }
 }

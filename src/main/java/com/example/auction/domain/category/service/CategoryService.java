@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -94,6 +96,32 @@ public class CategoryService {
                 category.getParentId(),
                 category.getName(),
                 category.getModifiedAt());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryListGetResponse> getCategoryList() {
+        List<Category> categoryList = categoryRepository.findAll();
+
+        Map<Long, CategoryListGetResponse> map = new LinkedHashMap<>();
+        for (Category category : categoryList) {
+            map.put(category.getId(), new CategoryListGetResponse(
+                    category.getId(),
+                    category.getName(),
+                    category.getDepth()
+            ));
+        }
+
+        List<CategoryListGetResponse> roots = new ArrayList<>();
+        for (Category category : categoryList) {
+            CategoryListGetResponse node = map.get(category.getId());
+            if (category.getParentId() == null) {
+                roots.add(node);
+            } else {
+                map.get(category.getParentId()).addChild(node);
+            }
+        }
+
+        return roots;
     }
 
     public List<Long> collectDescendantIds(Long categoryId) {
