@@ -3,7 +3,6 @@ package com.example.auction.domain.ai.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.domain.ai.dto.AiMessageSendRequest;
 import com.example.auction.domain.ai.service.AiService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
@@ -26,7 +25,7 @@ public class AiController {
     public Flux<ServerSentEvent<String>> sendMessage(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long roomId,
-            @RequestBody @Valid AiMessageSendRequest request
+            @RequestBody AiMessageSendRequest request
     ) {
         return aiService.streamMessage(roomId, userDetails.getUserId(), request.content());
     }

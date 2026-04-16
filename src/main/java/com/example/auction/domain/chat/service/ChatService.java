@@ -59,10 +59,10 @@ public class ChatService {
 
     // 채팅방 존재 여부 + 소유자 검증
     private void validateRoomOwner(Long roomId, Long userId) {
-        if (!chatRoomRepository.existsById(roomId)) {
-            throw new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_NOT_FOUND);
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_NOT_FOUND));
+        if (!chatRoom.getUserId().equals(userId)) {
+            throw new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_FORBIDDEN);
         }
-        chatRoomRepository.findByIdAndUserId(roomId, userId)
-                .orElseThrow(() -> new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_FORBIDDEN));
     }
 }

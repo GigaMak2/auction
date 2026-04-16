@@ -60,7 +60,7 @@ public class ChatContextCacheService {
 
     // AI 응답 완료 후 유저 메시지 + AI 응답을 캐시에 추가 — doFinally에서 호출
     // Redis 장애 시 무시 — 다음 턴 getContext()의 DB 폴백으로 복구됨
-    // TODO: GET→수정→SET 방식이라 동시 요청 시 마지막 write가 앞선 turn을 덮어쓸 수 있음 (sse-known-issues.md 이슈 3)
+    // TODO: GET→수정→SET 방식이라 동시 요청 시 마지막 write가 앞선 turn을 덮어쓸 수 있음 (docs/known-issues.md SSE-2)
     public void appendMessages(Long roomId, String userContent, String assistantContent) {
         String key = KEY_PREFIX + roomId;
 
@@ -93,11 +93,11 @@ public class ChatContextCacheService {
         }
     }
 
-    // JSON 직렬화 후 Redis에 저장 + TTL 갱신
+    // JSON 직렬화 후 Redis에 저장 + TTL 갱신 — best-effort, 모든 예외 흡수
     private void save(String key, List<ChatMessageCacheDto> messages) {
         try {
             stringRedisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(messages), TTL);
-        } catch (JacksonException e) {
+        } catch (Exception e) {
             log.warn("[ChatContextCacheService] 캐시 저장 실패 key={}", key, e);
         }
     }
