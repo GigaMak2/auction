@@ -1,10 +1,7 @@
 package com.example.auction.domain.category.controller;
 
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.domain.category.dto.CategoryCreateRequest;
-import com.example.auction.domain.category.dto.CategoryCreateResponse;
-import com.example.auction.domain.category.dto.CategoryRenameRequest;
-import com.example.auction.domain.category.dto.CategoryRenameResponse;
+import com.example.auction.domain.category.dto.*;
 import com.example.auction.domain.category.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +30,14 @@ public class CategoryController {
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "카테고리 이름 수정 요청 성공", categoryService.renameCategory(categoryId, request)));
+    }
+
+    @PatchMapping("/api/admin/categories/{categoryId}/parent")
+    public ResponseEntity<BaseResponse<CategoryMoveResponse>> moveCategory(
+            @PathVariable Long categoryId,
+            @Valid @RequestBody CategoryMoveRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
+                HttpStatus.OK.name(), "카테고리 이동 요청 성공", categoryService.moveCategory(categoryId, request)));
     }
 }

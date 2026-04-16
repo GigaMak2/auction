@@ -47,4 +47,13 @@ public class Category extends ModifiableEntity {
     public void rename(String name) {
         this.name = name;
     }
+
+    public void updateDepth(int newDepth) {
+        this.depth = newDepth;
+    }
+
+    public void move(Long parentId, int newDepth) {
+        this.parentId = parentId;
+        this.depth = newDepth;
+    }
 }
