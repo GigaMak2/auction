@@ -1,7 +1,6 @@
 package com.example.auction.domain.auction.scheduler;
 
 import com.example.auction.domain.auction.entity.Auction;
-import com.example.auction.domain.auction.enums.AuctionProductCategory;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +63,7 @@ class AuctionSchedulerTimingTest {
                     "테스트 상품 " + i,
                     startedAt,
                     startedAt.plusHours(1),
-                    AuctionProductCategory.ELECTRONICS
+                    1L
             );
             auctionIds.add(auctionRepository.save(auction).getId());
             scheduledStartTimes.add(startedAt);
@@ -133,7 +132,7 @@ class AuctionSchedulerTimingTest {
                     "테스트 상품 " + i,
                     LocalDateTime.now().minusHours(1), // 이미 시작됨
                     endedAt,
-                    AuctionProductCategory.ELECTRONICS
+                    1L
             );
             auction.activate();
             auctions.add(auctionRepository.save(auction));

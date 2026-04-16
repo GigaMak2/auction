@@ -1,7 +1,6 @@
 package com.example.auction.domain.auction.scheduler;
 
 import com.example.auction.domain.auction.entity.Auction;
-import com.example.auction.domain.auction.enums.AuctionProductCategory;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
@@ -48,7 +47,7 @@ class AuctionSchedulerTest {
                 "테스트 상품",
                 startedAt,
                 endedAt,
-                AuctionProductCategory.ELECTRONICS
+                1L
         );
     }
 

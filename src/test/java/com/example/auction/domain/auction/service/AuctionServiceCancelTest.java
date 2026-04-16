@@ -3,7 +3,6 @@ package com.example.auction.domain.auction.service;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.entity.Auction;
-import com.example.auction.domain.auction.enums.AuctionProductCategory;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.user.entity.User;
@@ -53,7 +52,7 @@ class AuctionServiceCancelTest {
                 "test auction name",
                 LocalDateTime.now().plusDays(30),
                 LocalDateTime.now().plusDays(40),
-                AuctionProductCategory.BOOKS
+                1L
         );
         ReflectionTestUtils.setField(auction, "id", 1L);
         given(auctionRepository.findById(auction.getId())).willReturn(Optional.of(auction));
@@ -78,7 +77,7 @@ class AuctionServiceCancelTest {
                 "test auction name",
                 LocalDateTime.now().plusDays(30),
                 LocalDateTime.now().plusDays(40),
-                AuctionProductCategory.BOOKS
+                1L
         );
         ReflectionTestUtils.setField(auction, "id", 1L);
         ReflectionTestUtils.setField(auction, "status", AuctionStatus.CANCELLED);
@@ -105,7 +104,7 @@ class AuctionServiceCancelTest {
                 "test auction name",
                 LocalDateTime.now(),
                 LocalDateTime.now().plusSeconds(1),
-                AuctionProductCategory.BOOKS
+                1L
         );
         ReflectionTestUtils.setField(auction, "id", 1L);
 
@@ -137,7 +136,7 @@ class AuctionServiceCancelTest {
                 "test auction name",
                 LocalDateTime.now().plusDays(30),
                 LocalDateTime.now().plusDays(40),
-                AuctionProductCategory.BOOKS
+                1L
         );
         ReflectionTestUtils.setField(auction, "id", 1L);
 
@@ -166,7 +165,7 @@ class AuctionServiceCancelTest {
                 "test auction name",
                 LocalDateTime.now().plusDays(30),
                 LocalDateTime.now().plusDays(40),
-                AuctionProductCategory.BOOKS
+                1L
         );
         ReflectionTestUtils.setField(auction, "id", 1L);
         ReflectionTestUtils.setField(auction, "status", status);

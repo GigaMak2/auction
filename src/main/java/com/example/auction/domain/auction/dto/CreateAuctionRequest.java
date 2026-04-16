@@ -3,8 +3,6 @@ package com.example.auction.domain.auction.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.example.auction.domain.auction.enums.AuctionProductCategory;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -28,8 +26,9 @@ public class CreateAuctionRequest {
     @NotNull
     private BigDecimal maxPrice;
 
+    @Positive(message = "카테고리 아이디는 1 이상이어야 합니다")
     @NotNull
-    private AuctionProductCategory category;
+    private Long categoryId;
 
     @NotNull
     private LocalDateTime startedAt;

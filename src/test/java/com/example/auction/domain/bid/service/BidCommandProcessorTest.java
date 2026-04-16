@@ -3,7 +3,6 @@ package com.example.auction.domain.bid.service;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.entity.Auction;
-import com.example.auction.domain.auction.enums.AuctionProductCategory;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.bid.dto.request.BidRequest;
@@ -58,7 +57,7 @@ class BidCommandProcessorTest {
                 "테스트 상품",
                 LocalDateTime.now().minusHours(1),
                 LocalDateTime.now().plusHours(1),
-                AuctionProductCategory.ELECTRONICS
+                1L
         );
         activeAuction.activate();
     }
@@ -175,7 +174,7 @@ class BidCommandProcessorTest {
                 99L, "테스트", BigDecimal.valueOf(200_000), "상품",
                 LocalDateTime.now().plusHours(1),
                 LocalDateTime.now().plusHours(2),
-                AuctionProductCategory.ELECTRONICS
+                1L
         );
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(readyAuction));
 
@@ -194,7 +193,7 @@ class BidCommandProcessorTest {
                 99L, "테스트", BigDecimal.valueOf(200_000), "상품",
                 LocalDateTime.now().minusHours(2),
                 LocalDateTime.now().minusHours(1),
-                AuctionProductCategory.ELECTRONICS
+                1L
         );
         doneAuction.activate();
         doneAuction.close();
@@ -215,7 +214,7 @@ class BidCommandProcessorTest {
                 1L, "내 경매", BigDecimal.valueOf(200_000), "상품",
                 LocalDateTime.now().minusHours(1),
                 LocalDateTime.now().plusHours(1),
-                AuctionProductCategory.ELECTRONICS
+                1L
         );
         myAuction.activate();
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(myAuction));

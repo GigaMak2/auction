@@ -4,6 +4,7 @@ import static com.example.auction.domain.auction.entity.QAuction.auction;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
+import com.example.auction.domain.category.service.CategoryService;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -26,6 +27,7 @@ import java.util.Set;
 public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
 
     private final JPAQueryFactory queryFactory;
+    private final CategoryService categoryService;
 
     @Override
     public Page<@NonNull Auction> findByCondition(
@@ -105,11 +107,12 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
     }
 
     private BooleanExpression hasCategory(AuctionSearchCondition condition) {
-        if (condition.getCategory() != null) {
-            return auction.category.eq(condition.getCategory());
+        if (condition.getCategoryId() == null) {
+            return null;
         }
 
-        return null;
+        List<Long> categoryIds = categoryService.collectDescendantIds(condition.getCategoryId());
+        return auction.categoryId.in(categoryIds);
     }
 
     private BooleanExpression isOwnedBy(@Nullable Long userId) {
