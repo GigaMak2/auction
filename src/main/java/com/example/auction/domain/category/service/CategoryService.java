@@ -124,6 +124,7 @@ public class CategoryService {
         return roots;
     }
 
+    @Transactional(readOnly = true)
     public List<Long> collectDescendantIds(Long categoryId) {
         List<Long> ids = new ArrayList<>();
 
