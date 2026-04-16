@@ -21,6 +21,7 @@ public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatContextCacheService chatContextCacheService;
 
     // 채팅방 생성
     @Transactional
@@ -37,12 +38,13 @@ public class ChatService {
                 .toList();
     }
 
-    // 채팅방 삭제 (소유자 검증 + 메시지 cascade 하드딜리트)
+    // 채팅방 삭제 (소유자 검증 + 메시지 cascade 하드딜리트 + Redis 캐시 evict)
     @Transactional
     public void deleteRoom(Long roomId, Long userId) {
         validateRoomOwner(roomId, userId);
         chatMessageRepository.deleteAllByRoomId(roomId);
         chatRoomRepository.deleteById(roomId);
+        chatContextCacheService.evict(roomId); // 채팅방 삭제 시 컨텍스트 캐시도 함께 제거
     }
 
     // 메시지 목록 조회 (커서 기반 페이징)
@@ -57,10 +59,10 @@ public class ChatService {
 
     // 채팅방 존재 여부 + 소유자 검증
     private void validateRoomOwner(Long roomId, Long userId) {
-        if (!chatRoomRepository.existsById(roomId)) {
-            throw new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_NOT_FOUND);
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_NOT_FOUND));
+        if (!chatRoom.getUserId().equals(userId)) {
+            throw new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_FORBIDDEN);
         }
-        chatRoomRepository.findByIdAndUserId(roomId, userId)
-                .orElseThrow(() -> new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_FORBIDDEN));
     }
 }

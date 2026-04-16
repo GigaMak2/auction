@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long>, ChatMessageRepositoryCustom {
 
     // 채팅방 삭제 시 메시지 bulk 하드딜리트
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("DELETE FROM ChatMessage m WHERE m.roomId = :roomId")
     void deleteAllByRoomId(@Param("roomId") Long roomId);
 
     // 스케줄러 - 30일 이전 메시지 bulk 삭제
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("DELETE FROM ChatMessage m WHERE m.createdAt < :dateTime")
     void deleteAllByCreatedAtBefore(@Param("dateTime") LocalDateTime dateTime);
 }

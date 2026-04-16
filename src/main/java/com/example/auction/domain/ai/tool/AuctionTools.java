@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-// LLM이 호출할 수 있는 AI Tool 모음 — 경매 데이터 조회 기능 3가지 제공
+// LLM이 호출할 수 있는 AI Tool 모음 — 경매 데이터 조회 기능 4가지 제공
 @Component
 @RequiredArgsConstructor
 public class AuctionTools {
