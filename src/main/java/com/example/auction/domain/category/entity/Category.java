@@ -43,4 +43,8 @@ public class Category extends ModifiableEntity {
 
         return category;
     }
+
+    public void rename(String name) {
+        this.name = name;
+    }
 }
