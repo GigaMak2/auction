@@ -1,8 +1,6 @@
 package com.example.auction.domain.bid.service;
 
-
 import com.example.auction.domain.auction.entity.Auction;
-import com.example.auction.domain.auction.enums.AuctionProductCategory;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.bid.dto.request.BidRequest;
 import com.example.auction.domain.bid.entity.Bid;
@@ -63,7 +61,7 @@ class BidConcurrencyTest {
                 "테스트 상품",
                 LocalDateTime.now().minusHours(1),
                 LocalDateTime.now().plusHours(1),
-                AuctionProductCategory.ELECTRONICS
+                1L
         );
         auction.activate();
         return auctionRepository.save(auction);

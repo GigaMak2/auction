@@ -2,8 +2,8 @@ package com.example.auction.domain.auction.repository;
 
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
 import com.example.auction.domain.auction.entity.Auction;
-import com.example.auction.domain.auction.enums.AuctionProductCategory;
 import com.example.auction.domain.auction.enums.AuctionStatus;
+import com.example.auction.domain.category.service.CategoryService;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 // H2좀 그만 불러!!
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
-@Import({QuerydslConfig.class, JpaConfig.class})
+@Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class})
 class AuctionRepositoryTest {
 
     // TODO: 현재 DB를 초기화 하지 않고 @Transactional에만 의존하고 있습니다.
@@ -61,7 +61,7 @@ class AuctionRepositoryTest {
             "test auction item name",
             LocalDateTime.now().plusDays(1),
             LocalDateTime.now().plusDays(2),
-            AuctionProductCategory.ELECTRONICS
+            1L
         );
 
         AuctionSearchCondition condition = new AuctionSearchCondition();
@@ -92,7 +92,7 @@ class AuctionRepositoryTest {
                 "test auction item name",
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(2),
-                AuctionProductCategory.ELECTRONICS
+                1L
             );
             auctionRepository.save(auction);
 
@@ -150,7 +150,7 @@ class AuctionRepositoryTest {
                     "test auction item name",
                     LocalDateTime.now().plusDays(1),
                     LocalDateTime.now().plusDays(2),
-                    AuctionProductCategory.ELECTRONICS
+                    1L
             );
 
             ReflectionTestUtils.setField(auction, "status", status);

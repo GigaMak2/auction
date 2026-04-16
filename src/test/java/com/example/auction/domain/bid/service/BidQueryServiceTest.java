@@ -4,7 +4,6 @@ import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.entity.Auction;
-import com.example.auction.domain.auction.enums.AuctionProductCategory;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.auction.result.entity.AuctionResult;
@@ -69,7 +68,7 @@ class BidQueryServiceTest {
                 99L, "진행중 경매", BigDecimal.valueOf(200_000), "상품",
                 LocalDateTime.now().minusHours(1),
                 LocalDateTime.now().plusHours(1),
-                AuctionProductCategory.ELECTRONICS
+                1L
         );
         activeAuction.activate();
 
@@ -77,7 +76,7 @@ class BidQueryServiceTest {
                 99L, "낙찰 경매", BigDecimal.valueOf(200_000), "상품",
                 LocalDateTime.now().minusHours(2),
                 LocalDateTime.now().minusHours(1),
-                AuctionProductCategory.ELECTRONICS
+                1L
         );
         doneAuction.activate();
         doneAuction.close();
@@ -86,7 +85,7 @@ class BidQueryServiceTest {
                 99L, "취소 경매", BigDecimal.valueOf(200_000), "상품",
                 LocalDateTime.now().plusHours(1),
                 LocalDateTime.now().plusHours(2),
-                AuctionProductCategory.ELECTRONICS
+                1L
         );
         cancelledAuction.cancel();
     }
@@ -254,7 +253,7 @@ class BidQueryServiceTest {
                 99L, "유찰 경매", BigDecimal.valueOf(200_000), "상품",
                 LocalDateTime.now().minusHours(2),
                 LocalDateTime.now().minusHours(1),
-                AuctionProductCategory.ELECTRONICS
+                1L
         );
         noBidAuction.activate();
         noBidAuction.noBid();
