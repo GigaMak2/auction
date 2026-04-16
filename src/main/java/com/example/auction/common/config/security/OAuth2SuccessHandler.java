@@ -1,5 +1,6 @@
 package com.example.auction.common.config.security;
 
+import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auth.dto.AuthLoginResponse;
 import com.example.auction.domain.user.entity.User;
@@ -10,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -54,7 +56,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(
-                objectMapper.writeValueAsString(new AuthLoginResponse(accessToken, refreshToken)));
+        response.getWriter().write(objectMapper.writeValueAsString(
+                BaseResponse.success(HttpStatus.OK.name(), "소셜 로그인 성공", new AuthLoginResponse(accessToken, refreshToken))));
     }
 }
