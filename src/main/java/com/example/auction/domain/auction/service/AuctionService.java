@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
+    private final AuctionEventBridgeService auctionEventBridgeService;
 
     @Transactional(readOnly = true)
     @Cacheable(
@@ -130,6 +131,10 @@ public class AuctionService {
         );
 
         auction = auctionRepository.saveAndFlush(auction);
+
+        // 이벤트브릿지
+        auctionEventBridgeService.registerStartSchedule(auction.getId(), auction.getStartedAt());
+        auctionEventBridgeService.registerEndSchedule(auction.getId(), auction.getEndedAt());
 
         return GetAuctionResponse.from(auction);
     }

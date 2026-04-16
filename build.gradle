@@ -62,6 +62,15 @@ dependencies {
     //redisson
     implementation 'org.redisson:redisson-spring-boot-starter:4.0.0'
 
+    // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // parameter-store
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store:4.0.0'
+
+    // AWS EventBridge Scheduler
+    implementation 'software.amazon.awssdk:scheduler:2.42.20'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
