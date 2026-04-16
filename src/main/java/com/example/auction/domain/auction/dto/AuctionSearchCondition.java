@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
-import com.example.auction.domain.auction.enums.AuctionProductCategory;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 
 import jakarta.validation.constraints.Positive;
@@ -29,7 +28,8 @@ public class AuctionSearchCondition {
 
     private @Nullable Set<AuctionStatus> status;
 
-    private @Nullable AuctionProductCategory category;
+    @Positive(message = "카테고리 아이디는 1 이상이어야 합니다")
+    private @Nullable Long categoryId;
 
     @PositiveOrZero(message = "페이지 0 이상이어야 커야합니다")
     private Integer page = 0;

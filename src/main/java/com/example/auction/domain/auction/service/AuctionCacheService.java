@@ -48,8 +48,8 @@ public class AuctionCacheService {
         builder.append("]");
 
         builder.append("category=[");
-        if (condition.getCategory() != null) {
-            builder.append(condition.getCategory());
+        if (condition.getCategoryId() != null) {
+            builder.append(condition.getCategoryId());
         }
         builder.append("]");
 

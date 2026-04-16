@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.example.auction.domain.auction.entity.Auction;
-import com.example.auction.domain.auction.enums.AuctionProductCategory;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 
 import lombok.AllArgsConstructor;
@@ -30,7 +29,7 @@ public class GetAuctionResponse {
     private final LocalDateTime endedAt;
     private final LocalDateTime cancelledAt;
 
-    private final AuctionProductCategory category;
+    private final Long categoryId;
 
     private final LocalDateTime createdAt;
 
@@ -52,7 +51,7 @@ public class GetAuctionResponse {
             auction.getEndedAt(),
             auction.getCancelledAt(),
 
-            auction.getCategory(),
+            auction.getCategoryId(),
 
             auction.getCreatedAt()
         );

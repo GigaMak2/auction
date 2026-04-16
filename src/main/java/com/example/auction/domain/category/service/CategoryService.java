@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -95,6 +96,15 @@ public class CategoryService {
                 category.getModifiedAt());
     }
 
+    public List<Long> collectDescendantIds(Long categoryId) {
+        List<Long> ids = new ArrayList<>();
+
+        ids.add(categoryId);
+
+        collectIds(categoryId, ids);
+        return ids;
+    }
+
     private Category rootCategory(String name) {
         if (categoryRepository.existsByParentIdIsNullAndName(name)) {
             throw new ServiceErrorException(CategoryErrorEnum.DUPLICATED_CATEGORY);
@@ -153,6 +163,14 @@ public class CategoryService {
         for (Category child : children) {
             child.updateDepth(child.getDepth() + depthDiff);
             updateChildrenDepth(child.getId(), depthDiff);
+        }
+    }
+
+    private void collectIds(Long categoryId, List<Long> ids) {
+        List<Category> children = categoryRepository.findAllByParentId(categoryId);
+        for (Category child : children) {
+            ids.add(child.getId());
+            collectIds(child.getId(), ids);
         }
     }
 }

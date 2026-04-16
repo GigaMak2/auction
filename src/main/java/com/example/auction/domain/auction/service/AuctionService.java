@@ -126,7 +126,7 @@ public class AuctionService {
                 req.getItemName(),
                 req.getStartedAt(),
                 req.getEndedAt(),
-                req.getCategory()
+                req.getCategoryId()
         );
 
         auction = auctionRepository.saveAndFlush(auction);
