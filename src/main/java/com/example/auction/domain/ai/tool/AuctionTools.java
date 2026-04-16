@@ -1,5 +1,7 @@
 package com.example.auction.domain.ai.tool;
 
+import com.example.auction.common.exception.ServiceErrorException;
+import com.example.auction.domain.ai.exception.AiErrorEnum;
 import com.example.auction.domain.ai.service.ReviewEmbeddingService;
 import com.example.auction.domain.ai.tool.dto.AuctionBidInfo;
 import com.example.auction.domain.ai.tool.dto.AuctionResultInfo;
@@ -24,7 +26,7 @@ public class AuctionTools {
     @Tool(description = "특정 경매 ID로 입찰 목록을 조회합니다. 입찰가 오름차순으로 정렬되어 최저가를 확인할 수 있습니다.")
     public List<AuctionBidInfo> getBidsByAuctionId(Long auctionId) {
         if (auctionId == null) {
-            throw new IllegalArgumentException("auctionId는 필수입니다.");
+            throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
         return aiToolRepository.findBidsByAuctionId(auctionId);
     }
@@ -39,10 +41,10 @@ public class AuctionTools {
     @Tool(description = "판매자 ID로 질문과 의미적으로 유사한 후기를 검색합니다. 판매자 신뢰도 심층 분석에 활용됩니다.")
     public List<String> getSellerReviewInsights(Long sellerId, String query) {
         if (sellerId == null) {
-            throw new IllegalArgumentException("sellerId는 필수입니다.");
+            throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
         if (query == null || query.isBlank()) {
-            throw new IllegalArgumentException("query는 필수입니다.");
+            throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
         return reviewEmbeddingService.search(sellerId, query);
     }
@@ -51,7 +53,7 @@ public class AuctionTools {
     @Tool(description = "판매자 ID로 총 낙찰 횟수, 평균 평점, 최근 후기를 조회합니다. 판매자 신뢰도 분석에 활용됩니다.")
     public SellerStatsInfo getSellerStats(Long sellerId) {
         if (sellerId == null) {
-            throw new IllegalArgumentException("sellerId는 필수입니다.");
+            throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
         long totalSales = aiToolRepository.countSellerSales(sellerId);
         Double avgScore = reviewRepository.findAvgScoreByRevieweeId(sellerId); // 리뷰 없으면 null

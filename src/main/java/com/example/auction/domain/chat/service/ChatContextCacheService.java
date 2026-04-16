@@ -3,7 +3,6 @@ package com.example.auction.domain.chat.service;
 import com.example.auction.domain.chat.dto.ChatMessageCacheDto;
 import com.example.auction.domain.chat.repository.ChatMessageRepository;
 import tools.jackson.core.JacksonException;
-import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +32,9 @@ public class ChatContextCacheService {
         String key = KEY_PREFIX + roomId;
 
         try {
-            String json = stringRedisTemplate.opsForValue().get(key);
-            if (json != null) {
-                List<ChatMessageCacheDto> cached = deserialize(key, json);
+            List<String> jsonList = stringRedisTemplate.opsForList().range(key, 0, -1);
+            if (jsonList != null && !jsonList.isEmpty()) {
+                List<ChatMessageCacheDto> cached = deserialize(key, jsonList);
                 if (cached != null) {
                     return cached;
                 }
@@ -59,25 +58,18 @@ public class ChatContextCacheService {
     }
 
     // AI 응답 완료 후 유저 메시지 + AI 응답을 캐시에 추가 — doFinally에서 호출
+    // RPUSH + LTRIM 원자 연산 — GET 없이 직접 추가해 동시 요청 시 덮어쓰기 문제 방지
     // Redis 장애 시 무시 — 다음 턴 getContext()의 DB 폴백으로 복구됨
-    // TODO: GET→수정→SET 방식이라 동시 요청 시 마지막 write가 앞선 turn을 덮어쓸 수 있음 (docs/known-issues.md SSE-2)
     public void appendMessages(Long roomId, String userContent, String assistantContent) {
         String key = KEY_PREFIX + roomId;
 
         try {
-            String json = stringRedisTemplate.opsForValue().get(key);
+            String userJson = objectMapper.writeValueAsString(new ChatMessageCacheDto("USER", userContent));
+            String assistantJson = objectMapper.writeValueAsString(new ChatMessageCacheDto("ASSISTANT", assistantContent));
 
-            List<ChatMessageCacheDto> parsed = (json != null) ? deserialize(key, json) : null;
-            List<ChatMessageCacheDto> messages = new ArrayList<>(parsed != null ? parsed : List.of());
-            messages.add(new ChatMessageCacheDto("USER", userContent));
-            messages.add(new ChatMessageCacheDto("ASSISTANT", assistantContent));
-
-            // MAX_MESSAGES 초과 시 오래된 것부터 제거 (슬라이딩 윈도우)
-            if (messages.size() > MAX_MESSAGES) {
-                messages = messages.subList(messages.size() - MAX_MESSAGES, messages.size());
-            }
-
-            save(key, messages);
+            stringRedisTemplate.opsForList().rightPushAll(key, userJson, assistantJson);
+            stringRedisTemplate.opsForList().trim(key, -MAX_MESSAGES, -1); // 슬라이딩 윈도우
+            stringRedisTemplate.expire(key, TTL);
         } catch (Exception e) {
             log.warn("[ChatContextCacheService] 캐시 추가 실패, 다음 턴 DB 폴백으로 복구 key={}", key, e);
         }
@@ -93,19 +85,29 @@ public class ChatContextCacheService {
         }
     }
 
-    // JSON 직렬화 후 Redis에 저장 + TTL 갱신 — best-effort, 모든 예외 흡수
+    // DB 폴백 후 캐시 백필 — delete + rightPushAll + expire (best-effort, 모든 예외 흡수)
     private void save(String key, List<ChatMessageCacheDto> messages) {
         try {
-            stringRedisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(messages), TTL);
+            List<String> jsonList = new ArrayList<>();
+            for (ChatMessageCacheDto m : messages) {
+                jsonList.add(objectMapper.writeValueAsString(m));
+            }
+            stringRedisTemplate.delete(key);
+            stringRedisTemplate.opsForList().rightPushAll(key, jsonList);
+            stringRedisTemplate.expire(key, TTL);
         } catch (Exception e) {
             log.warn("[ChatContextCacheService] 캐시 저장 실패 key={}", key, e);
         }
     }
 
-    // JSON 역직렬화 — 파싱 실패 시 null 반환 (호출부에서 손상된 키 삭제 후 DB 재조회)
-    private List<ChatMessageCacheDto> deserialize(String key, String json) {
+    // 개별 JSON 역직렬화 — 파싱 실패 시 null 반환 (호출부에서 손상된 키 삭제 후 DB 재조회)
+    private List<ChatMessageCacheDto> deserialize(String key, List<String> jsonList) {
         try {
-            return objectMapper.readValue(json, new TypeReference<>() {});
+            List<ChatMessageCacheDto> result = new ArrayList<>();
+            for (String json : jsonList) {
+                result.add(objectMapper.readValue(json, ChatMessageCacheDto.class));
+            }
+            return result;
         } catch (JacksonException e) {
             log.warn("[ChatContextCacheService] 캐시 역직렬화 실패, 손상된 키 제거 후 DB 재조회 key={}", key, e);
             stringRedisTemplate.delete(key);
