@@ -1,4 +1,7 @@
 spring:
+  config:
+    import: aws-parameterstore:/param/reverse-auction/prod/
+
   datasource:
     url: ${POSTGRES_URL}
     username: ${POSTGRES_USERNAME}
@@ -15,7 +18,26 @@ spring:
         format_sql: false
     defer-datasource-initialization: false
 
+  cloud:
+    # AWS 관련
+    aws:
+      # parameterstore 활성화
+      parameterstore:
+        enabled: true
+
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: 6379
+
+# actuator 관련
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+
+  endpoint:
+    health:
+      show-details: never
