@@ -1,4 +1,12 @@
 spring:
+  config:
+    import: aws-parameterstore:/auction/prod/
+  cloud:
+    aws:
+      parameterstore:
+        enabled: true
+      region:
+        static: ap-northeast-2
   datasource:
     url: ${POSTGRES_URL}
     username: ${POSTGRES_USERNAME}
@@ -8,9 +16,11 @@ spring:
   jpa:
     show-sql: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     defer-datasource-initialization: false

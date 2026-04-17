@@ -1,5 +1,6 @@
 package com.example.auction.domain.auction.service;
 
+import com.example.auction.domain.bid.enums.BidAuctionStatus;
 import org.springframework.stereotype.Service;
 
 import com.example.auction.common.exception.ServiceErrorException;
@@ -13,6 +14,8 @@ import com.example.auction.domain.bid.repository.BidRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Lambda에서 호출하는 내부 서비스
@@ -66,6 +69,10 @@ public class AuctionLambdaService {
             auction.noBid();
             log.info("[경매 유찰] auctionId={}", auctionId);
         }
+
+        // 해당 경매의 모든 입찰 상태를 CLOSED로 변경
+        List<Bid> bids = bidRepository.findAllByAuctionId(auctionId);
+        bids.forEach(bid -> bid.updateStatus(BidAuctionStatus.CLOSED));
 
         // todo: 카프카 이벤트 발행
     }

@@ -16,6 +16,7 @@
 //import java.time.LocalDateTime;
 //import java.util.List;
 //
+ // 미사용: aws lambda & eventBridge 로 전환
 //@Slf4j
 //@Component
 //@RequiredArgsConstructor
