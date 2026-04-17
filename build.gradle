@@ -36,7 +36,7 @@ dependencies {
     annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:7.1:jpa'
 
     // Spring AI
-    implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'  // DeepSeek V3 채팅 + OpenAI 임베딩
     implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector' // RAG용 pgvector 벡터 저장소
 
     // Redis

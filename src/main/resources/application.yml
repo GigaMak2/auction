@@ -14,14 +14,17 @@ spring:
     bootstrap-servers: ${KAFKA_HOST:localhost}:9092
 
   ai:
-    ollama:
-      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    openai:
       chat:
+        base-url: https://api.deepseek.com  # OpenAI 호환 엔드포인트 (DeepSeek V3)
+        api-key: ${DEEPSEEK_API_KEY}
         options:
-          model: ${OLLAMA_MODEL:llama3.2}
+          model: deepseek-chat
       embedding:
+        base-url: https://api.openai.com
+        api-key: ${OPENAI_API_KEY}
         options:
-          model: nomic-embed-text # 텍스트 → 벡터 변환 전용 임베딩 모델 (RAG용)
+          model: text-embedding-3-small    # 텍스트 → 벡터 변환 전용 임베딩 모델 (RAG용)
 
 jwt:
   secret:

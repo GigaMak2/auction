@@ -117,8 +117,7 @@ class ChatServiceTest {
         ChatRoom chatRoom = ChatRoom.from(USER_ID);
         ReflectionTestUtils.setField(chatRoom, "id", ROOM_ID);
 
-        given(chatRoomRepository.existsById(ROOM_ID)).willReturn(true);
-        given(chatRoomRepository.findByIdAndUserId(ROOM_ID, USER_ID)).willReturn(Optional.of(chatRoom));
+        given(chatRoomRepository.findById(ROOM_ID)).willReturn(Optional.of(chatRoom));
 
         // when
         chatService.deleteRoom(ROOM_ID, USER_ID);
@@ -133,7 +132,7 @@ class ChatServiceTest {
     @DisplayName("채팅방 삭제 실패 - 채팅방 없음")
     void deleteRoom_fail_roomNotFound() {
         // given
-        given(chatRoomRepository.existsById(ROOM_ID)).willReturn(false);
+        given(chatRoomRepository.findById(ROOM_ID)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> chatService.deleteRoom(ROOM_ID, USER_ID))
@@ -144,9 +143,11 @@ class ChatServiceTest {
     @Test
     @DisplayName("채팅방 삭제 실패 - 본인 채팅방 아님")
     void deleteRoom_fail_forbidden() {
-        // given
-        given(chatRoomRepository.existsById(ROOM_ID)).willReturn(true);
-        given(chatRoomRepository.findByIdAndUserId(ROOM_ID, USER_ID)).willReturn(Optional.empty());
+        // given — 다른 유저 소유 채팅방
+        ChatRoom otherUserRoom = ChatRoom.from(999L);
+        ReflectionTestUtils.setField(otherUserRoom, "id", ROOM_ID);
+
+        given(chatRoomRepository.findById(ROOM_ID)).willReturn(Optional.of(otherUserRoom));
 
         // when & then
         assertThatThrownBy(() -> chatService.deleteRoom(ROOM_ID, USER_ID))
@@ -171,8 +172,7 @@ class ChatServiceTest {
         ChatMessage msg2 = ChatMessage.of(ROOM_ID, "안녕하세요", MessageRole.ASSISTANT);
         ReflectionTestUtils.setField(msg2, "id", 2L);
 
-        given(chatRoomRepository.existsById(ROOM_ID)).willReturn(true);
-        given(chatRoomRepository.findByIdAndUserId(ROOM_ID, USER_ID)).willReturn(Optional.of(chatRoom));
+        given(chatRoomRepository.findById(ROOM_ID)).willReturn(Optional.of(chatRoom));
         given(chatMessageRepository.findByCursor(ROOM_ID, null, 20)).willReturn(List.of(msg1, msg2));
 
         // when
@@ -199,8 +199,7 @@ class ChatServiceTest {
             messages.add(m);
         }
 
-        given(chatRoomRepository.existsById(ROOM_ID)).willReturn(true);
-        given(chatRoomRepository.findByIdAndUserId(ROOM_ID, USER_ID)).willReturn(Optional.of(chatRoom));
+        given(chatRoomRepository.findById(ROOM_ID)).willReturn(Optional.of(chatRoom));
         given(chatMessageRepository.findByCursor(ROOM_ID, 100L, 20)).willReturn(messages);
 
         // when
@@ -215,7 +214,7 @@ class ChatServiceTest {
     @DisplayName("메시지 목록 조회 실패 - 채팅방 없음")
     void getMessages_fail_roomNotFound() {
         // given
-        given(chatRoomRepository.existsById(ROOM_ID)).willReturn(false);
+        given(chatRoomRepository.findById(ROOM_ID)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> chatService.getMessages(ROOM_ID, USER_ID, null, 20))
@@ -226,9 +225,11 @@ class ChatServiceTest {
     @Test
     @DisplayName("메시지 목록 조회 실패 - 본인 채팅방 아님")
     void getMessages_fail_forbidden() {
-        // given
-        given(chatRoomRepository.existsById(ROOM_ID)).willReturn(true);
-        given(chatRoomRepository.findByIdAndUserId(ROOM_ID, USER_ID)).willReturn(Optional.empty());
+        // given — 다른 유저 소유 채팅방
+        ChatRoom otherUserRoom = ChatRoom.from(999L);
+        ReflectionTestUtils.setField(otherUserRoom, "id", ROOM_ID);
+
+        given(chatRoomRepository.findById(ROOM_ID)).willReturn(Optional.of(otherUserRoom));
 
         // when & then
         assertThatThrownBy(() -> chatService.getMessages(ROOM_ID, USER_ID, null, 20))
