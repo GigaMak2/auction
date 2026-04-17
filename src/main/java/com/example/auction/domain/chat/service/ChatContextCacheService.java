@@ -85,16 +85,20 @@ public class ChatContextCacheService {
         }
     }
 
-    // DB 폴백 후 캐시 백필 — delete + rightPushAll + expire (best-effort, 모든 예외 흡수)
+    // DB 폴백 후 캐시 백필 — LLEN 체크 후 빈 키에만 RPUSH (best-effort, 모든 예외 흡수)
+    // delete + rightPushAll 구조는 동시 appendMessages()가 끼어들면 새 메시지를 덮어쓰는 경합 발생
+    // size() == 0 일 때만 백필하므로 다른 스레드가 이미 쓴 경우 건너뜀
     private void save(String key, List<ChatMessageCacheDto> messages) {
         try {
             List<String> jsonList = new ArrayList<>();
             for (ChatMessageCacheDto m : messages) {
                 jsonList.add(objectMapper.writeValueAsString(m));
             }
-            stringRedisTemplate.delete(key);
-            stringRedisTemplate.opsForList().rightPushAll(key, jsonList);
-            stringRedisTemplate.expire(key, TTL);
+            Long len = stringRedisTemplate.opsForList().size(key);
+            if (len == null || len == 0) {
+                stringRedisTemplate.opsForList().rightPushAll(key, jsonList);
+                stringRedisTemplate.expire(key, TTL);
+            }
         } catch (Exception e) {
             log.warn("[ChatContextCacheService] 캐시 저장 실패 key={}", key, e);
         }
