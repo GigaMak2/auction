@@ -74,41 +74,15 @@ services:
     build: .
     container_name: auction-app
     environment:
-      OLLAMA_BASE_URL: http://auction-ollama:11434
-      OLLAMA_MODEL: llama3.2
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
-      ollama:
-        condition: service_healthy  # API 준비 완료 후 app 시작 (service_started → service_healthy)
-      ollama-init:
-        condition: service_completed_successfully  # 모델 pull 완료 후 app 시작
-
-  ollama:
-    image: ollama/ollama:latest
-    container_name: auction-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
-    # API 준비 여부 확인 후 app이 연결하도록 healthcheck 추가
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  ollama-init:
-    image: ollama/ollama:latest
-    container_name: auction-ollama-init
-    depends_on:
-      ollama:
-        condition: service_healthy  # ollama API 준비 완료 후 실행
-    environment:
-      OLLAMA_HOST: http://ollama:11434  # 같은 네트워크의 ollama 서비스로 연결
-    command: >
-      sh -c "ollama pull llama3.2 && ollama pull nomic-embed-text"
-    restart: "no"  # 모델 pull 완료 후 종료, 재시작 없음
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
 volumes:
   postgres-data:
-  ollama-data:

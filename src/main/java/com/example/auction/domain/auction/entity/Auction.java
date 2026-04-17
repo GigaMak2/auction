@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.example.auction.common.entity.CreatableEntity;
-import com.example.auction.domain.auction.enums.AuctionProductCategory;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 
 import lombok.AccessLevel;
@@ -52,9 +51,8 @@ public class Auction extends CreatableEntity {
     @Column(name="cancelled_at", nullable = true)
     private LocalDateTime cancelledAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name="category", nullable = false)
-    private AuctionProductCategory category;
+    @Column(name="category_id", nullable = false)
+    private Long categoryId;
 
     public static Auction of(
         @NonNull Long userId,
@@ -63,7 +61,7 @@ public class Auction extends CreatableEntity {
         @NonNull String itemName,
         @NonNull LocalDateTime startedAt,
         @NonNull LocalDateTime endedAt,
-        @NonNull AuctionProductCategory category
+        @NonNull Long categoryId
     ) {
         Auction auction = new Auction();
 
@@ -77,7 +75,7 @@ public class Auction extends CreatableEntity {
         auction.startedAt = startedAt;
         auction.endedAt = endedAt;
 
-        auction.category = category;
+        auction.categoryId = categoryId;
 
         return auction;
     }

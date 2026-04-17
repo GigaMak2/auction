@@ -3,6 +3,8 @@ package com.example.auction.domain.auction.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import com.example.auction.domain.category.exception.CategoryErrorEnum;
+import com.example.auction.domain.category.repository.CategoryRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -34,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
     private final AuctionEventBridgeService auctionEventBridgeService;
 
     @Transactional(readOnly = true)
@@ -120,6 +123,9 @@ public class AuctionService {
 
         AuctionUtil.throwIfCreateAuctionRequestNotValid(req);
 
+        categoryRepository.findById(req.getCategoryId()).orElseThrow(() ->
+                new ServiceErrorException(CategoryErrorEnum.CATEGORY_NOT_FOUND));
+
         Auction auction = Auction.of(
                 userDetails.getUserId(), 
                 req.getDescription(),
@@ -127,7 +133,7 @@ public class AuctionService {
                 req.getItemName(),
                 req.getStartedAt(),
                 req.getEndedAt(),
-                req.getCategory()
+                req.getCategoryId()
         );
 
         auction = auctionRepository.saveAndFlush(auction);

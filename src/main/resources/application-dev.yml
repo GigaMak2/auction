@@ -11,6 +11,10 @@ spring:
       region:
         static: ap-northeast-2
 
+  sql:
+    init:
+      mode: always
+
   jpa:
     show-sql: true
     hibernate:

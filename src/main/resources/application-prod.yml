@@ -24,3 +24,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     defer-datasource-initialization: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379

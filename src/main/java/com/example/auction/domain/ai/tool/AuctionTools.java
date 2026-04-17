@@ -1,5 +1,7 @@
 package com.example.auction.domain.ai.tool;
 
+import com.example.auction.common.exception.ServiceErrorException;
+import com.example.auction.domain.ai.exception.AiErrorEnum;
 import com.example.auction.domain.ai.service.ReviewEmbeddingService;
 import com.example.auction.domain.ai.tool.dto.AuctionBidInfo;
 import com.example.auction.domain.ai.tool.dto.AuctionResultInfo;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-// LLM이 호출할 수 있는 AI Tool 모음 — 경매 데이터 조회 기능 3가지 제공
+// LLM이 호출할 수 있는 AI Tool 모음 — 경매 데이터 조회 기능 4가지 제공
 @Component
 @RequiredArgsConstructor
 public class AuctionTools {
@@ -23,8 +25,8 @@ public class AuctionTools {
     // 특정 경매의 입찰 목록과 최저가를 조회 — 경쟁 입찰 분석에 활용
     @Tool(description = "특정 경매 ID로 입찰 목록을 조회합니다. 입찰가 오름차순으로 정렬되어 최저가를 확인할 수 있습니다.")
     public List<AuctionBidInfo> getBidsByAuctionId(Long auctionId) {
-        if (auctionId == null) {
-            throw new IllegalArgumentException("auctionId는 필수입니다.");
+        if (auctionId == null || auctionId <= 0) {
+            throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
         return aiToolRepository.findBidsByAuctionId(auctionId);
     }
@@ -38,11 +40,11 @@ public class AuctionTools {
     // 판매자 후기 의미 검색 — RAG 기반으로 질문과 관련 있는 후기 텍스트 반환
     @Tool(description = "판매자 ID로 질문과 의미적으로 유사한 후기를 검색합니다. 판매자 신뢰도 심층 분석에 활용됩니다.")
     public List<String> getSellerReviewInsights(Long sellerId, String query) {
-        if (sellerId == null) {
-            throw new IllegalArgumentException("sellerId는 필수입니다.");
+        if (sellerId == null || sellerId <= 0) {
+            throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
         if (query == null || query.isBlank()) {
-            throw new IllegalArgumentException("query는 필수입니다.");
+            throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
         return reviewEmbeddingService.search(sellerId, query);
     }
@@ -50,8 +52,8 @@ public class AuctionTools {
     // 판매자의 낙찰 횟수, 평균 평점, 최근 후기를 종합 조회 — 판매자 신뢰도 분석에 활용
     @Tool(description = "판매자 ID로 총 낙찰 횟수, 평균 평점, 최근 후기를 조회합니다. 판매자 신뢰도 분석에 활용됩니다.")
     public SellerStatsInfo getSellerStats(Long sellerId) {
-        if (sellerId == null) {
-            throw new IllegalArgumentException("sellerId는 필수입니다.");
+        if (sellerId == null || sellerId <= 0) {
+            throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
         long totalSales = aiToolRepository.countSellerSales(sellerId);
         Double avgScore = reviewRepository.findAvgScoreByRevieweeId(sellerId); // 리뷰 없으면 null
