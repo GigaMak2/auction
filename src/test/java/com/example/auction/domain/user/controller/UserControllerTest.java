@@ -1,9 +1,7 @@
 package com.example.auction.domain.user.controller;
 
-import com.example.auction.common.config.security.CustomAccessDeniedHandler;
-import com.example.auction.common.config.security.CustomAuthenticationEntryPoint;
 import com.example.auction.common.config.security.CustomUserDetails;
-import com.example.auction.common.config.security.JwtProvider;
+import com.example.auction.common.exception.GlobalExceptionHandler;
 import com.example.auction.domain.user.dto.UserChangePasswordRequest;
 import com.example.auction.domain.user.dto.UserGetResponse;
 import com.example.auction.domain.user.dto.UserWithdrawResponse;
@@ -16,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,7 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
+@WebMvcTest({UserController.class, GlobalExceptionHandler.class})
 @AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest {
 
@@ -46,18 +43,6 @@ class UserControllerTest {
 
     @MockitoBean
     private UserService userService;
-
-    @MockitoBean
-    private JwtProvider jwtProvider;
-
-    @MockitoBean
-    private RedisTemplate<String, Object> redisTemplate;
-
-    @MockitoBean
-    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
-    @MockitoBean
-    private CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @BeforeEach
     void setUpSecurityContext() {
