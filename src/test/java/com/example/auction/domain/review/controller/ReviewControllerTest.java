@@ -1,9 +1,6 @@
 package com.example.auction.domain.review.controller;
 
-import com.example.auction.common.config.security.CustomAccessDeniedHandler;
-import com.example.auction.common.config.security.CustomAuthenticationEntryPoint;
 import com.example.auction.common.config.security.CustomUserDetails;
-import com.example.auction.common.config.security.JwtProvider;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.GlobalExceptionHandler;
 import com.example.auction.domain.review.dto.*;
@@ -15,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,18 +43,6 @@ class ReviewControllerTest {
 
     @MockitoBean
     private ReviewService reviewService;
-
-    @MockitoBean
-    private JwtProvider jwtProvider;
-
-    @MockitoBean
-    private RedisTemplate<String, Object> redisTemplate;
-
-    @MockitoBean
-    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
-    @MockitoBean
-    private CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @BeforeEach
     void setUpSecurityContext() {
