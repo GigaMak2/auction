@@ -398,7 +398,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("카테고리 이동 실패 -  순환 참조")
+    @DisplayName("카테고리 이동 실패 - 순환 참조")
     void moveCategory_fail_circularReference() {
         // given
         Long categoryId = 1L;

@@ -1,8 +1,5 @@
 package com.example.auction.domain.category.controller;
 
-import com.example.auction.common.config.security.CustomAccessDeniedHandler;
-import com.example.auction.common.config.security.CustomAuthenticationEntryPoint;
-import com.example.auction.common.config.security.JwtProvider;
 import com.example.auction.common.exception.GlobalExceptionHandler;
 import com.example.auction.domain.category.dto.*;
 import com.example.auction.domain.category.service.CategoryService;
@@ -11,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,18 +35,6 @@ class CategoryControllerTest {
 
     @MockitoBean
     private CategoryService categoryService;
-
-    @MockitoBean
-    private JwtProvider jwtProvider;
-
-    @MockitoBean
-    private RedisTemplate<String, Object> redisTemplate;
-
-    @MockitoBean
-    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
-    @MockitoBean
-    private CustomAccessDeniedHandler customAccessDeniedHandler;
 
 
     // ========================
