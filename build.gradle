@@ -62,6 +62,12 @@ dependencies {
     //redisson
     implementation 'org.redisson:redisson:3.45.0'
 
+    // monitoring and aws deployment dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:4.0.0')
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
