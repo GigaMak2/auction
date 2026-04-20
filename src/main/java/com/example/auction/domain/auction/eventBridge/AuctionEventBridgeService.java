@@ -34,10 +34,24 @@ public class AuctionEventBridgeService {
     private String roleArn;
 
     // 트랜잭션 커밋 이후 eventBridge 스케줄 등록하여 고아 스케줄 방지(db에는 없고 aws 스케줄에만 있는 경우 방지)
+    // 3회 재시도
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAuctionCreated(AuctionCreatedEventBridge event) {
-        registerStartSchedule(event.auctionId(), event.startedAt());
-        registerEndSchedule(event.auctionId(), event.endedAt());
+        int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                registerStartSchedule(event.auctionId(), event.startedAt());
+                registerEndSchedule(event.auctionId(), event.endedAt());
+                return; // 성공하면 종료
+            } catch (Exception e) {
+                log.warn("[EventBridge] 스케줄 등록 실패 {}/{}회 - auctionId={}",
+                        attempt, maxAttempts, event.auctionId(), e);
+                if (attempt == maxAttempts) {
+                    log.error("[EventBridge] 스케줄 등록 최종 실패 - auctionId={}, 수동 확인 필요",
+                            event.auctionId(), e);
+                }
+            }
+        }
     }
 
     // 경매 시작 스케줄 등록
