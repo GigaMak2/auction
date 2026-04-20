@@ -6,10 +6,14 @@ import com.example.auction.domain.ai.exception.ToolEmptyResultException;
 import com.example.auction.domain.ai.service.ReviewEmbeddingService;
 import com.example.auction.domain.ai.tool.dto.AuctionBidInfo;
 import com.example.auction.domain.ai.tool.dto.AuctionResultInfo;
+import com.example.auction.domain.ai.tool.dto.CategoryAuctionStats;
+import com.example.auction.domain.ai.tool.dto.MyAuctionInfo;
+import com.example.auction.domain.ai.tool.dto.MyBidInfo;
 import com.example.auction.domain.ai.tool.dto.SellerStatsInfo;
 import com.example.auction.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
@@ -66,6 +70,49 @@ public class AuctionTools {
         }
         List<String> results = reviewEmbeddingService.search(sellerId, query);
         log.info("[Tool] getSellerReviewInsights result count={}", results.size());
+        if (results.isEmpty()) {
+            throw new ToolEmptyResultException("판매자(ID: " + sellerId + ")의 관련 후기가 없습니다. 데이터를 추측하지 마세요.");
+        }
+        return results;
+    }
+
+    // 내가 등록한 경매 목록 + 현재 최저 입찰가 조회
+    @Tool(description = "사용자가 직접 등록한 경매 목록을 조회할 때 사용합니다. 각 경매의 현재 상태(READY/ACTIVE/DONE 등), 마감 시각, 현재 최저 입찰가를 확인할 수 있습니다. '내 경매 어때?', '내가 올린 경매 현황 알려줘' 같은 질문에 호출하세요.")
+    public List<MyAuctionInfo> getMyAuctions(ToolContext toolContext) {
+        Long userId = (Long) toolContext.getContext().get("userId");
+        if (userId == null) throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
+        log.info("[Tool] getMyAuctions called — userId={}", userId);
+        List<MyAuctionInfo> results = aiToolRepository.findMyAuctions(userId);
+        if (results.isEmpty()) {
+            throw new ToolEmptyResultException("등록한 경매가 없습니다. 데이터를 추측하지 마세요.");
+        }
+        return results;
+    }
+
+    // 내가 입찰한 경매 현황 + 현재 최저가 비교 조회
+    @Tool(description = "사용자가 입찰한 경매 현황을 조회할 때 사용합니다. 내 입찰가와 현재 최저가를 비교해 현재 1위인지 확인할 수 있습니다. '내 입찰 현황 어때?', '내가 이기고 있어?', '내 입찰 목록 보여줘' 같은 질문에 호출하세요.")
+    public List<MyBidInfo> getMyBids(ToolContext toolContext) {
+        Long userId = (Long) toolContext.getContext().get("userId");
+        if (userId == null) throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
+        log.info("[Tool] getMyBids called — userId={}", userId);
+        List<MyBidInfo> results = aiToolRepository.findMyBids(userId);
+        if (results.isEmpty()) {
+            throw new ToolEmptyResultException("입찰한 경매가 없습니다. 데이터를 추측하지 마세요.");
+        }
+        return results;
+    }
+
+    // 카테고리명으로 낙찰 통계 조회 — 카테고리별 시세 분석에 활용
+    @Tool(description = "특정 카테고리의 낙찰 통계(평균·최저·최고가, 건수)를 조회할 때 사용합니다. 카테고리 단위 시세 분석이나 비교가 필요할 때 호출하세요. '전자기기 평균 낙찰가 어때?', '의류 카테고리 시세 알려줘' 같은 질문에 호출하세요. categoryName은 한국어 카테고리명으로 전달하세요.")
+    public List<CategoryAuctionStats> getAuctionStatsByCategory(String categoryName) {
+        if (categoryName == null || categoryName.isBlank()) {
+            throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
+        }
+        log.info("[Tool] getAuctionStatsByCategory called — categoryName={}", categoryName);
+        List<CategoryAuctionStats> results = aiToolRepository.findAuctionStatsByCategory(categoryName.trim());
+        if (results.isEmpty()) {
+            throw new ToolEmptyResultException("'" + categoryName + "' 카테고리의 낙찰 이력이 없습니다. 데이터를 추측하지 마세요.");
+        }
         return results;
     }
 
