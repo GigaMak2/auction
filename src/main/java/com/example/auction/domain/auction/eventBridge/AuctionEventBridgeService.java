@@ -84,9 +84,8 @@ public class AuctionEventBridgeService {
                     .actionAfterCompletion(ActionAfterCompletion.DELETE) // 실행 후 자동 삭제(경매 시작/종료는 1번씩이니까)
             );
         } catch (ConflictException e) {
-            log.warn("[EventBridge] 기존 스케줄 존재, 재생성: {}", scheduleName);
-            schedulerClient.deleteSchedule(d -> d.name(scheduleName));
-            schedulerClient.createSchedule(r -> r
+            log.warn("[EventBridge] 기존 스케줄 존재, 업데이트: {}", scheduleName);
+            schedulerClient.updateSchedule(r -> r
                     .name(scheduleName)
                     .scheduleExpression(atExpression)
                     .scheduleExpressionTimezone("UTC")
