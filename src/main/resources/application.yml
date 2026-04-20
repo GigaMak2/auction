@@ -1,8 +1,8 @@
 spring:
   application:
     name: auction
-autoconfigure:
-  exclude:
+  autoconfigure:
+    exclude:
     - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
     - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
     - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration

@@ -11,6 +11,8 @@ import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
 import com.example.auction.domain.bid.exceptions.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
+import com.example.auction.domain.user.entity.User;
+import com.example.auction.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +28,9 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class BidCommandProcessorTest {
@@ -39,6 +43,9 @@ class BidCommandProcessorTest {
 
     @Mock
     private AuctionRepository auctionRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     private CustomUserDetails userDetails;
     private Long auctionId;
@@ -59,6 +66,8 @@ class BidCommandProcessorTest {
                 LocalDateTime.now().plusHours(1),
                 1L
         );
+        given(userRepository.findByIdAndDeletedFalse(anyLong()))
+                .willReturn(Optional.of(mock(User.class)));
         activeAuction.activate();
     }
 
