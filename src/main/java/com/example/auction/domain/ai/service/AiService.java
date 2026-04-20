@@ -4,8 +4,11 @@ import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.chat.service.ChatContextCacheService;
 import com.example.auction.domain.ai.enums.SseEventType;
 import com.example.auction.domain.ai.exception.AiErrorEnum;
+import com.example.auction.domain.ai.exception.ToolEmptyResultException;
 import com.example.auction.domain.ai.tool.AuctionTools;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import com.example.auction.domain.chat.entity.ChatMessage;
 import com.example.auction.domain.chat.entity.ChatRoom;
@@ -75,6 +78,8 @@ public class AiService {
             // 시스템 프롬프트: Chapter 3 역할 부여 + 퓨-샷 기법 적용
             Flux<ServerSentEvent<String>> tokenStream = chatClient.prompt()
                     .system("""
+                            오늘 날짜는 %s입니다. 날짜 상대 표현은 이 날짜를 기준으로 계산하세요.
+
                             ## 역할
                             당신은 중고물품 역경매 플랫폼 전문 AI 상담사입니다.
                             이 플랫폼은 구매자가 경매를 등록하면 판매자들이 입찰하고, 마감 시 최저가 입찰자가 자동 낙찰되는 역경매 구조입니다.
@@ -135,7 +140,7 @@ public class AiService {
                             - 현재 입찰자 3명, 최저가는 150,000원입니다.
                             - 입찰가 격차가 크지 않아 경쟁이 활발한 편입니다.
                             - 낙찰을 노린다면 현재 최저가보다 낮은 금액으로 입찰을 고려해보세요.
-                            """)
+                            """.formatted(LocalDate.now(ZoneId.of("Asia/Seoul"))))
                     .messages(historyMessages) // 이전 대화 히스토리 (Redis 캐시)
                     .user(content)
                     .tools(auctionTools)  // LLM이 필요 시 경매 데이터 조회 Tool 호출
@@ -165,6 +170,10 @@ public class AiService {
             // Flux.defer: tokenStream 완료 후 구독 시점에 실행 (즉시 실행 방지)
             Flux<ServerSentEvent<String>> topicStream = isFirstMessage
                     ? Flux.defer(() -> generateTitle(chatRoom, content))
+                            .onErrorResume(e -> {
+                                log.warn("[AiService] 채팅방 제목 생성 실패 roomId={}: {}", roomId, e.getMessage());
+                                return Flux.empty();
+                            })
                     : Flux.empty();
 
             // 7. DONE 이벤트
@@ -180,9 +189,14 @@ public class AiService {
         // 8. Fallback — 검증 실패·AI 장애 시 ERROR 이벤트로 오류 안내 후 DONE으로 스트림 종료
         .onErrorResume(e -> {
             log.error("[AiService] 스트리밍 오류: {}", e.getMessage());
-            String errorMessage = (e instanceof ServiceErrorException)
-                    ? e.getMessage()
-                    : AiErrorEnum.AI_SERVICE_UNAVAILABLE.getMessage();
+            String errorMessage;
+            if (e instanceof ServiceErrorException) {
+                errorMessage = e.getMessage();
+            } else if (e instanceof ToolEmptyResultException) {
+                errorMessage = AiErrorEnum.TOOL_NO_DATA.getMessage();
+            } else {
+                errorMessage = AiErrorEnum.AI_SERVICE_UNAVAILABLE.getMessage();
+            }
             return Flux.just(
                     ServerSentEvent.<String>builder()
                             .event(SseEventType.ERROR.name())
@@ -213,10 +227,12 @@ public class AiService {
                             .call()
                             .content();
 
-                    // AI 응답 정제 — 프롬프트만으로는 길이/null 보장 불가
-                    String trimmed = (rawTitle != null) ? rawTitle.trim() : "";
-                    String safeTitle = !trimmed.isBlank()
-                            ? trimmed.substring(0, Math.min(trimmed.length(), 10))
+                    // AI 응답 정제 — 프롬프트만으로는 prefix/따옴표/길이 보장 불가
+                    String sanitized = (rawTitle != null) ? rawTitle.trim() : "";
+                    sanitized = sanitized.replaceFirst("(?i)^(제목|title)\\s*[:：]\\s*", "");
+                    sanitized = sanitized.replaceAll("^[\"'\\u201C\\u201D\\u2018\\u2019]+|[\"'\\u201C\\u201D\\u2018\\u2019]+$", "").trim();
+                    String safeTitle = !sanitized.isBlank()
+                            ? sanitized.substring(0, Math.min(sanitized.length(), 10))
                             : "새 채팅";
 
                     chatRoom.updateTitle(safeTitle);
