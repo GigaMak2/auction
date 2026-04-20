@@ -4,7 +4,9 @@ import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.domain.chat.dto.ChatMessageListResponse;
 import com.example.auction.domain.chat.dto.ChatRoomResponse;
+import com.example.auction.domain.chat.dto.ChatRoomUpdateRequest;
 import com.example.auction.domain.chat.service.ChatService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +45,21 @@ public class ChatController {
                         HttpStatus.OK.name(),
                         "채팅방 목록을 조회했습니다",
                         chatService.getRooms(userDetails.getUserId())
+                ));
+    }
+
+    // 채팅방 제목 수정
+    @PatchMapping("/rooms/{roomId}")
+    public ResponseEntity<BaseResponse<ChatRoomResponse>> updateRoom(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long roomId,
+            @RequestBody @Valid ChatRoomUpdateRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(BaseResponse.success(
+                        HttpStatus.OK.name(),
+                        "채팅방 제목을 수정했습니다",
+                        chatService.updateTitle(roomId, userDetails.getUserId(), request.title())
                 ));
     }
 
