@@ -4,32 +4,26 @@ services:
   spring:
     image: ${ECR_URI}
     container_name: auction-spring
+    restart: on-failure:5
     depends_on:
       redis:
         condition: service_healthy
     environment:
-      POSTGRES_URL: ${POSTGRES_URL}
-      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
-      REDIS_HOST: ${REDIS_HOST}
-
       SPRING_PROFILES_ACTIVE: prod
-      # 만약을 위해서 있는 DDL_AUTO setting
-      # 물론 배포시에 create로 띄우면 안되긴 하지만
-      # 일단 저희가 고객 데이터가 없고 또 sql schema를 작성하지
-      # 않았으므로 편의를 위해서 setting을 넣었습니다.
-      # 
-      # TODO: 이거 빼기
-      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
-
-      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8080:8080"
+
+    healthcheck:
+      test: "curl --fail --silent localhost:8080/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   redis:
     image: redis:8.6.2
     container_name: auction-redis
+    restart: on-failure:5
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s

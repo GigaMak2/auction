@@ -8,6 +8,13 @@ spring:
     - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
     - org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration
 
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration
+
   profiles:
     include: oauth
 
@@ -31,6 +38,27 @@ spring:
         api-key: ${OPENAI_API_KEY}
         options:
           model: text-embedding-3-small    # 텍스트 → 벡터 변환 전용 임베딩 모델 (RAG용)
+
+  cloud:
+    # AWS 관련
+    aws:
+      # 기본적으로 parameterstore는 비활성화
+      parameterstore:
+        enabled: false
+
+# actuator 관련
+# 일단은 ALB나 ASG 를 위해서 health end point를 열어둡니다.
+# 다른 정보들은 나중에 추가합시다.
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+
+  endpoint:
+    health:
+      show-details: never
 
 jwt:
   secret:

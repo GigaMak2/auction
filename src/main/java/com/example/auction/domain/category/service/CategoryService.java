@@ -6,6 +6,8 @@ import com.example.auction.domain.category.entity.Category;
 import com.example.auction.domain.category.exception.CategoryErrorEnum;
 import com.example.auction.domain.category.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ public class CategoryService {
     private static final int MAX_DEPTH = 2;
 
     @Transactional
+    @CacheEvict(cacheNames = "getCategoryList", key = "'all'")
     public CategoryCreateResponse createCategory(CategoryCreateRequest request) {
         Category category = request.parentId() == null ? rootCategory(request.name()) : childCategory(request.parentId(), request.name());
         categoryRepository.save(category);
@@ -36,6 +39,7 @@ public class CategoryService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "getCategoryList", key = "'all'")
     public CategoryRenameResponse renameCategory(Long categoryId, CategoryRenameRequest request) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(
                 () -> new ServiceErrorException(CategoryErrorEnum.CATEGORY_NOT_FOUND));
@@ -56,6 +60,7 @@ public class CategoryService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "getCategoryList", key = "'all'")
     public CategoryMoveResponse moveCategory(Long categoryId, CategoryMoveRequest request) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(
                 () -> new ServiceErrorException(CategoryErrorEnum.CATEGORY_NOT_FOUND));
@@ -99,6 +104,7 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "getCategoryList", key = "'all'")
     public List<CategoryListGetResponse> getCategoryList() {
         List<Category> categoryList = categoryRepository.findAll();
 

@@ -71,6 +71,12 @@ dependencies {
     // AWS EventBridge Scheduler
     implementation 'software.amazon.awssdk:scheduler:2.42.20'
 
+    // monitoring and aws deployment dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:4.0.0')
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
