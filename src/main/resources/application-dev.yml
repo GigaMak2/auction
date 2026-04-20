@@ -24,5 +24,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     defer-datasource-initialization: true
-LAMBDA_ARN: ${lambdaArn}
-ROLE_ARN: ${roleArn}
+aws:
+  eventbridge:
+    lambda-arn: ${lambdaArn:}
+    role-arn: ${roleArn:}

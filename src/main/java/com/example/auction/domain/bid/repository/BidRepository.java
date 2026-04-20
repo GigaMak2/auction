@@ -19,8 +19,6 @@ public interface BidRepository extends JpaRepository<Bid, Long>, BidCustomReposi
 
     Page<Bid> findAllByAuctionId(Long auctionId, Pageable pageable);
 
-    List<Bid> findAllByAuctionId(Long auctionId);
-
     @Query("SELECT MIN(b.price) FROM Bid b WHERE b.auctionId = :auctionId")
     Optional<BigDecimal> findMinPriceByAuctionId(@Param("auctionId") Long auctionId);
 

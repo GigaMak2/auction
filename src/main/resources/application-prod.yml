@@ -33,6 +33,10 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: 6379
+aws:
+  eventbridge:
+    lambda-arn: ${LAMBDA_ARN}
+    role-arn: ${ROLE_ARN}
 
 # actuator 관련
 management:

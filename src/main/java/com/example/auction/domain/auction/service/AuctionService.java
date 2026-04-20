@@ -3,6 +3,8 @@ package com.example.auction.domain.auction.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import com.example.auction.domain.auction.eventBridge.AuctionCreatedEventBridge;
+import com.example.auction.domain.auction.eventBridge.AuctionEventBridgeService;
 import com.example.auction.domain.category.exception.CategoryErrorEnum;
 import com.example.auction.domain.category.repository.CategoryRepository;
 import org.jspecify.annotations.NonNull;
@@ -10,6 +12,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,7 @@ public class AuctionService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final AuctionEventBridgeService auctionEventBridgeService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     @Cacheable(
@@ -138,9 +142,10 @@ public class AuctionService {
 
         auction = auctionRepository.saveAndFlush(auction);
 
-        // 이벤트브릿지
-        auctionEventBridgeService.registerStartSchedule(auction.getId(), auction.getStartedAt());
-        auctionEventBridgeService.registerEndSchedule(auction.getId(), auction.getEndedAt());
+        // 이벤트퍼블리셔를 활용하여 트랜잭션 밖으로 빼냄
+        // 트랜잭션 커밋 이후 EventBridge 등록 (고아 스케줄 방지)
+        // 이 매서드의 트랜잭션 커밋이 끝나면 event가 발행되고, AuctionEventBridgeService의 handleAuctionCreated 가 실행됨
+        eventPublisher.publishEvent(new AuctionCreatedEventBridge(auction.getId(), auction.getStartedAt(), auction.getEndedAt()));
 
         return GetAuctionResponse.from(auction);
     }
