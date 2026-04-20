@@ -11,7 +11,7 @@ public enum AiErrorEnum implements ErrorEnumInterface {
     INVALID_MESSAGE_CONTENT(HttpStatus.BAD_REQUEST, "메시지 내용을 입력해 주세요"),
     MESSAGE_TOO_LONG(HttpStatus.BAD_REQUEST, "메시지는 500자 이하여야 합니다"),
     INVALID_TOOL_PARAMETER(HttpStatus.BAD_REQUEST, "필수 파라미터가 누락되었습니다"),
-    TOOL_NO_DATA(HttpStatus.OK, "조회된 데이터가 없습니다");
+    TOOL_NO_DATA(HttpStatus.NOT_FOUND, "조회된 데이터가 없습니다");
 
     private final HttpStatus status;
     private final String message;
