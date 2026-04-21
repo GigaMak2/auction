@@ -60,7 +60,16 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     //redisson
-    implementation 'org.redisson:redisson:3.45.0'
+    implementation 'org.redisson:redisson-spring-boot-starter:4.0.0'
+
+    // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // parameter-store
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store:4.0.0'
+
+    // AWS EventBridge Scheduler
+    implementation 'software.amazon.awssdk:scheduler:2.42.20'
 
     // monitoring and aws deployment dependencies
     implementation 'org.springframework.boot:spring-boot-starter-actuator'

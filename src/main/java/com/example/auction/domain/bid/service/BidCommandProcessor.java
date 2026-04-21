@@ -12,6 +12,9 @@ import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
 import com.example.auction.domain.bid.exceptions.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
+import com.example.auction.domain.user.entity.User;
+import com.example.auction.domain.user.exception.UserErrorEnum;
+import com.example.auction.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ public class BidCommandProcessor {
 
     private final BidRepository bidRepository;
     private final AuctionRepository auctionRepository;
+    private final UserRepository userRepository;
 
     // requires_new를 붙여야 메서드가 끝날 때 커밋이 확정되어서 커밋 -> 락해제 순서가 보장됨
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -38,12 +42,15 @@ public class BidCommandProcessor {
         Long userId = userDetails.getUserId();
         BigDecimal bidPrice = request.getPrice();
 
+        // 유저 존재 및 삭제되지 않았는지 확인
+        User user = userRepository.findByIdAndDeletedFalse(userId)
+                .orElseThrow(() -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
+
         // 경매 존재 여부 확인
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));
 
         // 경매 상태 검증 (ACTIVE만 입찰 가능)
-        // todo: 경매 시작시간, 종료시간과 스케줄러 돌아가는 차이가 있는데 입찰을 어떻게 받을지
         if (auction.getStatus() != AuctionStatus.ACTIVE) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_INVALID_STATUS);
         }

@@ -6,8 +6,12 @@ import com.example.auction.domain.bid.dto.request.BidRequest;
 import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.repository.BidRepository;
 import com.example.auction.common.config.security.CustomUserDetails;
+import com.example.auction.domain.user.entity.User;
+import com.example.auction.domain.user.enums.UserRole;
+import com.example.auction.domain.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -47,10 +52,26 @@ class BidConcurrencyTest {
     @Autowired
     private BidRepository bidRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    private List<Long> userIds = new ArrayList<>();
+
+    @BeforeEach
+    void setUp() {
+        userIds.clear();
+        for (long i = 1; i <= 50; i++) {
+            User user = User.of("user" + i + "@test.com", "password", UserRole.USER);
+            User saved = userRepository.save(user);
+            userIds.add(saved.getId()); // 실제 저장된 ID 기록
+        }
+    }
+
     @AfterEach
     void tearDown() {
         bidRepository.deleteAll();
         auctionRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     private Auction createActiveAuction(Long userId) {
@@ -83,7 +104,7 @@ class BidConcurrencyTest {
 
         // when - 50명 동시 입찰
         for (int i = 0; i < threadCount; i++) {
-            final long userId = i + 1;
+            final long userId = userIds.get(i);
             executor.submit(() -> {
                 try {
                     CustomUserDetails userDetails = new CustomUserDetails(userId, "USER");
@@ -136,7 +157,7 @@ class BidConcurrencyTest {
 
         // when - 50명 동시 입찰
         for (int i = 0; i < threadCount; i++) {
-            final long userId = i + 1;
+            final long userId = userIds.get(i);
             executor.submit(() -> {
                 try {
                     CustomUserDetails userDetails = new CustomUserDetails(userId, "USER");

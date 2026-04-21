@@ -14,6 +14,8 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     defer-datasource-initialization: false
@@ -24,11 +26,17 @@ spring:
       # parameterstore 활성화
       parameterstore:
         enabled: true
+      region:
+        static: ap-northeast-2
 
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: 6379
+aws:
+  eventbridge:
+    lambda-arn: ${LAMBDA_ARN}
+    role-arn: ${ROLE_ARN}
 
 # actuator 관련
 management:
