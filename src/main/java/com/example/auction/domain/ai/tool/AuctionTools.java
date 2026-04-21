@@ -3,6 +3,7 @@ package com.example.auction.domain.ai.tool;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.ai.exception.AiErrorEnum;
 import com.example.auction.domain.ai.exception.ToolEmptyResultException;
+import com.example.auction.domain.ai.service.AuctionEmbeddingService;
 import com.example.auction.domain.ai.service.ReviewEmbeddingService;
 import com.example.auction.domain.ai.tool.dto.AuctionBidInfo;
 import com.example.auction.domain.ai.tool.dto.AuctionResultInfo;
@@ -25,8 +26,9 @@ import java.util.List;
 public class AuctionTools {
 
     private final AiToolRepository aiToolRepository;
-    private final ReviewRepository reviewRepository;         // 평균 평점 조회 (이미 구현된 JPQL 활용)
-    private final ReviewEmbeddingService reviewEmbeddingService; // RAG 유사도 검색
+    private final ReviewRepository reviewRepository;
+    private final ReviewEmbeddingService reviewEmbeddingService;
+    private final AuctionEmbeddingService auctionEmbeddingService;
 
     // 특정 경매의 입찰 목록과 최저가를 조회 — 경쟁 입찰 분석에 활용
     @Tool(description = "특정 경매의 현재 입찰 경쟁 현황을 파악할 때 사용합니다. 입찰가 목록, 최저가, 입찰자 수를 확인할 수 있습니다. auctionId는 숫자 ID입니다. '경매 N번 경쟁 심해?', '지금 최저 입찰가 얼마야?' 같은 질문에 호출하세요.")
@@ -112,6 +114,20 @@ public class AuctionTools {
         List<CategoryAuctionStats> results = aiToolRepository.findAuctionStatsByCategory(categoryName.trim());
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("해당 카테고리의 낙찰 이력이 없습니다. 데이터를 추측하지 마세요.");
+        }
+        return results;
+    }
+
+    // 낙찰 경매의 상품명+설명 텍스트를 의미 기반으로 검색 — 상품 상태·스펙 분석에 활용
+    @Tool(description = "실제 낙찰된 경매의 상품 설명을 의미 기반으로 검색할 때 사용합니다. '노트북 보통 어떤 상태로 올라와?', '아이폰 설명 어떻게 써?', '충전기 포함 상품 많아?' 같이 상품 상태나 스펙을 물을 때 호출하세요. query는 검색할 상품 상태·스펙 관련 키워드를 한국어로 전달하세요.")
+    public List<String> searchAuctionDescriptions(String query) {
+        if (query == null || query.isBlank()) {
+            throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
+        }
+        log.info("[Tool] searchAuctionDescriptions called — queryLength={}", query.length());
+        List<String> results = auctionEmbeddingService.search(query);
+        if (results.isEmpty()) {
+            throw new ToolEmptyResultException("관련 상품 설명이 없습니다. 데이터를 추측하지 마세요.");
         }
         return results;
     }

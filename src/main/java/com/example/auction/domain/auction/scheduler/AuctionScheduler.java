@@ -1,5 +1,6 @@
 package com.example.auction.domain.auction.scheduler;
 
+import com.example.auction.domain.ai.service.AuctionEmbeddingService;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.repository.AuctionRepository;
@@ -24,6 +25,7 @@ public class AuctionScheduler {
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
     private final AuctionResultRepository resultRepository;
+    private final AuctionEmbeddingService auctionEmbeddingService;
 
     /*
      startedAt 이 지난 경매 시작 처리(READY -> ACTIVE)
@@ -70,6 +72,7 @@ public class AuctionScheduler {
                         winnerBid.getId()
                 );
                 resultRepository.save(auctionResult);
+                auctionEmbeddingService.embed(auction);
                 log.info("[경매 낙찰] auctionId={}", auctionId);
             } else {
                 // 유찰

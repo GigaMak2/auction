@@ -14,6 +14,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import static com.example.auction.domain.review.entity.QReview.review;
 
 @Repository
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AiToolRepositoryImpl implements AiToolRepository {
 
     private static final int MAX_BIDS_FOR_TOOL = 50;
@@ -40,7 +42,7 @@ public class AiToolRepositoryImpl implements AiToolRepository {
     @Override
     public List<AuctionBidInfo> findBidsByAuctionId(Long auctionId) {
         return queryFactory
-                .select(bid.id, bid.userId, bid.price, bid.createdAt)
+                .select(bid.price, bid.createdAt)
                 .from(bid)
                 .where(bid.auctionId.eq(auctionId))
                 .orderBy(bid.price.asc(), bid.createdAt.asc(), bid.id.asc())
@@ -48,8 +50,6 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 .fetch()
                 .stream()
                 .map(t -> new AuctionBidInfo(
-                        t.get(bid.id),
-                        t.get(bid.userId),
                         t.get(bid.price),
                         t.get(bid.createdAt)
                 ))
@@ -103,13 +103,16 @@ public class AiToolRepositoryImpl implements AiToolRepository {
     @Override
     public List<MyAuctionInfo> findMyAuctions(Long userId) {
         QBid bidSub = new QBid("bidSub");
+        var lowestBidSub = JPAExpressions.select(bidSub.price.min())
+                .from(bidSub)
+                .where(bidSub.auctionId.eq(auction.id));
         return queryFactory
-                .select(auction.id, auction.itemName, auction.status, auction.endedAt,
-                        JPAExpressions.select(bidSub.price.min())
-                                .from(bidSub)
-                                .where(bidSub.auctionId.eq(auction.id)))
+                .select(auction.id, auction.itemName, auction.status, auction.endedAt, lowestBidSub)
                 .from(auction)
-                .where(auction.userId.eq(userId))
+                .where(
+                        auction.userId.eq(userId),
+                        auction.status.ne(AuctionStatus.CANCELLED)
+                )
                 .orderBy(
                         new CaseBuilder()
                                 .when(auction.status.in(AuctionStatus.ACTIVE, AuctionStatus.READY)).then(0)
@@ -124,7 +127,7 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                         t.get(auction.itemName),
                         t.get(auction.status).name(),
                         t.get(auction.endedAt),
-                        t.get(4, BigDecimal.class)
+                        t.get(lowestBidSub)
                 ))
                 .toList();
     }
@@ -182,23 +185,23 @@ public class AiToolRepositoryImpl implements AiToolRepository {
         QBid bidSub = new QBid("bidSub");
         QBid bidWinner = new QBid("bidWinner");
         QBid bidWinnerPrice = new QBid("bidWinnerPrice");
+        var currentLowestSub = JPAExpressions.select(bidSub.price.min())
+                .from(bidSub)
+                .where(bidSub.auctionId.eq(auction.id));
+        // 동일 최저가 tie-breaking: createdAt ASC → id ASC 기준 1위 userId
+        var winnerUserIdSub = JPAExpressions.select(bidWinner.userId)
+                .from(bidWinner)
+                .where(bidWinner.auctionId.eq(auction.id)
+                        .and(bidWinner.price.eq(
+                                JPAExpressions.select(bidWinnerPrice.price.min())
+                                        .from(bidWinnerPrice)
+                                        .where(bidWinnerPrice.auctionId.eq(auction.id))
+                        )))
+                .orderBy(bidWinner.createdAt.asc(), bidWinner.id.asc())
+                .limit(1);
         return queryFactory
                 .select(auction.id, auction.itemName, auction.status, auction.endedAt,
-                        bid.price.min(),
-                        JPAExpressions.select(bidSub.price.min())
-                                .from(bidSub)
-                                .where(bidSub.auctionId.eq(auction.id)),
-                        // 동일 최저가 tie-breaking: createdAt ASC → id ASC 기준 1위 userId
-                        JPAExpressions.select(bidWinner.userId)
-                                .from(bidWinner)
-                                .where(bidWinner.auctionId.eq(auction.id)
-                                        .and(bidWinner.price.eq(
-                                                JPAExpressions.select(bidWinnerPrice.price.min())
-                                                        .from(bidWinnerPrice)
-                                                        .where(bidWinnerPrice.auctionId.eq(auction.id))
-                                        )))
-                                .orderBy(bidWinner.createdAt.asc(), bidWinner.id.asc())
-                                .limit(1))
+                        bid.price.min(), currentLowestSub, winnerUserIdSub)
                 .from(bid)
                 .join(auction).on(auction.id.eq(bid.auctionId))
                 .where(bid.userId.eq(userId))
@@ -214,8 +217,8 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 .stream()
                 .map(t -> {
                     BigDecimal myLowest = t.get(bid.price.min());
-                    BigDecimal currentLowest = t.get(5, BigDecimal.class);
-                    Long winnerUserId = t.get(6, Long.class);
+                    BigDecimal currentLowest = t.get(currentLowestSub);
+                    Long winnerUserId = t.get(winnerUserIdSub);
                     return new MyBidInfo(
                             t.get(auction.id),
                             t.get(auction.itemName),

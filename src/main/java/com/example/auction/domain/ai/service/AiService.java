@@ -40,17 +40,19 @@ public class AiService {
     private final ChatContextCacheService chatContextCacheService; // 대화 컨텍스트 Redis 캐싱
 
     public Flux<ServerSentEvent<String>> streamMessage(Long roomId, Long userId, String content) {
-        // Flux.defer: 모든 로직을 구독 시점에 실행 — 동기 예외가 Flux 에러로 처리되어
-        // onErrorResume이 SSE ERROR 이벤트로 반환 (HttpMediaTypeNotAcceptableException 방지)
+        // Flux.defer: 모든 경로(검증 포함)를 onErrorResume이 감쌀 수 있도록 구독 시점에 실행
+        // — 동기 예외가 raw 에러로 전파되면 SSE MediaType 충돌(HttpMediaTypeNotAcceptableException) 발생
         return Flux.defer(() -> {
-            // 1. content 수동 검증 — @Valid 대신 Flux.defer() 안에서 처리 (SSE MediaType 충돌 방지)
-            if (content == null || content.isBlank()) {
-                throw new ServiceErrorException(AiErrorEnum.INVALID_MESSAGE_CONTENT);
-            }
-            if (content.length() > 500) {
-                throw new ServiceErrorException(AiErrorEnum.MESSAGE_TOO_LONG);
-            }
+        // 1. content 수동 검증
+        if (content == null || content.isBlank()) {
+            return Flux.error(new ServiceErrorException(AiErrorEnum.INVALID_MESSAGE_CONTENT));
+        }
+        if (content.length() > 500) {
+            return Flux.error(new ServiceErrorException(AiErrorEnum.MESSAGE_TOO_LONG));
+        }
 
+        // blocking I/O(JPA, Redis)를 boundedElastic에서 실행 후 스트림으로 연결
+        return Mono.fromCallable(() -> {
             // 2. 채팅방 존재 확인 + 소유자 검증
             ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                     .orElseThrow(() -> new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_NOT_FOUND));
@@ -70,7 +72,13 @@ public class AiService {
             // 4. 유저 메시지 저장
             chatMessageRepository.save(ChatMessage.of(roomId, content, MessageRole.USER));
 
-            boolean isFirstMessage = chatRoom.getTitle() == null;
+            return new StreamContext(chatRoom, historyMessages, chatRoom.getTitle() == null);
+        })
+        .subscribeOn(Schedulers.boundedElastic())
+        .flatMapMany(ctx -> {
+            ChatRoom chatRoom = ctx.chatRoom();
+            List<Message> historyMessages = ctx.historyMessages();
+            boolean isFirstMessage = ctx.isFirstMessage();
             StringBuilder fullResponse = new StringBuilder();
 
             // 5. TOKEN 스트리밍 — 이전 대화 히스토리 + 현재 메시지, Tool Calling 포함
@@ -105,6 +113,7 @@ public class AiService {
                             - 내가 등록한 경매 현황·최저 입찰가 조회 → getMyAuctions
                             - 내가 입찰한 경매 현황·1위 여부 조회 → getMyBids
                             - 카테고리 단위 낙찰 통계·시세 분석 → getAuctionStatsByCategory (categoryName 한국어)
+                            - 상품 상태·스펙·설명 관련 질문 → searchAuctionDescriptions (query 한국어)
                             - 여러 정보가 필요한 질문에는 필요한 Tool을 모두 호출하세요.
                               예: "경매 N번 입찰 현황이랑 판매자 M번 분석해줘" → getBidsByAuctionId + getSellerStats 둘 다 호출
 
@@ -163,6 +172,12 @@ public class AiService {
                             - 경매 5번은 현재 1위입니다. 마감까지 유지되면 낙찰됩니다.
                             - 경매 8번은 더 낮은 입찰가가 있어 현재 1위가 아닙니다.
 
+                            Q: "노트북 보통 어떤 상태로 올라와?"
+                            A:
+                            - 최근 낙찰된 노트북 설명을 검색했습니다.
+                            - 대부분 충전기 포함 여부와 배터리 상태를 명시합니다.
+                            - 외관 기스 여부는 거의 모든 판매자가 표기합니다.
+
                             Q: "전자기기 카테고리 시세 어때?"
                             A:
                             | 카테고리 | 평균 낙찰가 | 최저 낙찰가 | 최고 낙찰가 | 거래 건수 |
@@ -186,15 +201,19 @@ public class AiService {
                             .build())
                     .doFinally(signalType -> {
                         // 정상 완료(ON_COMPLETE)일 때만 저장 — 에러/취소 시 부분 응답이 다음 턴 컨텍스트 오염 방지
+                        // boundedElastic으로 오프로드 — doFinally는 Reactor/netty 스레드에서 실행되므로
+                        // JPA·Redis blocking 호출을 직접 하면 이벤트 루프가 블로킹됨
                         if (signalType == reactor.core.publisher.SignalType.ON_COMPLETE && !fullResponse.isEmpty()) {
-                            chatMessageRepository.save(
-                                    ChatMessage.of(roomId, fullResponse.toString(), MessageRole.ASSISTANT));
-                            // 유저 메시지 + AI 응답을 캐시에 추가 (다음 턴 컨텍스트에 활용)
-                            chatContextCacheService.appendMessages(roomId, content, fullResponse.toString());
+                            String responseSnapshot = fullResponse.toString();
+                            Schedulers.boundedElastic().schedule(() -> {
+                                chatMessageRepository.save(
+                                        ChatMessage.of(roomId, responseSnapshot, MessageRole.ASSISTANT));
+                                chatContextCacheService.appendMessages(roomId, content, responseSnapshot);
+                            });
                         } else if (signalType != reactor.core.publisher.SignalType.ON_COMPLETE) {
                             // 실패 시 캐시 evict — 유저 메시지는 DB에 저장됐으나 캐시엔 없으므로
                             // 다음 턴 getContext()가 DB 폴백으로 정확한 이력을 가져오도록 함
-                            chatContextCacheService.evict(roomId);
+                            Schedulers.boundedElastic().schedule(() -> chatContextCacheService.evict(roomId));
                         }
                     });
 
@@ -217,7 +236,8 @@ public class AiService {
             );
 
             return tokenStream.concatWith(topicStream).concatWith(doneEvent);
-        })
+        }); // flatMapMany end
+        }) // Flux.defer end
         // 8. Fallback — 검증 실패·AI 장애 시 ERROR 이벤트로 오류 안내 후 DONE으로 스트림 종료
         .onErrorResume(e -> {
             log.error("[AiService] 스트리밍 오류: {}", e.getMessage());
@@ -267,8 +287,12 @@ public class AiService {
                             ? sanitized.substring(0, Math.min(sanitized.length(), 10))
                             : "새 채팅";
 
-                    chatRoom.updateTitle(safeTitle);
-                    chatRoomRepository.save(chatRoom);
+                    // 동시 요청으로 title이 이미 설정된 경우 덮어쓰지 않음
+                    ChatRoom fresh = chatRoomRepository.findById(chatRoom.getId()).orElse(chatRoom);
+                    if (fresh.getTitle() == null) {
+                        fresh.updateTitle(safeTitle);
+                        chatRoomRepository.save(fresh);
+                    }
                     return safeTitle;
                 })
                 .subscribeOn(Schedulers.boundedElastic())
@@ -278,4 +302,6 @@ public class AiService {
                         .build())
                 .flux();
     }
+
+    private record StreamContext(ChatRoom chatRoom, List<Message> historyMessages, boolean isFirstMessage) {}
 }

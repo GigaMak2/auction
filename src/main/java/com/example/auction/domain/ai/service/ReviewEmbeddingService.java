@@ -14,6 +14,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 // 후기 텍스트 임베딩 저장 + 유사도 검색 — 판매자 신뢰도 RAG 분석에 활용
@@ -26,6 +28,9 @@ public class ReviewEmbeddingService {
     private static final double SIMILARITY_THRESHOLD = 0.4;
     private static final int HYDE_TIMEOUT_SECONDS = 5;
     private static final int HYDE_CACHE_MAX_SIZE = 50;
+
+    // ForkJoinPool.commonPool() 대신 전용 executor — blocking HTTP 호출로 commonPool 고갈 방지
+    private static final ExecutorService hydeExecutor = Executors.newFixedThreadPool(4);
 
     private final VectorStore vectorStore;
     private final ChatModel chatModel;
@@ -52,6 +57,7 @@ public class ReviewEmbeddingService {
         Document document = new Document(
                 contextualText,
                 Map.of(
+                        "source", "review",
                         "sellerId", review.getRevieweeId(),
                         "score", review.getScore(),
                         "reviewId", review.getId()
@@ -98,7 +104,7 @@ public class ReviewEmbeddingService {
                             질문: "%s"
 
                             후기:
-                            """.formatted(query)))
+                            """.formatted(query)), hydeExecutor)
                     .get(HYDE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             hydeCache.put(query, result);
             log.debug("[RAG] HyDE 가상 후기 생성 성공 — queryLength={}", query.length());
