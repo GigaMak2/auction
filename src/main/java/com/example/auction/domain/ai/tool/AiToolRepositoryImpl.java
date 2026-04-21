@@ -157,17 +157,22 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 .toList();
     }
 
-    // name 일치 카테고리 + 자식/손자(depth 최대 2) ID를 전부 수집
+    // name 일치 카테고리 + 자식/손자(depth 최대 2) ID 수집 — 총 3 queries (name검색·자식배치·손자배치)
     private Set<Long> resolveDescendantCategoryIds(String categoryName) {
         List<Category> matched = categoryRepository.findByNameContainingIgnoreCase(categoryName);
+        if (matched.isEmpty()) return Set.of();
+
         Set<Long> ids = new HashSet<>();
-        for (Category cat : matched) {
-            ids.add(cat.getId());
-            for (Category child : categoryRepository.findAllByParentId(cat.getId())) {
-                ids.add(child.getId());
-                categoryRepository.findAllByParentId(child.getId())
-                        .forEach(gc -> ids.add(gc.getId()));
-            }
+        matched.forEach(cat -> ids.add(cat.getId()));
+
+        List<Category> children = categoryRepository.findAllByParentIdIn(ids);
+        Set<Long> childIds = new HashSet<>();
+        children.forEach(child -> childIds.add(child.getId()));
+        ids.addAll(childIds);
+
+        if (!childIds.isEmpty()) {
+            categoryRepository.findAllByParentIdIn(childIds)
+                    .forEach(gc -> ids.add(gc.getId()));
         }
         return ids;
     }

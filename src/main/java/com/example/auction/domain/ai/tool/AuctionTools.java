@@ -52,8 +52,8 @@ public class AuctionTools {
         List<AuctionResultInfo> results = aiToolRepository.findRecentAuctionResultsByItemName(itemName.trim());
         log.info("[Tool] getRecentAuctionResults result count={}", results.size());
         if (results.isEmpty()) {
-            log.warn("[Tool] getRecentAuctionResults — no data, throwing exception for itemName={}", itemName);
-            throw new ToolEmptyResultException("'" + itemName + "'의 낙찰 이력이 없습니다. 시세나 낙찰가를 추측하지 마세요.");
+            log.warn("[Tool] getRecentAuctionResults — no data, itemName length={}", itemName.length());
+            throw new ToolEmptyResultException("해당 상품의 낙찰 이력이 없습니다. 시세나 낙찰가를 추측하지 마세요.");
         }
         return results;
     }
@@ -111,7 +111,7 @@ public class AuctionTools {
         log.info("[Tool] getAuctionStatsByCategory called — categoryName={}", categoryName);
         List<CategoryAuctionStats> results = aiToolRepository.findAuctionStatsByCategory(categoryName.trim());
         if (results.isEmpty()) {
-            throw new ToolEmptyResultException("'" + categoryName + "' 카테고리의 낙찰 이력이 없습니다. 데이터를 추측하지 마세요.");
+            throw new ToolEmptyResultException("해당 카테고리의 낙찰 이력이 없습니다. 데이터를 추측하지 마세요.");
         }
         return results;
     }
