@@ -180,12 +180,25 @@ public class AiToolRepositoryImpl implements AiToolRepository {
     @Override
     public List<MyBidInfo> findMyBids(Long userId) {
         QBid bidSub = new QBid("bidSub");
+        QBid bidWinner = new QBid("bidWinner");
+        QBid bidWinnerPrice = new QBid("bidWinnerPrice");
         return queryFactory
                 .select(auction.id, auction.itemName, auction.status, auction.endedAt,
                         bid.price.min(),
                         JPAExpressions.select(bidSub.price.min())
                                 .from(bidSub)
-                                .where(bidSub.auctionId.eq(auction.id)))
+                                .where(bidSub.auctionId.eq(auction.id)),
+                        // 동일 최저가 tie-breaking: createdAt ASC → id ASC 기준 1위 userId
+                        JPAExpressions.select(bidWinner.userId)
+                                .from(bidWinner)
+                                .where(bidWinner.auctionId.eq(auction.id)
+                                        .and(bidWinner.price.eq(
+                                                JPAExpressions.select(bidWinnerPrice.price.min())
+                                                        .from(bidWinnerPrice)
+                                                        .where(bidWinnerPrice.auctionId.eq(auction.id))
+                                        )))
+                                .orderBy(bidWinner.createdAt.asc(), bidWinner.id.asc())
+                                .limit(1))
                 .from(bid)
                 .join(auction).on(auction.id.eq(bid.auctionId))
                 .where(bid.userId.eq(userId))
@@ -202,6 +215,7 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 .map(t -> {
                     BigDecimal myLowest = t.get(bid.price.min());
                     BigDecimal currentLowest = t.get(5, BigDecimal.class);
+                    Long winnerUserId = t.get(6, Long.class);
                     return new MyBidInfo(
                             t.get(auction.id),
                             t.get(auction.itemName),
@@ -209,7 +223,7 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                             t.get(auction.endedAt),
                             myLowest,
                             currentLowest,
-                            myLowest != null && currentLowest != null && myLowest.compareTo(currentLowest) == 0
+                            winnerUserId != null && winnerUserId.equals(userId)
                     );
                 })
                 .toList();

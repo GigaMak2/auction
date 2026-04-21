@@ -41,7 +41,7 @@ public class ChatService {
     // 채팅방 제목 수정
     @Transactional
     public ChatRoomResponse updateTitle(Long roomId, Long userId, String title) {
-        if (title == null || title.isBlank() || title.length() > 10) {
+        if (title == null || title.isBlank() || title.trim().length() > 10) {
             throw new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_TITLE_INVALID);
         }
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
