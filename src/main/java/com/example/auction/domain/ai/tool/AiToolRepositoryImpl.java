@@ -2,65 +2,79 @@ package com.example.auction.domain.ai.tool;
 
 import com.example.auction.domain.ai.tool.dto.AuctionBidInfo;
 import com.example.auction.domain.ai.tool.dto.AuctionResultInfo;
-import com.querydsl.core.types.Projections;
+import com.example.auction.domain.ai.tool.dto.CategoryAuctionStats;
+import com.example.auction.domain.ai.tool.dto.MyAuctionInfo;
+import com.example.auction.domain.ai.tool.dto.MyBidInfo;
+import com.example.auction.domain.auction.enums.AuctionStatus;
+import com.example.auction.domain.category.entity.Category;
+import com.example.auction.domain.category.repository.CategoryRepository;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import com.example.auction.domain.bid.entity.QBid;
 
 import static com.example.auction.domain.auction.entity.QAuction.auction;
 import static com.example.auction.domain.auction.result.entity.QAuctionResult.auctionResult;
 import static com.example.auction.domain.bid.entity.QBid.bid;
+import static com.example.auction.domain.category.entity.QCategory.category;
 import static com.example.auction.domain.review.entity.QReview.review;
 
-// AI Tool 전용 QueryDSL 구현체 — 다중 테이블 조인 및 AI 전용 집계 쿼리 처리
 @Repository
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AiToolRepositoryImpl implements AiToolRepository {
 
     private static final int MAX_BIDS_FOR_TOOL = 50;
 
     private final JPAQueryFactory queryFactory;
+    private final CategoryRepository categoryRepository;
 
-    // bids 테이블 단순 조회 — 입찰가 오름차순 정렬로 최저가 우선 확인
     @Override
     public List<AuctionBidInfo> findBidsByAuctionId(Long auctionId) {
         return queryFactory
-                .select(Projections.constructor(AuctionBidInfo.class,
-                        bid.id,
-                        bid.userId,
-                        bid.price,
-                        bid.createdAt
-                ))
+                .select(bid.price, bid.createdAt)
                 .from(bid)
                 .where(bid.auctionId.eq(auctionId))
                 .orderBy(bid.price.asc(), bid.createdAt.asc(), bid.id.asc())
                 .limit(MAX_BIDS_FOR_TOOL)
-                .fetch();
+                .fetch()
+                .stream()
+                .map(t -> new AuctionBidInfo(
+                        t.get(bid.price),
+                        t.get(bid.createdAt)
+                ))
+                .toList();
     }
 
-    // auction_results + auctions 조인 — 상품명으로 최근 낙찰가 이력 조회 (시세 파악용)
     @Override
     public List<AuctionResultInfo> findRecentAuctionResultsByItemName(String itemName) {
         return queryFactory
-                .select(Projections.constructor(AuctionResultInfo.class,
-                        auction.itemName,
-                        auctionResult.price,
-                        auction.endedAt
-                ))
+                .select(auction.itemName, auctionResult.price, auction.endedAt)
                 .from(auctionResult)
                 .join(auction).on(auctionResult.auctionId.eq(auction.id))
-                .where(itemName != null && !itemName.isBlank()
-                        ? auction.itemName.containsIgnoreCase(itemName.trim())
-                        : null)
+                .where(auction.itemName.containsIgnoreCase(itemName))
                 .orderBy(auction.endedAt.desc())
                 .limit(10)
-                .fetch();
+                .fetch()
+                .stream()
+                .map(t -> new AuctionResultInfo(
+                        t.get(auction.itemName),
+                        t.get(auctionResult.price),
+                        t.get(auction.endedAt)
+                ))
+                .toList();
     }
 
-    // auction_results 단순 집계 — 판매자의 총 낙찰 횟수 카운트
     @Override
     public long countSellerSales(Long sellerId) {
         Long count = queryFactory
@@ -71,7 +85,6 @@ public class AiToolRepositoryImpl implements AiToolRepository {
         return count != null ? count : 0L;
     }
 
-    // reviews 단순 조회 — 판매자가 받은 최근 후기 텍스트만 추출 (LLM 분석용)
     @Override
     public List<String> findRecentReviewTextsBySellerId(Long sellerId) {
         return queryFactory
@@ -79,11 +92,143 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 .from(review)
                 .where(
                         review.revieweeId.eq(sellerId),
-                        review.description.isNotNull(),  // 텍스트 없는 별점만 있는 후기 제외
-                        Expressions.stringTemplate("trim({0})", review.description).ne("")  // 공백만 있는 후기 제외
+                        review.description.isNotNull(),
+                        Expressions.stringTemplate("trim({0})", review.description).ne("")
                 )
                 .orderBy(review.createdAt.desc())
                 .limit(5)
                 .fetch();
+    }
+
+    @Override
+    public List<MyAuctionInfo> findMyAuctions(Long userId) {
+        QBid bidSub = new QBid("bidSub");
+        var lowestBidSub = JPAExpressions.select(bidSub.price.min())
+                .from(bidSub)
+                .where(bidSub.auctionId.eq(auction.id));
+        return queryFactory
+                .select(auction.id, auction.itemName, auction.status, auction.endedAt, lowestBidSub)
+                .from(auction)
+                .where(
+                        auction.userId.eq(userId),
+                        auction.status.ne(AuctionStatus.CANCELLED)
+                )
+                .orderBy(
+                        new CaseBuilder()
+                                .when(auction.status.in(AuctionStatus.ACTIVE, AuctionStatus.READY)).then(0)
+                                .otherwise(1).asc(),
+                        auction.endedAt.asc()
+                )
+                .limit(10)
+                .fetch()
+                .stream()
+                .map(t -> new MyAuctionInfo(
+                        t.get(auction.id),
+                        t.get(auction.itemName),
+                        t.get(auction.status).name(),
+                        t.get(auction.endedAt),
+                        t.get(lowestBidSub)
+                ))
+                .toList();
+    }
+
+    @Override
+    public List<CategoryAuctionStats> findAuctionStatsByCategory(String categoryName) {
+        Set<Long> categoryIds = resolveDescendantCategoryIds(categoryName);
+        if (categoryIds.isEmpty()) return List.of();
+
+        return queryFactory
+                .select(category.name,
+                        auctionResult.price.avg(),
+                        auctionResult.price.min(),
+                        auctionResult.price.max(),
+                        auctionResult.count())
+                .from(auctionResult)
+                .join(auction).on(auctionResult.auctionId.eq(auction.id))
+                .join(category).on(category.id.eq(auction.categoryId))
+                .where(category.id.in(categoryIds))
+                .groupBy(category.name)
+                .fetch()
+                .stream()
+                .map(t -> new CategoryAuctionStats(
+                        t.get(category.name),
+                        t.get(auctionResult.price.avg()),
+                        t.get(auctionResult.price.min()),
+                        t.get(auctionResult.price.max()),
+                        t.get(auctionResult.count())
+                ))
+                .toList();
+    }
+
+    // name 일치 카테고리 + 자식/손자(depth 최대 2) ID 수집 — 총 3 queries (name검색·자식배치·손자배치)
+    private Set<Long> resolveDescendantCategoryIds(String categoryName) {
+        List<Category> matched = categoryRepository.findByNameContainingIgnoreCase(categoryName);
+        if (matched.isEmpty()) return Set.of();
+
+        Set<Long> ids = new HashSet<>();
+        matched.forEach(cat -> ids.add(cat.getId()));
+
+        List<Category> children = categoryRepository.findAllByParentIdIn(ids);
+        Set<Long> childIds = new HashSet<>();
+        children.forEach(child -> childIds.add(child.getId()));
+        ids.addAll(childIds);
+
+        if (!childIds.isEmpty()) {
+            categoryRepository.findAllByParentIdIn(childIds)
+                    .forEach(gc -> ids.add(gc.getId()));
+        }
+        return ids;
+    }
+
+    @Override
+    public List<MyBidInfo> findMyBids(Long userId) {
+        QBid bidSub = new QBid("bidSub");
+        QBid bidWinner = new QBid("bidWinner");
+        QBid bidWinnerPrice = new QBid("bidWinnerPrice");
+        var currentLowestSub = JPAExpressions.select(bidSub.price.min())
+                .from(bidSub)
+                .where(bidSub.auctionId.eq(auction.id));
+        // 동일 최저가 tie-breaking: createdAt ASC → id ASC 기준 1위 userId
+        var winnerUserIdSub = JPAExpressions.select(bidWinner.userId)
+                .from(bidWinner)
+                .where(bidWinner.auctionId.eq(auction.id)
+                        .and(bidWinner.price.eq(
+                                JPAExpressions.select(bidWinnerPrice.price.min())
+                                        .from(bidWinnerPrice)
+                                        .where(bidWinnerPrice.auctionId.eq(auction.id))
+                        )))
+                .orderBy(bidWinner.createdAt.asc(), bidWinner.id.asc())
+                .limit(1);
+        return queryFactory
+                .select(auction.id, auction.itemName, auction.status, auction.endedAt,
+                        bid.price.min(), currentLowestSub, winnerUserIdSub)
+                .from(bid)
+                .join(auction).on(auction.id.eq(bid.auctionId))
+                .where(bid.userId.eq(userId))
+                .groupBy(auction.id, auction.itemName, auction.status, auction.endedAt)
+                .orderBy(
+                        new CaseBuilder()
+                                .when(auction.status.eq(AuctionStatus.ACTIVE)).then(0)
+                                .otherwise(1).asc(),
+                        auction.endedAt.desc()
+                )
+                .limit(10)
+                .fetch()
+                .stream()
+                .map(t -> {
+                    BigDecimal myLowest = t.get(bid.price.min());
+                    BigDecimal currentLowest = t.get(currentLowestSub);
+                    Long winnerUserId = t.get(winnerUserIdSub);
+                    return new MyBidInfo(
+                            t.get(auction.id),
+                            t.get(auction.itemName),
+                            t.get(auction.status).name(),
+                            t.get(auction.endedAt),
+                            myLowest,
+                            currentLowest,
+                            winnerUserId != null && winnerUserId.equals(userId)
+                    );
+                })
+                .toList();
     }
 }

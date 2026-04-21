@@ -6,6 +6,6 @@ import java.util.List;
 public record SellerStatsInfo(
         Long sellerId,              // 판매자 ID
         long totalSales,            // 총 낙찰 횟수
-        double avgScore,            // 평균 평점 (리뷰 없으면 0.0)
+        Double avgScore,            // 평균 평점 (리뷰 없으면 null)
         List<String> recentReviews  // 최근 후기 텍스트 목록 (최대 5개)
 ) {}

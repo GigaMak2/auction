@@ -38,6 +38,21 @@ public class ChatService {
                 .toList();
     }
 
+    // 채팅방 제목 수정
+    @Transactional
+    public ChatRoomResponse updateTitle(Long roomId, Long userId, String title) {
+        if (title == null || title.isBlank() || title.trim().length() > 10) {
+            throw new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_TITLE_INVALID);
+        }
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_NOT_FOUND));
+        if (!chatRoom.getUserId().equals(userId)) {
+            throw new ServiceErrorException(ChatErrorEnum.CHAT_ROOM_FORBIDDEN);
+        }
+        chatRoom.updateTitle(title.trim());
+        return ChatRoomResponse.from(chatRoomRepository.save(chatRoom));
+    }
+
     // 채팅방 삭제 (소유자 검증 + 메시지 cascade 하드딜리트 + Redis 캐시 evict)
     @Transactional
     public void deleteRoom(Long roomId, Long userId) {

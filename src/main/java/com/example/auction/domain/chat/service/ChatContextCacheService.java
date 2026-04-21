@@ -58,7 +58,7 @@ public class ChatContextCacheService {
     }
 
     // AI 응답 완료 후 유저 메시지 + AI 응답을 캐시에 추가 — doFinally에서 호출
-    // RPUSH + LTRIM 원자 연산 — GET 없이 직접 추가해 동시 요청 시 덮어쓰기 문제 방지
+    // GET 없이 RPUSH로 직접 추가 — 동시 요청 시 덮어쓰기 없이 순서대로 누적
     // Redis 장애 시 무시 — 다음 턴 getContext()의 DB 폴백으로 복구됨
     public void appendMessages(Long roomId, String userContent, String assistantContent) {
         String key = KEY_PREFIX + roomId;
