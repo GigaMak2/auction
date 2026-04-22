@@ -13,6 +13,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
+    public static final String AUCTION_EVENTS_CHANNEL = "auction-events";
+
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
 
@@ -37,7 +39,7 @@ public class RedisConfig {
             AuctionEmbedListener auctionEmbedListener) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(auctionEmbedListener, new ChannelTopic("auction-events"));
+        container.addMessageListener(auctionEmbedListener, new ChannelTopic(AUCTION_EVENTS_CHANNEL));
         return container;
     }
 

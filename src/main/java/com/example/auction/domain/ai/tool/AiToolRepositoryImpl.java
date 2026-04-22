@@ -197,14 +197,14 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 .from(bidSub)
                 .where(bidSub.auctionId.eq(auction.id));
         // 동일 최저가 tie-breaking: price ASC → createdAt ASC → id ASC 기준 1위 userId
-        var winnerUserIdSub = JPAExpressions.select(bidWinner.userId)
+        var currentLowestBidderUserIdSub = JPAExpressions.select(bidWinner.userId)
                 .from(bidWinner)
                 .where(bidWinner.auctionId.eq(auction.id))
                 .orderBy(bidWinner.price.asc(), bidWinner.createdAt.asc(), bidWinner.id.asc())
                 .limit(1);
         return queryFactory
                 .select(auction.id, auction.itemName, auction.status, auction.endedAt,
-                        bid.price.min(), currentLowestSub, winnerUserIdSub)
+                        bid.price.min(), currentLowestSub, currentLowestBidderUserIdSub)
                 .from(bid)
                 .join(auction).on(auction.id.eq(bid.auctionId))
                 .where(bid.userId.eq(userId))
@@ -221,7 +221,7 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 .map(t -> {
                     BigDecimal myLowest = t.get(bid.price.min());
                     BigDecimal currentLowest = t.get(currentLowestSub);
-                    Long winnerUserId = t.get(winnerUserIdSub);
+                    Long currentLowestBidderUserId = t.get(currentLowestBidderUserIdSub);
                     return new MyBidInfo(
                             t.get(auction.id),
                             t.get(auction.itemName),
@@ -229,7 +229,7 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                             t.get(auction.endedAt),
                             myLowest,
                             currentLowest,
-                            winnerUserId != null && winnerUserId.equals(userId)
+                            currentLowestBidderUserId != null && currentLowestBidderUserId.equals(userId)
                     );
                 })
                 .toList();
