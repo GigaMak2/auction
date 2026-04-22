@@ -30,7 +30,7 @@
                     "value": "prod"
                 }
             ],
-            "startTimeout": 300,
+            "startTimeout": 120,
             "stopTimeout": 120,
             "logConfiguration": {
                 "logDriver": "awslogs",
