@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -21,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 public class AuctionEmbedListener implements MessageListener {
 
     private static final String EMBED_KEY_PREFIX = "embed:auction:";
+    private static final ExecutorService embedExecutor = Executors.newFixedThreadPool(4);
 
     private final AuctionRepository auctionRepository;
     private final AuctionEmbeddingService auctionEmbeddingService;
@@ -74,6 +77,6 @@ public class AuctionEmbedListener implements MessageListener {
             } catch (Exception e) {
                 log.error("[AuctionEmbed] 임베딩 처리 실패 — auctionId={}, error={}", finalAuctionId, e.getMessage(), e);
             }
-        });
+        }, embedExecutor); // ForkJoinPool.commonPool() 대신 전용 풀 — 블로킹 JPA/OpenAI 호출로 commonPool 고갈 방지
     }
 }
