@@ -66,6 +66,17 @@ jobs:
           # extract short sha
           SHORT_SHA=$(git rev-parse --short "$FULL_SHA")
 
+          # reject deploy it is't not part of dev/main
+          git fetch origin \
+              '+refs/heads/main:refs/remotes/origin/main' \
+              '+refs/heads/dev:refs/remotes/origin/dev'
+
+          if ! git merge-base --is-ancestor "$FULL_SHA" origin/dev \
+              && ! git merge-base --is-ancestor "$FULL_SHA" origin/main; then
+              echo "commit ${FULL_SHA} is not reachable from dev/main"
+              exit 1
+          fi
+
           # save it to github environment
           echo "full_sha=${FULL_SHA}" >> $GITHUB_OUTPUT
 
