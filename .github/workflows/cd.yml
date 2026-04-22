@@ -18,6 +18,10 @@ permissions:
   id-token: write   # OIDC 토큰 요청용
   contents: read    # 코드 체크아웃용
 
+concurrency:
+  group: cd-production
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
