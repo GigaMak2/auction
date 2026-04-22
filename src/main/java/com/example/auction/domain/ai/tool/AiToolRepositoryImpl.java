@@ -5,6 +5,7 @@ import com.example.auction.domain.ai.tool.dto.AuctionResultInfo;
 import com.example.auction.domain.ai.tool.dto.CategoryAuctionStats;
 import com.example.auction.domain.ai.tool.dto.MyAuctionInfo;
 import com.example.auction.domain.ai.tool.dto.MyBidInfo;
+import com.example.auction.domain.ai.tool.dto.SellerReviewSummary;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.category.entity.Category;
 import com.example.auction.domain.category.repository.CategoryRepository;
@@ -86,8 +87,14 @@ public class AiToolRepositoryImpl implements AiToolRepository {
     }
 
     @Override
-    public List<String> findRecentReviewTextsBySellerId(Long sellerId) {
-        return queryFactory
+    public SellerReviewSummary findSellerReviewSummary(Long sellerId) {
+        Double avgScore = queryFactory
+                .select(review.score.avg())
+                .from(review)
+                .where(review.revieweeId.eq(sellerId))
+                .fetchOne();
+
+        List<String> recentTexts = queryFactory
                 .select(review.description)
                 .from(review)
                 .where(
@@ -98,6 +105,8 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                 .orderBy(review.createdAt.desc())
                 .limit(5)
                 .fetch();
+
+        return new SellerReviewSummary(avgScore, recentTexts);
     }
 
     @Override
@@ -184,20 +193,14 @@ public class AiToolRepositoryImpl implements AiToolRepository {
     public List<MyBidInfo> findMyBids(Long userId) {
         QBid bidSub = new QBid("bidSub");
         QBid bidWinner = new QBid("bidWinner");
-        QBid bidWinnerPrice = new QBid("bidWinnerPrice");
         var currentLowestSub = JPAExpressions.select(bidSub.price.min())
                 .from(bidSub)
                 .where(bidSub.auctionId.eq(auction.id));
-        // 동일 최저가 tie-breaking: createdAt ASC → id ASC 기준 1위 userId
+        // 동일 최저가 tie-breaking: price ASC → createdAt ASC → id ASC 기준 1위 userId
         var winnerUserIdSub = JPAExpressions.select(bidWinner.userId)
                 .from(bidWinner)
-                .where(bidWinner.auctionId.eq(auction.id)
-                        .and(bidWinner.price.eq(
-                                JPAExpressions.select(bidWinnerPrice.price.min())
-                                        .from(bidWinnerPrice)
-                                        .where(bidWinnerPrice.auctionId.eq(auction.id))
-                        )))
-                .orderBy(bidWinner.createdAt.asc(), bidWinner.id.asc())
+                .where(bidWinner.auctionId.eq(auction.id))
+                .orderBy(bidWinner.price.asc(), bidWinner.createdAt.asc(), bidWinner.id.asc())
                 .limit(1);
         return queryFactory
                 .select(auction.id, auction.itemName, auction.status, auction.endedAt,

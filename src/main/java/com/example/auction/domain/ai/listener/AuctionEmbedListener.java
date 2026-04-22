@@ -1,0 +1,63 @@
+package com.example.auction.domain.ai.listener;
+
+import com.example.auction.domain.ai.service.AuctionEmbeddingService;
+import com.example.auction.domain.auction.enums.AuctionStatus;
+import com.example.auction.domain.auction.repository.AuctionRepository;
+import tools.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.stereotype.Component;
+
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class AuctionEmbedListener implements MessageListener {
+
+    private final AuctionRepository auctionRepository;
+    private final AuctionEmbeddingService auctionEmbeddingService;
+    private final ObjectMapper objectMapper;
+
+    @Override
+    public void onMessage(Message message, byte[] pattern) {
+        String body = new String(message.getBody(), StandardCharsets.UTF_8);
+        Long auctionId;
+
+        try {
+            var tree = objectMapper.readTree(body);
+            String eventType = tree.get("eventType").asText();
+            if (!"AUCTION_ENDED".equals(eventType)) {
+                return;
+            }
+            auctionId = tree.get("auctionId").asLong();
+        } catch (Exception e) {
+            log.error("[AuctionEmbed] 메시지 파싱 실패: body={}, error={}", body, e.getMessage());
+            return;
+        }
+
+        Long finalAuctionId = auctionId;
+        // embed()는 JPA + OpenAI API 블로킹 호출 — 리스너 스레드 블로킹 방지를 위해 비동기 처리
+        CompletableFuture.runAsync(() -> {
+            try {
+                auctionRepository.findById(finalAuctionId).ifPresentOrElse(
+                        auction -> {
+                            if (auction.getStatus() != AuctionStatus.DONE) {
+                                log.debug("[AuctionEmbed] 낙찰 상태 아님, 스킵 — auctionId={}, status={}",
+                                        finalAuctionId, auction.getStatus());
+                                return;
+                            }
+                            auctionEmbeddingService.embed(auction);
+                            log.info("[AuctionEmbed] 임베딩 완료 — auctionId={}", finalAuctionId);
+                        },
+                        () -> log.warn("[AuctionEmbed] 경매 없음 — auctionId={}", finalAuctionId)
+                );
+            } catch (Exception e) {
+                log.error("[AuctionEmbed] 임베딩 처리 실패 — auctionId={}, error={}", finalAuctionId, e.getMessage(), e);
+            }
+        });
+    }
+}
