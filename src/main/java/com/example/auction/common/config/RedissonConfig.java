@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RedissonConfig {
-    @Value("${spring.data.redis.protocol:redis}")
+    @Value("${spring.data.redis.protocol}")
     private String redisProtocol;
 
     @Value("${spring.data.redis.host}")

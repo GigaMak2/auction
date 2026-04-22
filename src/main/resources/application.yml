@@ -1,23 +1,34 @@
 spring:
   application:
     name: auction
+
   autoconfigure:
     exclude:
-    - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
-    - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
-    - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
-    - org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration
 
   profiles:
     include: oauth
 
   data:
     redis:
+      #  redis에서 tls 연결을 사용할 경우 
+      #
+      #  data.redis.ssl.enabled=true
+      #  data.redis.protocol=rediss
+      #
+      #  로 *둘다* 바꿔줘야 합니다.
+      #  하나만 바꾸시면 안됩니다.
+      #
+      #  이는 저희가 lettuce와 redisson client를 둘다 쓰고 있고
+      #  tls 적용 방법이 둘다 다르기 때문입니다.
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:false}
+      protocol: ${REDIS_PROTOCOL:redis}
       host: ${REDIS_HOST:localhost}
       port: 6379
-
-  kafka:
-    bootstrap-servers: ${KAFKA_HOST:localhost}:9092
 
   ai:
     openai:

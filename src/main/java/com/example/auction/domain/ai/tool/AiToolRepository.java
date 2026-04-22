@@ -2,6 +2,9 @@ package com.example.auction.domain.ai.tool;
 
 import com.example.auction.domain.ai.tool.dto.AuctionBidInfo;
 import com.example.auction.domain.ai.tool.dto.AuctionResultInfo;
+import com.example.auction.domain.ai.tool.dto.CategoryAuctionStats;
+import com.example.auction.domain.ai.tool.dto.MyAuctionInfo;
+import com.example.auction.domain.ai.tool.dto.MyBidInfo;
 
 import java.util.List;
 
@@ -19,4 +22,13 @@ public interface AiToolRepository {
 
     // 판매자가 받은 최근 후기 텍스트 조회 (최대 5건)
     List<String> findRecentReviewTextsBySellerId(Long sellerId);
+
+    // 내가 등록한 경매 목록 + 현재 최저 입찰가 (최대 10건, 마감일 오름차순)
+    List<MyAuctionInfo> findMyAuctions(Long userId);
+
+    // 내가 입찰한 경매 현황 + 현재 최저가 비교 (최대 10건, 마감일 내림차순)
+    List<MyBidInfo> findMyBids(Long userId);
+
+    // 카테고리명으로 낙찰 통계 조회 (평균·최저·최고가, 건수)
+    List<CategoryAuctionStats> findAuctionStatsByCategory(String categoryName);
 }
