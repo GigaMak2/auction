@@ -23,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -92,17 +94,22 @@ public class BidCommandProcessor {
 
         log.info("[입찰] auctionId={}, userId={}, bidPrice={}", auctionId, userId, bidPrice);
 
-        // 새 입찰 발생 알림
-        notificationMessagePublisher.publish(new NotificationMessage(
-                NotificationType.NEW_BID, auction.getUserId(), auctionId, auction.getItemName()
-        ));
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                // 새 입찰 발생 알림
+                notificationMessagePublisher.publish(new NotificationMessage(
+                        NotificationType.NEW_BID, auction.getUserId(), auctionId, auction.getItemName()
+                ));
 
-        // 최저가 갱신 알림
-        if (currentMinPrice != null && currentMin != null) {
-            notificationMessagePublisher.publish(new NotificationMessage(
-                    NotificationType.LOWEST_BID_UPDATED, currentMin.getUserId(), auctionId, auction.getItemName()
-            ));
-        }
+                // 최저가 갱신 알림
+                if (currentMinPrice != null && currentMin != null) {
+                    notificationMessagePublisher.publish(new NotificationMessage(
+                            NotificationType.LOWEST_BID_UPDATED, currentMin.getUserId(), auctionId, auction.getItemName()
+                    ));
+                }
+            }
+        });
 
         return BidResponse.of(savedBid);
     }
