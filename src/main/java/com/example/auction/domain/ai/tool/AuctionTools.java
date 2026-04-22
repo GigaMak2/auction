@@ -10,8 +10,8 @@ import com.example.auction.domain.ai.tool.dto.AuctionResultInfo;
 import com.example.auction.domain.ai.tool.dto.CategoryAuctionStats;
 import com.example.auction.domain.ai.tool.dto.MyAuctionInfo;
 import com.example.auction.domain.ai.tool.dto.MyBidInfo;
+import com.example.auction.domain.ai.tool.dto.SellerReviewSummary;
 import com.example.auction.domain.ai.tool.dto.SellerStatsInfo;
-import com.example.auction.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ToolContext;
@@ -26,7 +26,6 @@ import java.util.List;
 public class AuctionTools {
 
     private final AiToolRepository aiToolRepository;
-    private final ReviewRepository reviewRepository;
     private final ReviewEmbeddingService reviewEmbeddingService;
     private final AuctionEmbeddingService auctionEmbeddingService;
 
@@ -140,14 +139,13 @@ public class AuctionTools {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
         long totalSales = aiToolRepository.countSellerSales(sellerId);
-        Double avgScore = reviewRepository.findAvgScoreByRevieweeId(sellerId); // 리뷰 없으면 null
-        List<String> recentReviews = aiToolRepository.findRecentReviewTextsBySellerId(sellerId);
+        SellerReviewSummary summary = aiToolRepository.findSellerReviewSummary(sellerId);
 
         return new SellerStatsInfo(
                 sellerId,
                 totalSales,
-                avgScore,
-                recentReviews
+                summary.avgScore(),
+                summary.recentTexts()
         );
     }
 }

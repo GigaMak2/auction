@@ -1,7 +1,6 @@
 spring:
   application:
     name: auction
-
   autoconfigure:
     exclude:
       - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration

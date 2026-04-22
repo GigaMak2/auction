@@ -45,8 +45,9 @@ public class ReviewEmbeddingService {
             }
     );
 
-    // 후기 1건을 벡터로 변환해 pgvector에 저장 — 리뷰 생성 시 호출
+    // 후기 1건을 벡터로 변환해 pgvector에 저장 — 리뷰 생성/수정 시 호출
     // Contextual Retrieval: 별점을 텍스트에 prepend해 짧은 후기의 임베딩 품질 개선
+    // reviewId를 Document ID로 고정해 동일 ID upsert로 수정 시 덮어쓰기 보장
     public void embed(Review review) {
         if (review.getDescription() == null || review.getDescription().isBlank()) {
             return;
@@ -55,6 +56,7 @@ public class ReviewEmbeddingService {
         String contextualText = "별점: " + review.getScore() + "점. 후기: " + review.getDescription();
 
         Document document = new Document(
+                String.valueOf(review.getId()),
                 contextualText,
                 Map.of(
                         "source", "review",
@@ -64,6 +66,11 @@ public class ReviewEmbeddingService {
                 )
         );
         vectorStore.add(List.of(document));
+    }
+
+    // 후기 삭제 시 pgvector에서 해당 벡터 제거
+    public void delete(Long reviewId) {
+        vectorStore.delete(List.of(String.valueOf(reviewId)));
     }
 
     // sellerId 필터 + 의미 유사도 기반 후기 텍스트 검색 — LLM 컨텍스트 주입용

@@ -20,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -61,11 +63,16 @@ public class ReviewService {
         } catch (DataIntegrityViolationException e) {
             throw new ServiceErrorException(ReviewErrorEnum.ALREADY_REVIEWED);
         }
-        try {
-            reviewEmbeddingService.embed(review); // 후기 텍스트 pgvector 임베딩 저장 (RAG용)
-        } catch (Exception e) {
-            log.warn("[ReviewService] 임베딩 저장 실패 — 리뷰 생성은 정상 처리됨. reviewId={}, error={}", review.getId(), e.getMessage());
-        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                try {
+                    reviewEmbeddingService.embed(review);
+                } catch (Exception e) {
+                    log.warn("[ReviewService] 임베딩 저장 실패 — 리뷰 생성은 정상 처리됨. reviewId={}, error={}", review.getId(), e.getMessage());
+                }
+            }
+        });
 
         Double avgScore = reviewRepository.findAvgScoreByRevieweeId(reviewee.getId());
         BigDecimal rating = BigDecimal.valueOf(avgScore).setScale(1, RoundingMode.HALF_UP);
@@ -144,6 +151,17 @@ public class ReviewService {
             });
         }
 
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                try {
+                    reviewEmbeddingService.embed(review);
+                } catch (Exception e) {
+                    log.warn("[ReviewService] 임베딩 업데이트 실패 — 리뷰 수정은 정상 처리됨. reviewId={}, error={}", review.getId(), e.getMessage());
+                }
+            }
+        });
+
         return new ReviewModifyResponse(
                 review.getId(),
                 review.getScore(),
@@ -165,6 +183,18 @@ public class ReviewService {
         Long revieweeId = review.getRevieweeId();
 
         reviewRepository.delete(review);
+
+        Long deletedReviewId = review.getId();
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                try {
+                    reviewEmbeddingService.delete(deletedReviewId);
+                } catch (Exception e) {
+                    log.warn("[ReviewService] 임베딩 삭제 실패 — 리뷰 삭제는 정상 처리됨. reviewId={}, error={}", deletedReviewId, e.getMessage());
+                }
+            }
+        });
 
         userRepository.findById(revieweeId).ifPresent(reviewee -> {
             if (!reviewee.isDeleted()) {

@@ -5,6 +5,7 @@ import com.example.auction.domain.ai.tool.dto.AuctionResultInfo;
 import com.example.auction.domain.ai.tool.dto.CategoryAuctionStats;
 import com.example.auction.domain.ai.tool.dto.MyAuctionInfo;
 import com.example.auction.domain.ai.tool.dto.MyBidInfo;
+import com.example.auction.domain.ai.tool.dto.SellerReviewSummary;
 
 import java.util.List;
 
@@ -20,8 +21,8 @@ public interface AiToolRepository {
     // 판매자의 총 낙찰 횟수 조회
     long countSellerSales(Long sellerId);
 
-    // 판매자가 받은 최근 후기 텍스트 조회 (최대 5건)
-    List<String> findRecentReviewTextsBySellerId(Long sellerId);
+    // 판매자 평균 평점 + 최근 후기 텍스트를 한 번에 조회 — ReviewRepository 의존 제거
+    SellerReviewSummary findSellerReviewSummary(Long sellerId);
 
     // 내가 등록한 경매 목록 + 현재 최저 입찰가 (최대 10건, 마감일 오름차순)
     List<MyAuctionInfo> findMyAuctions(Long userId);
