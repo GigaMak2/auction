@@ -12,6 +12,9 @@ import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
 import com.example.auction.domain.bid.exceptions.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
+import com.example.auction.domain.notification.dto.NotificationMessage;
+import com.example.auction.domain.notification.enums.NotificationType;
+import com.example.auction.domain.notification.publisher.NotificationMessagePublisher;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
@@ -20,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,6 +39,7 @@ public class BidCommandProcessor {
     private final BidRepository bidRepository;
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
+    private final NotificationMessagePublisher notificationMessagePublisher;
 
     // requires_new를 붙여야 메서드가 끝날 때 커밋이 확정되어서 커밋 -> 락해제 순서가 보장됨
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -74,6 +80,9 @@ public class BidCommandProcessor {
             throw new ServiceErrorException(BidErrorEnum.BID_PRICE_NOT_LOWER);
         }
 
+        // 기존 최저가 입찰 조회
+        Bid currentMin = bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId).orElse(null);
+
         // 입찰 생성 및 저장
         Bid bid = Bid.of(
                 request.getDescription(),
@@ -85,7 +94,22 @@ public class BidCommandProcessor {
 
         log.info("[입찰] auctionId={}, userId={}, bidPrice={}", auctionId, userId, bidPrice);
 
-        // todo: 카프카 이벤트 발행
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                // 새 입찰 발생 알림
+                notificationMessagePublisher.publish(new NotificationMessage(
+                        NotificationType.NEW_BID, auction.getUserId(), auctionId, auction.getItemName()
+                ));
+
+                // 최저가 갱신 알림
+                if (currentMinPrice != null && currentMin != null) {
+                    notificationMessagePublisher.publish(new NotificationMessage(
+                            NotificationType.LOWEST_BID_UPDATED, currentMin.getUserId(), auctionId, auction.getItemName()
+                    ));
+                }
+            }
+        });
 
         return BidResponse.of(savedBid);
     }
