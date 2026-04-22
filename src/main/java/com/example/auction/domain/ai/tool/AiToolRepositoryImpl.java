@@ -102,7 +102,7 @@ public class AiToolRepositoryImpl implements AiToolRepository {
                         review.description.isNotNull(),
                         Expressions.stringTemplate("trim({0})", review.description).ne("")
                 )
-                .orderBy(review.createdAt.desc())
+                .orderBy(review.createdAt.desc(), review.id.desc())
                 .limit(5)
                 .fetch();
 

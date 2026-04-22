@@ -8,19 +8,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuctionEmbedListener implements MessageListener {
 
+    private static final String EMBED_KEY_PREFIX = "embed:auction:";
+
     private final AuctionRepository auctionRepository;
     private final AuctionEmbeddingService auctionEmbeddingService;
     private final ObjectMapper objectMapper;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
@@ -43,18 +48,29 @@ public class AuctionEmbedListener implements MessageListener {
         // embed()는 JPA + OpenAI API 블로킹 호출 — 리스너 스레드 블로킹 방지를 위해 비동기 처리
         CompletableFuture.runAsync(() -> {
             try {
-                auctionRepository.findById(finalAuctionId).ifPresentOrElse(
-                        auction -> {
-                            if (auction.getStatus() != AuctionStatus.DONE) {
-                                log.debug("[AuctionEmbed] 낙찰 상태 아님, 스킵 — auctionId={}, status={}",
-                                        finalAuctionId, auction.getStatus());
-                                return;
-                            }
-                            auctionEmbeddingService.embed(auction);
-                            log.info("[AuctionEmbed] 임베딩 완료 — auctionId={}", finalAuctionId);
-                        },
-                        () -> log.warn("[AuctionEmbed] 경매 없음 — auctionId={}", finalAuctionId)
-                );
+                var optionalAuction = auctionRepository.findById(finalAuctionId);
+                if (optionalAuction.isEmpty()) {
+                    log.warn("[AuctionEmbed] 경매 없음 — auctionId={}", finalAuctionId);
+                    return;
+                }
+                var auction = optionalAuction.get();
+                if (auction.getStatus() != AuctionStatus.DONE) {
+                    log.debug("[AuctionEmbed] 낙찰 상태 아님, 스킵 — auctionId={}, status={}", finalAuctionId, auction.getStatus());
+                    return;
+                }
+                String embedKey = EMBED_KEY_PREFIX + finalAuctionId;
+                Boolean isNew = stringRedisTemplate.opsForValue().setIfAbsent(embedKey, "1", 30, TimeUnit.DAYS);
+                if (Boolean.FALSE.equals(isNew)) {
+                    log.info("[AuctionEmbed] 이미 임베딩 처리됨, 스킵 — auctionId={}", finalAuctionId);
+                    return;
+                }
+                try {
+                    auctionEmbeddingService.embed(auction);
+                    log.info("[AuctionEmbed] 임베딩 완료 — auctionId={}", finalAuctionId);
+                } catch (Exception e) {
+                    stringRedisTemplate.delete(embedKey);
+                    throw e;
+                }
             } catch (Exception e) {
                 log.error("[AuctionEmbed] 임베딩 처리 실패 — auctionId={}, error={}", finalAuctionId, e.getMessage(), e);
             }
