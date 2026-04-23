@@ -4,7 +4,6 @@ import com.example.auction.domain.chat.dto.ChatMessageCacheDto;
 import com.example.auction.domain.chat.entity.ChatMessage;
 import com.example.auction.domain.chat.entity.MessageRole;
 import com.example.auction.domain.chat.repository.ChatMessageRepository;
-import org.junit.jupiter.api.Disabled;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,8 +83,8 @@ class ChatContextCacheServiceTest {
 
         given(stringRedisTemplate.opsForList()).willReturn(listOperations);
         given(listOperations.range(KEY, 0, -1)).willReturn(List.of());
-        given(listOperations.size(KEY)).willReturn(0L);
         given(chatMessageRepository.findRecentByRoomId(ROOM_ID, 20)).willReturn(List.of(msg1, msg2));
+        given(listOperations.size(KEY)).willReturn(0L);
 
         // when
         List<ChatMessageCacheDto> result = chatContextCacheService.getContext(ROOM_ID);
@@ -95,6 +94,7 @@ class ChatContextCacheServiceTest {
         assertThat(result.get(0).role()).isEqualTo("USER");
         assertThat(result.get(1).role()).isEqualTo("ASSISTANT");
 
+        verify(listOperations).size(KEY);
         verify(listOperations).rightPushAll(eq(KEY), anyList());
         verify(stringRedisTemplate).expire(KEY, Duration.ofHours(24));
     }
