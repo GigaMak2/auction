@@ -72,16 +72,15 @@ public class BidCommandProcessor {
         }
 
         // 현재 최저가보다 낮아야 함
-        BigDecimal currentMinPrice = bidRepository.findMinPriceByAuctionId(auctionId).orElse(null);
+        Bid currentMin = bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId).orElse(null);
+        BigDecimal currentMinPrice = currentMin != null ? currentMin.getPrice() : null;
 
+        // currentMinPrice 가 null일경우 bidPrice 가격검증 스킵됨
         if (currentMinPrice != null && bidPrice.compareTo(currentMinPrice) >= 0) {
             log.warn("[입찰 실패] auctionId={}, userId={}, bidPrice={}, currentMinPrice={}",
                     auctionId, userId, bidPrice, currentMinPrice);
             throw new ServiceErrorException(BidErrorEnum.BID_PRICE_NOT_LOWER);
         }
-
-        // 기존 최저가 입찰 조회
-        Bid currentMin = bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId).orElse(null);
 
         // 입찰 생성 및 저장
         Bid bid = Bid.of(
@@ -103,7 +102,7 @@ public class BidCommandProcessor {
                 ));
 
                 // 최저가 갱신 알림
-                if (currentMinPrice != null && currentMin != null) {
+                if (currentMinPrice != null) {
                     notificationMessagePublisher.publish(new NotificationMessage(
                             NotificationType.LOWEST_BID_UPDATED, currentMin.getUserId(), auctionId, auction.getItemName()
                     ));

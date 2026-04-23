@@ -11,8 +11,10 @@ import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
 import com.example.auction.domain.bid.exceptions.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
+import com.example.auction.domain.notification.publisher.NotificationMessagePublisher;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -47,12 +50,20 @@ class BidCommandProcessorTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private NotificationMessagePublisher publisher;
+
     private CustomUserDetails userDetails;
     private Long auctionId;
     private Auction activeAuction;
 
     @BeforeEach
     void setUp() {
+
+        // TransactionSynchronizationManager 는 트랜잭션 동기화가 활성화되어야 호출 가능한데 단위테스트라서 트랜잭션이 없음
+        // 그래서 수동으로 트랜잭션 동기화 실행, 각 테스트 종료 후 해제
+        TransactionSynchronizationManager.initSynchronization();
+
         userDetails = new CustomUserDetails(1L, "USER");  // 입찰자(판매자) userId = 1
         auctionId = 10L;
 
@@ -71,6 +82,11 @@ class BidCommandProcessorTest {
         activeAuction.activate();
     }
 
+    @AfterEach
+    void tearDown() {
+        TransactionSynchronizationManager.clearSynchronization();
+    }
+
     // ========================
     // 입찰 생성 성공 케이스
     // ========================
@@ -82,7 +98,7 @@ class BidCommandProcessorTest {
         Bid savedBid = Bid.of(null, BigDecimal.valueOf(150_000), auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
 
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
-        given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.empty());
+        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.empty());
         given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
 
         // when
@@ -103,7 +119,7 @@ class BidCommandProcessorTest {
         Bid savedBid = Bid.of(null, BigDecimal.valueOf(200_000), auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
 
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
-        given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.empty());
+        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.empty());
         given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
 
         // when
@@ -125,9 +141,11 @@ class BidCommandProcessorTest {
         BigDecimal newBidPrice = BigDecimal.valueOf(100000);  // 현재 최저가보다 낮음
         BidRequest request = new BidRequest(newBidPrice, null);
         Bid savedBid = Bid.of(null, newBidPrice, auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
+        Bid mockCurrentMin = mock(Bid.class);
 
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
-        given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.of(currentMinPrice));
+        given(mockCurrentMin.getPrice()).willReturn(currentMinPrice);
+        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.of(mockCurrentMin));
         given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
 
         // when
@@ -148,8 +166,10 @@ class BidCommandProcessorTest {
         // given
         BigDecimal currentMinPrice = BigDecimal.valueOf(150_000);
         BidRequest request = new BidRequest(currentMinPrice, null);
+        Bid mockCurrentMin = mock(Bid.class);
 
-        given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.of(currentMinPrice));
+        given(mockCurrentMin.getPrice()).willReturn(currentMinPrice);
+        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.of(mockCurrentMin));
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when & then
@@ -164,8 +184,11 @@ class BidCommandProcessorTest {
         // given
         BigDecimal currentMinPrice = BigDecimal.valueOf(150000);
         BidRequest request = new BidRequest(BigDecimal.valueOf(200_000), null);  // 최저가보다 높음
+        Bid mockCurrentMin = mock(Bid.class);
 
-        given(bidRepository.findMinPriceByAuctionId(auctionId)).willReturn(Optional.of(currentMinPrice));
+
+        given(mockCurrentMin.getPrice()).willReturn(currentMinPrice);
+        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.of(mockCurrentMin));
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when & then

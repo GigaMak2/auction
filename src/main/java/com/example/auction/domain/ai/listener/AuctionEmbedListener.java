@@ -25,7 +25,7 @@ public class AuctionEmbedListener implements MessageListener {
     // 처리 중 중복 요청 차단용 — 10분 TTL로 크래시 시 자동 해제
     private static final String EMBED_LOCK_KEY_PREFIX = "embed:lock:auction:";
 
-    // JPA + OpenAI 블로킹 호출 전용 가상 스레드 Executor — Tomcat 요청 스레드와 격리
+    // JPA + OpenAI 블로킹 호출 전용 가상 스레드 Executor - Tomcat 요청 스레드와 격리
     private final ExecutorService embedExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     private final AuctionRepository auctionRepository;

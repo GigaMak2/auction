@@ -1,34 +1,88 @@
 name: CD Pipeline
 
+# 수동으로 실행하는 배포 파이프라인입니다.
+# 배포할 커밋 해시를 입력하면 해당 커밋 기준으로 빌드 및 배포가 진행됩니다.
+# 입력값을 비워두면 이 워크플로우를 트리거한 커밋이 배포됩니다
+
 on:
-  workflow_run:
-    workflows: [ "CI-BASIC" ]
-    types: [ completed ] # CI가 통과된 이후에 실행됩니다
-    branches: [ main, dev ]
+  workflow_dispatch:
+    inputs:
+      sha_to_deploy:
+        description: '실제 배포할 commit hash를 입력해주세요'
+        type: string
+        default: ''
+
 
 # OIDC 토큰 요청 권한
 permissions:
   id-token: write   # OIDC 토큰 요청용
   contents: read    # 코드 체크아웃용
 
+concurrency:
+  group: cd-production
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
     outputs:
-      image_tag: ${{ steps.vars.outputs.short_sha }}
+      short_sha: ${{ steps.vars.outputs.short_sha }}
+      full_sha: ${{ steps.vars.outputs.full_sha }}
 
     steps:
       # 코드 가져오기
+      # 모든 브랜치를 가져옵니다
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
 
-      # 커밋 해시 추출
-      - name: Set short SHA
+      # 커밋 해시 있는지 확인후 추출
+      - name: Check SHA exists and checkout
         id: vars
-        run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        env: 
+          SHA_TO_DEPLOY: ${{ inputs.sha_to_deploy }}
+        run: |
+          set -euo pipefail
+
+          if [ "$SHA_TO_DEPLOY" != "" ]; then
+              # extract sha if it even exists
+
+              set +e
+              FULL_SHA=$( git rev-parse -q --verify "$SHA_TO_DEPLOY^{commit}" )
+              GIT_COMMIT_CHECK_RESULT=$?
+              set -e
+
+              if [ $GIT_COMMIT_CHECK_RESULT == 0 ]; then
+                  echo "git commit is ${FULL_SHA}"
+              else
+                  echo "git commit \"${SHA_TO_DEPLOY}\" does not exist!"
+                  exit 1
+              fi
+          else
+              FULL_SHA=$GITHUB_SHA
+          fi
+
+          # extract short sha
+          SHORT_SHA=$(git rev-parse --short "$FULL_SHA")
+
+          # reject deploy it is't not part of dev/main
+          git fetch origin \
+              '+refs/heads/main:refs/remotes/origin/main' \
+              '+refs/heads/dev:refs/remotes/origin/dev'
+
+          if ! git merge-base --is-ancestor "$FULL_SHA" origin/dev \
+              && ! git merge-base --is-ancestor "$FULL_SHA" origin/main; then
+              echo "commit ${FULL_SHA} is not reachable from dev/main"
+              exit 1
+          fi
+
+          # save it to github environment
+          echo "full_sha=${FULL_SHA}" >> $GITHUB_OUTPUT
+
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+          git checkout $FULL_SHA
 
       # Java 21 설치
       - name: Setup Java 21
@@ -77,9 +131,16 @@ jobs:
 
       # Docker 빌드 및 push
       - name: Build and push Docker image
+        env:
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
+
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-          SHORT_SHA=${{ steps.vars.outputs.short_sha }}
-          IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}
+          set -euo pipefail
+
+          IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}"
 
           # Docker 빌드 및 push
           docker buildx build --platform linux/arm64 -t $IMAGE_URI:$SHORT_SHA --push .
@@ -88,9 +149,6 @@ jobs:
 
   deploy:
     needs: build
-    if: github.event.workflow_run.event == 'push'
-    # 일단은 dev에서도 해보죠!
-    # if: github.ref == 'refs/heads/main'   # main push에서만 배포 (PR에서는 CI만 실행)
     runs-on: ubuntu-latest
 
     steps:
@@ -105,72 +163,60 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{ needs.build.outputs.full_sha }}
 
-      # EC2 한테 docker pull 받아오라고 하기
-      - name: Tell EC2 to pull from docker and run it
+      # ECS 태스크및 서비스 업데이트
+      - name: Ecs, update Task Definition and Update Service
         env:
-          IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
+          IMAGE_TAG: ${{ needs.build.outputs.short_sha }}
+
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          AWS_INSTANCE_ID: ${{ secrets.AWS_INSTANCE_ID }}
+
+          TASK_FAMILY: ${{ secrets.TASK_FAMILY }}
+
+          AWS_TASK_ROLE_ARN: ${{ secrets.AWS_TASK_ROLE_ARN }}
+          AWS_EXECUTION_ROLE_ARN: ${{ secrets.AWS_EXECUTION_ROLE_ARN }}
+
+          AWS_ECS_SERVICE_ARN: ${{ secrets.AWS_ECS_SERVICE_ARN }}
+          AWS_ECS_CLUSTER_ARN: ${{ secrets.AWS_ECS_CLUSTER_ARN }}
 
         run: |
           set -euo pipefail
 
           ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
 
-          IMAGES_TO_DELETE="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}*"
+          # task_definition.json에 적혀 있는 secret들을
+          # 실제 값으로 치환
 
-          COMPOSE_B64=$(base64 -w0 docker-compose-prod.yml)
+          TASK_DEF=$(cat task_definition.json \
+            | sed -e "s|__TASK_FAMILY__|${TASK_FAMILY}|g" \
+            | sed -e "s|__AWS_TASK_ROLE_ARN__|${AWS_TASK_ROLE_ARN}|g" \
+            | sed -e "s|__AWS_EXECUTION_ROLE_ARN__|${AWS_EXECUTION_ROLE_ARN}|g" \
+            | sed -e "s|__ECR_URI__|${ECR_URI}|g" \
+            | sed -e "s|__AWS_REGION__|${AWS_REGION}|g" \
+          )
 
-          cat > ssm-params.json <<JSON
-          {
-              "commands": [
-                  "set -euo pipefail",
-                  "docker version",
-                  "cd /home/ec2-user/app",
-                  "set +e",
-                  "docker rm -v -f \$(docker ps -qa)",
-                  "docker rmi \$(docker images \"$IMAGES_TO_DELETE\" -q)",
-                  "set -e",
-                  "echo $COMPOSE_B64 | base64 -d - > docker-compose.yml",
-                  "docker pull \"$ECR_URI\"",
-                  "ECR_URI=\"$ECR_URI\" docker compose up -d"
-              ]
-          }
-          JSON
+          echo "$TASK_DEF" > task-definition-out.json
 
-          COMMAND_ID=$(
-              aws ssm send-command \
-                  --region "$AWS_REGION" \
-                  --instance-ids "$AWS_INSTANCE_ID" \
-                  --document-name "AWS-RunShellScript" \
-                  --comment "deploy auction spring server" \
-                  --parameters file://ssm-params.json \
-                  --query "Command.CommandId" \
-                  --output text
-              )
+          # task 업데이트
 
-          echo "SSM CommandId: $COMMAND_ID"
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
+              --cli-input-json file://./task-definition-out.json \
+              --output json \
+              --query "taskDefinition.taskDefinitionArn" \
+          )
 
-          set +e
-          aws ssm wait command-executed \
-              --region "$AWS_REGION" \
-              --command-id "$COMMAND_ID" \
-              --instance-id "$AWS_INSTANCE_ID" \
-              --cli-connect-timeout 180 \
-              --cli-read-timeout 180
-          COMMAND_RESULT=$?
-          set -e
+          # 서비스 업데이트
 
-          aws ssm get-command-invocation \
-              --region "$AWS_REGION" \
-              --command-id "$COMMAND_ID" \
-              --instance-id "$AWS_INSTANCE_ID" \
-              --query "{Status:Status,ResponseCode:ResponseCode,Stdout:StandardOutputContent,Stderr:StandardErrorContent}" \
-              --output json
+          # remove double quotes
+          TASK_DEF_ARN=${TASK_DEF_ARN//\"/}
 
-          exit $COMMAND_RESULT
+          aws ecs update-service \
+              --cluster "${AWS_ECS_CLUSTER_ARN}" \
+              --service "${AWS_ECS_SERVICE_ARN}" \
+              --task-definition "${TASK_DEF_ARN}" \
+              --force-new-deployment
 

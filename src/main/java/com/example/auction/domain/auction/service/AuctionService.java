@@ -121,7 +121,7 @@ public class AuctionService {
             CreateAuctionRequest req
     ) {
         // 경매 생성은 중요한 작업이기 때문에 JWT만을 믿지 않고 DB에 유저가 있는지 확인
-        userRepository.findById(userDetails.getUserId()).orElseThrow(()->
+        userRepository.findByIdAndDeletedFalse(userDetails.getUserId()).orElseThrow(()->
             new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND)
         );
 
@@ -180,7 +180,7 @@ public class AuctionService {
         LocalDateTime now = LocalDateTime.now();
 
         // 경매 취소는 중요한 작업이기 때문에 JWT만을 믿지 않고 DB에 유저가 있는지 확인
-        userRepository.findById(details.getUserId()).orElseThrow(()->
+        userRepository.findByIdAndDeletedFalse(details.getUserId()).orElseThrow(()->
             new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND)
         );
 
