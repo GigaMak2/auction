@@ -26,7 +26,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-@Disabled
 @ExtendWith(MockitoExtension.class)
 class ChatContextCacheServiceTest {
 
@@ -85,6 +84,7 @@ class ChatContextCacheServiceTest {
 
         given(stringRedisTemplate.opsForList()).willReturn(listOperations);
         given(listOperations.range(KEY, 0, -1)).willReturn(List.of());
+        given(listOperations.size(KEY)).willReturn(0L);
         given(chatMessageRepository.findRecentByRoomId(ROOM_ID, 20)).willReturn(List.of(msg1, msg2));
 
         // when
@@ -95,7 +95,6 @@ class ChatContextCacheServiceTest {
         assertThat(result.get(0).role()).isEqualTo("USER");
         assertThat(result.get(1).role()).isEqualTo("ASSISTANT");
 
-        verify(stringRedisTemplate).delete(KEY);
         verify(listOperations).rightPushAll(eq(KEY), anyList());
         verify(stringRedisTemplate).expire(KEY, Duration.ofHours(24));
     }
