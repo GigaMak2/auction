@@ -29,8 +29,8 @@ public class ReviewEmbeddingService {
     private static final int HYDE_TIMEOUT_SECONDS = 5;
     private static final int HYDE_CACHE_MAX_SIZE = 50;
 
-    // ForkJoinPool.commonPool() 대신 전용 executor — blocking HTTP 호출로 commonPool 고갈 방지
-    private static final ExecutorService hydeExecutor = Executors.newFixedThreadPool(4);
+    // blocking HTTP 호출 전용 가상 스레드 Executor — Tomcat 요청 스레드와 격리
+    private static final ExecutorService hydeExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     private final VectorStore vectorStore;
     private final ChatModel chatModel;
