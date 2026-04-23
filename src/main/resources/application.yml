@@ -1,6 +1,7 @@
 spring:
   application:
     name: auction
+
   autoconfigure:
     exclude:
       - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
@@ -48,6 +49,11 @@ spring:
       # 기본적으로 parameterstore는 비활성화
       parameterstore:
         enabled: false
+
+  # 가상 스레드 관련
+  threads:
+    virtual:
+      enabled: true
 
 # actuator 관련
 # 일단은 ALB나 ASG 를 위해서 health end point를 열어둡니다.
