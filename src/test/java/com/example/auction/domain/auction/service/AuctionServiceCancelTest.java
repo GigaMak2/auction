@@ -108,7 +108,7 @@ class AuctionServiceCancelTest {
         );
         ReflectionTestUtils.setField(auction, "id", 1L);
 
-        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(userRepository.findByIdAndDeletedFalse(user.getId())).willReturn(Optional.of(user));
         given(auctionRepository.findById(auction.getId())).willReturn(Optional.of(auction));
 
         // WHEN & THEN 
@@ -195,7 +195,7 @@ class AuctionServiceCancelTest {
     private User createMockUser() {
         User user = User.of("test@test.com", "encodedPassword", UserRole.USER);
         ReflectionTestUtils.setField(user, "id", 1L);
-        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(userRepository.findByIdAndDeletedFalse(user.getId())).willReturn(Optional.of(user));
 
         return user;
     }
