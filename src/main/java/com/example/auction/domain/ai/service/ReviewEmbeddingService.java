@@ -45,8 +45,8 @@ public class ReviewEmbeddingService {
             "좋은", "빠른", "빠르", "친절", "정확", "깔끔", "만족", "훌륭", "완벽", "추천", "믿을"
     );
 
-    // ForkJoinPool.commonPool() 대신 전용 executor — blocking HTTP 호출로 commonPool 고갈 방지
-    private static final ExecutorService hydeExecutor = Executors.newFixedThreadPool(4);
+    // blocking HTTP 호출 전용 가상 스레드 Executor — Tomcat 요청 스레드와 격리
+    private static final ExecutorService hydeExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     private final VectorStore vectorStore;
     private final ChatModel chatModel;

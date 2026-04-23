@@ -13,10 +13,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -29,13 +28,8 @@ public class AuctionEmbedListener implements MessageListener {
     // 처리 중 중복 요청 차단용 — 10분 TTL로 크래시 시 자동 해제
     private static final String EMBED_LOCK_KEY_PREFIX = "embed:lock:auction:";
 
-    // JPA + OpenAI 블로킹 호출 전용 풀 — 유한 큐(100) + 포화 시 호출자 스레드 실행
-    private final ExecutorService embedExecutor = new ThreadPoolExecutor(
-            2, 4,
-            60L, TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(100),
-            new ThreadPoolExecutor.CallerRunsPolicy()
-    );
+    // JPA + OpenAI 블로킹 호출 전용 가상 스레드 Executor — Tomcat 요청 스레드와 격리
+    private final ExecutorService embedExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     private final AuctionRepository auctionRepository;
     private final AuctionEmbeddingService auctionEmbeddingService;
