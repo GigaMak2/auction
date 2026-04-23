@@ -16,6 +16,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +31,7 @@ import java.util.Optional;
  */
 @Slf4j
 @RestController
-@Profile("!prod")
+@Profile("dev")
 @RequiredArgsConstructor
 @RequestMapping("/lambda/auctions")
 public class LocalAuctionSimController {
@@ -74,10 +76,15 @@ public class LocalAuctionSimController {
             auctionResultRepository.save(AuctionResult.of(
                     bid.getPrice(), auctionId, auction.getUserId(), bid.getUserId(), bid.getId()
             ));
-            stringRedisTemplate.convertAndSend(
-                    RedisConfig.AUCTION_EVENTS_CHANNEL,
-                    "{\"eventType\":\"AUCTION_ENDED\",\"auctionId\":" + auctionId + "}"
-            );
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    stringRedisTemplate.convertAndSend(
+                            RedisConfig.AUCTION_EVENTS_CHANNEL,
+                            "{\"eventType\":\"AUCTION_ENDED\",\"auctionId\":" + auctionId + "}"
+                    );
+                }
+            });
             log.info("[LocalSim] 경매 낙찰 — auctionId={}, bidId={}, price={}", auctionId, bid.getId(), bid.getPrice());
             return ResponseEntity.ok("경매 낙찰: auctionId=" + auctionId + ", bidId=" + bid.getId() + ", price=" + bid.getPrice());
         }

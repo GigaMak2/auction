@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -36,7 +37,12 @@ public class ReviewEmbeddingService {
 
     // 부정 쿼리 감지 키워드 — 매칭 시 score <= 2 필터 적용으로 부정 후기만 검색
     private static final List<String> NEGATIVE_KEYWORDS = List.of(
-            "오래", "느리", "불량", "최악", "연락두절", "사기", "불만", "실망", "늦게", "늦는", "안 되", "못 받"
+            "오래 걸", "너무 늦", "불량", "최악", "연락두절", "사기", "불만", "실망", "안 되", "못 받", "느리"
+    );
+
+    // 긍정 쿼리 감지 키워드 — 매칭 시 score >= 4 필터 적용으로 긍정 후기만 검색
+    private static final List<String> POSITIVE_KEYWORDS = List.of(
+            "좋은", "빠른", "빠르", "친절", "정확", "깔끔", "만족", "훌륭", "완벽", "추천", "믿을"
     );
 
     // ForkJoinPool.commonPool() 대신 전용 executor — blocking HTTP 호출로 commonPool 고갈 방지
@@ -85,7 +91,7 @@ public class ReviewEmbeddingService {
     }
 
     private static String toDocId(Long reviewId) {
-        return UUID.nameUUIDFromBytes(("review:" + reviewId).getBytes()).toString();
+        return UUID.nameUUIDFromBytes(("review:" + reviewId).getBytes(StandardCharsets.UTF_8)).toString();
     }
 
     // sellerId 필터 + 의미 유사도 기반 후기 텍스트 검색 — LLM 컨텍스트 주입용
@@ -94,7 +100,8 @@ public class ReviewEmbeddingService {
     public List<String> search(Long sellerId, String query) {
         String searchQuery = generateHypotheticalReview(query);
         boolean isNegative = NEGATIVE_KEYWORDS.stream().anyMatch(query::contains);
-        String scoreFilter = isNegative ? " AND score <= 2" : " AND score >= 4";
+        boolean isPositive = !isNegative && POSITIVE_KEYWORDS.stream().anyMatch(query::contains);
+        String scoreFilter = isNegative ? " AND score <= 2" : isPositive ? " AND score >= 4" : "";
 
         List<Document> documents = vectorStore.similaritySearch(
                 SearchRequest.builder()
