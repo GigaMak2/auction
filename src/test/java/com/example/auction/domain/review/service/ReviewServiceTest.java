@@ -13,11 +13,14 @@ import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -25,6 +28,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -36,8 +40,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewServiceTest {
@@ -53,6 +56,18 @@ class ReviewServiceTest {
 
     @Mock
     private AuctionResultRepository auctionResultRepository;
+
+    private MockedStatic<TransactionSynchronizationManager> mockedTsm;
+
+    @BeforeEach
+    void setUpTransactionSync() {
+        mockedTsm = mockStatic(TransactionSynchronizationManager.class);
+    }
+
+    @AfterEach
+    void tearDownTransactionSync() {
+        mockedTsm.close();
+    }
 
     // ========================
     // 리뷰 생성
