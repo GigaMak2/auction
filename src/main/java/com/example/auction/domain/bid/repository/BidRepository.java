@@ -13,14 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BidRepository extends JpaRepository<Bid, Long>, BidCustomRepository {
-    Optional<Bid> findFirstByAuctionIdOrderByPriceAsc(Long auctionId);
 
     Page<Bid> findAllByUserId(Long userId, Pageable pageable);
 
     Page<Bid> findAllByAuctionId(Long auctionId, Pageable pageable);
-
-    @Query("SELECT MIN(b.price) FROM Bid b WHERE b.auctionId = :auctionId")
-    Optional<BigDecimal> findMinPriceByAuctionId(@Param("auctionId") Long auctionId);
 
     boolean existsByUserIdAndStatus(Long userId, BidAuctionStatus bidAuctionStatus);
 }

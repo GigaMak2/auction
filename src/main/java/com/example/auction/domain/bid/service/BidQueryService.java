@@ -33,7 +33,7 @@ public class BidQueryService {
     private final AuctionResultRepository resultRepository;
 
 
-    // 내 입찰 조회
+    // 내 입찰 조회(로그인한 본인만 가능하므로 삭제된 유저 처리 X)
     public PageResponse<BidListResponse> getMyBids(CustomUserDetails userDetails, Pageable pageable) {
 
         Long userId = userDetails.getUserId();
@@ -48,7 +48,7 @@ public class BidQueryService {
         return PageResponse.create(myBidPage);
     }
 
-    // 특정 경매의 입찰조회
+    // 특정 경매의 입찰조회(삭제된 유저의 입찰 조회 가능)
     public PageResponse<BidListResponse> getBids(CustomUserDetails userDetails, Long auctionId, Pageable pageable) {
         // 경매 존재 여부 및 상태 확인
         Auction auction = auctionRepository.findById(auctionId)
@@ -65,7 +65,7 @@ public class BidQueryService {
         return PageResponse.create(bidPage);
     }
 
-    // 입찰 결과 조회(1건)
+    // 입찰 결과 조회(1건, 삭제된 유저의 입찰 조회 가능)
     public BidResponse getWinnerBid(CustomUserDetails userDetails, Long auctionId) {
 
         // 경매 존재 여부 및 상태 확인
@@ -88,6 +88,7 @@ public class BidQueryService {
 
     }
 
+    // 현재 최저가 입찰 조회(삭제된 유저의 입찰 제외)
     public BidResponse getCurrentMinBid(CustomUserDetails userDetails, Long auctionId) {
         // 경매 존재 여부 및 상태 확인
         Auction auction = auctionRepository.findById(auctionId)
