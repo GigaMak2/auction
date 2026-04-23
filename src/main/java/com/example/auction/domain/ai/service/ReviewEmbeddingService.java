@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,7 +57,7 @@ public class ReviewEmbeddingService {
         String contextualText = "별점: " + review.getScore() + "점. 후기: " + review.getDescription();
 
         Document document = new Document(
-                String.valueOf(review.getId()),
+                toDocId(review.getId()),
                 contextualText,
                 Map.of(
                         "source", "review",
@@ -70,7 +71,11 @@ public class ReviewEmbeddingService {
 
     // 후기 삭제 시 pgvector에서 해당 벡터 제거
     public void delete(Long reviewId) {
-        vectorStore.delete(List.of(String.valueOf(reviewId)));
+        vectorStore.delete(List.of(toDocId(reviewId)));
+    }
+
+    private static String toDocId(Long reviewId) {
+        return UUID.nameUUIDFromBytes(("review:" + reviewId).getBytes()).toString();
     }
 
     // sellerId 필터 + 의미 유사도 기반 후기 텍스트 검색 — LLM 컨텍스트 주입용
