@@ -22,7 +22,7 @@ public class BidCustomRepositoryImpl implements BidCustomRepository {
                         bid.auctionId.eq(auctionId),
                         user.deleted.isFalse()
                 )
-                .orderBy(bid.price.asc())
+                .orderBy(bid.price.asc(), bid.createdAt.asc())
                 .limit(1)
                 .fetchOne();
 
