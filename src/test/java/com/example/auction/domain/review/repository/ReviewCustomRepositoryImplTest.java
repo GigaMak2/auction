@@ -2,10 +2,10 @@ package com.example.auction.domain.review.repository;
 
 import com.example.auction.common.config.JpaConfig;
 import com.example.auction.common.config.QuerydslConfig;
+import com.example.auction.domain.category.service.CategoryService;
 import com.example.auction.domain.review.dto.ReviewListGetResponse;
 import com.example.auction.domain.review.entity.Review;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +20,10 @@ import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled
 @DataJpaTest
 @ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
-@Import({QuerydslConfig.class, JpaConfig.class})
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class})
 class ReviewCustomRepositoryImplTest {
 
     @Autowired
