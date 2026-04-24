@@ -56,8 +56,14 @@ public class BidCommandProcessor {
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));
 
-        // 경매 상태 검증 (ACTIVE만 입찰 가능)
-        if (auction.getStatus() != AuctionStatus.ACTIVE) {
+        // 취소된 경매 입찰 불가
+        if (auction.getStatus() == AuctionStatus.CANCELLED) {
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_INVALID_STATUS);
+        }
+
+        // 경매 시간 검증(경매 시작 시간 <= 입찰 발생 시간 <= 경매 종료 시간)
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(auction.getStartedAt()) || now.isAfter(auction.getEndedAt())) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_INVALID_STATUS);
         }
 
