@@ -79,7 +79,6 @@ class BidCommandProcessorTest {
         );
         given(userRepository.findByIdAndDeletedFalse(anyLong()))
                 .willReturn(Optional.of(mock(User.class)));
-        activeAuction.activate();
     }
 
     @AfterEach
@@ -198,8 +197,28 @@ class BidCommandProcessorTest {
     }
 
     @Test
-    @DisplayName("READY 상태 경매에 입찰 시 실패")
-    void auction_ready_bid_fail() {
+    @DisplayName("취소된 경매에 입찰 시 실패")
+    void auction_cancelled_bid_fail() {
+        // given
+        BidRequest request = new BidRequest(BigDecimal.valueOf(150_000), null);
+        Auction cancelledAuction = Auction.of(
+                99L, "테스트", BigDecimal.valueOf(200_000), "상품",
+                LocalDateTime.now().minusHours(1),
+                LocalDateTime.now().plusHours(1),
+                1L
+        );
+        cancelledAuction.cancel();  // READY -> CANCELLED
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(cancelledAuction));
+
+        // when & then
+        assertThatThrownBy(() -> processor.placeBid(userDetails, auctionId, request))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(AuctionErrorEnum.AUCTION_INVALID_STATUS.getMessage());
+    }
+
+    @Test
+    @DisplayName("경매 시작 전에 입찰 시 실패")
+    void not_started_auction_bid_fail() {
         // given
         BidRequest request = new BidRequest(BigDecimal.valueOf(150_000), null);
         Auction readyAuction = Auction.of(
@@ -217,8 +236,8 @@ class BidCommandProcessorTest {
     }
 
     @Test
-    @DisplayName("DONE 상태 경매에 입찰 시 실패")
-    void auction_done_bid_fail() {
+    @DisplayName("경매 종료 후에 입찰 시 실패")
+    void ended_auction_bid_fail() {
         // given
         BidRequest request = new BidRequest(BigDecimal.valueOf(150_000), null);
         Auction doneAuction = Auction.of(
