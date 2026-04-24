@@ -2,10 +2,10 @@ package com.example.auction.domain.chat.repository;
 
 import com.example.auction.common.config.JpaConfig;
 import com.example.auction.common.config.QuerydslConfig;
+import com.example.auction.domain.category.service.CategoryService;
 import com.example.auction.domain.chat.entity.ChatMessage;
 import com.example.auction.domain.chat.entity.MessageRole;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +18,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({QuerydslConfig.class, JpaConfig.class})
+@Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class})
 class ChatMessageRepositoryImplTest {
 
     @Autowired
