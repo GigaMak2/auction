@@ -42,7 +42,7 @@ public class AuthService {
 
         String encodedPassword = passwordEncoder.encode(request.password());
 
-        User user = User.of(request.email(), encodedPassword, request.role());
+        User user = User.of(request.email(), encodedPassword);
         userRepository.save(user);
 
         return new AuthSignupResponse(user.getId(), user.getEmail(), user.getRole(), user.getCreatedAt());

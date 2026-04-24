@@ -66,8 +66,8 @@ class AuthServiceTest {
     @DisplayName("회원가입 성공")
     void signup_success() {
         // given
-        AuthSignupRequest request = new AuthSignupRequest("test@test.com", "password123", UserRole.USER);
-        User user = User.of(request.email(), "encodedPassword", request.role());
+        AuthSignupRequest request = new AuthSignupRequest("test@test.com", "password123");
+        User user = User.of(request.email(), "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(userRepository.existsByEmail(request.email())).willReturn(false);
@@ -86,7 +86,7 @@ class AuthServiceTest {
     @DisplayName("회원가입 실패 - 이메일 중복")
     void signup_fail_duplicatedEmail() {
         // given
-        AuthSignupRequest request = new AuthSignupRequest("test@test.com", "password123", UserRole.USER);
+        AuthSignupRequest request = new AuthSignupRequest("test@test.com", "password123");
 
         given(userRepository.existsByEmail(request.email())).willReturn(true);
 
@@ -106,7 +106,7 @@ class AuthServiceTest {
     void login_success() {
         //given
         AuthLoginRequest request = new AuthLoginRequest("test@test.com", "password123");
-        User user = User.of(request.email(), "encodedPassword", UserRole.USER);
+        User user = User.of(request.email(), "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(userRepository.findByEmailAndDeletedFalse(request.email())).willReturn(Optional.of(user));
@@ -142,7 +142,7 @@ class AuthServiceTest {
     void login_fail_invalidPassword() {
         // given
         AuthLoginRequest request = new AuthLoginRequest("test@test.com", "wrongPassword");
-        User user = User.of(request.email(), "encodedPassword", UserRole.USER);
+        User user = User.of(request.email(), "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(userRepository.findByEmailAndDeletedFalse(request.email())).willReturn(Optional.of(user));
@@ -164,7 +164,7 @@ class AuthServiceTest {
     void refreshToken_success() {
         // given
         String refreshToken = "refreshToken";
-        User user = User.of("test@test.com", "encodedPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(jwtProvider.validateRefreshToken(refreshToken)).willReturn(true);

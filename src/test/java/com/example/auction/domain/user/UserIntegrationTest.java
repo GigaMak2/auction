@@ -44,7 +44,7 @@ public class UserIntegrationTest extends BaseIntegrationTest {
     @BeforeEach
     void setUp() throws Exception {
         // 회원가입
-        AuthSignupRequest signupRequest = new AuthSignupRequest("test@test.com", "password123", UserRole.USER);
+        AuthSignupRequest signupRequest = new AuthSignupRequest("test@test.com", "password123");
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signupRequest)));

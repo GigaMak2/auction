@@ -2,9 +2,7 @@ package com.example.auction.domain.auth;
 
 import com.example.auction.domain.auth.dto.AuthLoginRequest;
 import com.example.auction.domain.auth.dto.AuthSignupRequest;
-import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.testutils.BaseIntegrationTest;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,7 +38,7 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        AuthSignupRequest signupRequest = new AuthSignupRequest("test@test.com", "password123", UserRole.USER);
+        AuthSignupRequest signupRequest = new AuthSignupRequest("test@test.com", "password123");
         mockMvc.perform(post("/api/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signupRequest)));
@@ -64,7 +62,7 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
     @DisplayName("회원가입 성공")
     void signup_success() throws Exception {
         // given
-        AuthSignupRequest request = new AuthSignupRequest("signup@test.com", "password123", UserRole.USER);
+        AuthSignupRequest request = new AuthSignupRequest("signup@test.com", "password123");
 
         // when & then
         mockMvc.perform(post("/api/auth/signup")
@@ -80,7 +78,7 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
     @DisplayName("회원가입 실패 - 이메일 중복")
     void signup_fail_duplicatedEmail() throws Exception {
         // given
-        AuthSignupRequest request = new AuthSignupRequest("signup@test.com", "password123", UserRole.USER);
+        AuthSignupRequest request = new AuthSignupRequest("signup@test.com", "password123");
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)));

@@ -52,7 +52,7 @@ class UserServiceTest {
     @DisplayName("마이페이지 조회 성공")
     void myPage_success() {
         // given
-        User user = User.of("test@test.com", "encodedPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(userRepository.findByIdAndDeletedFalse(1L)).willReturn(Optional.of(user));
@@ -86,7 +86,7 @@ class UserServiceTest {
     @DisplayName("비밀번호 변경 성공")
     void changePassword_success() {
         // given
-        User user = User.of("test@test.com", "encodedOldPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedOldPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
         UserChangePasswordRequest request = new UserChangePasswordRequest("oldPassword", "newPassword");
 
@@ -116,7 +116,7 @@ class UserServiceTest {
     @DisplayName("비밀번호 변경 실패 - 새 비밀번호가 기존과 동일")
     void changePassword_fail_sameAsOldPassword() {
         // given
-        User user = User.of("test@test.com", "encodedOldPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedOldPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
         UserChangePasswordRequest request = new UserChangePasswordRequest("samePassword", "samePassword");
 
@@ -132,7 +132,7 @@ class UserServiceTest {
     @DisplayName("비밀번호 변경 실패 - 기존 비밀번호 불일치")
     void changePassword_fail_invalidOldPassword() {
         // given
-        User user = User.of("test@test.com", "encodedOldPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedOldPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
         UserChangePasswordRequest request = new UserChangePasswordRequest("wrongOldPassword", "newPassword");
 
@@ -154,7 +154,7 @@ class UserServiceTest {
     @DisplayName("회원 탈퇴 성공")
     void withdraw_success() {
         // given
-        User user = User.of("test@test.com", "encodedPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(userRepository.findByIdAndDeletedFalse(1L)).willReturn(Optional.of(user));
@@ -185,7 +185,7 @@ class UserServiceTest {
     @DisplayName("회원 탈퇴 실패 - 진행 중인 경매 있음")
     void withdraw_fail_hasActiveAuction() {
         // given
-        User user = User.of("test@test.com", "encodedPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(userRepository.findByIdAndDeletedFalse(1L)).willReturn(Optional.of(user));
@@ -201,7 +201,7 @@ class UserServiceTest {
     @DisplayName("회원 탈퇴 실패 - 진행 중인 입찰 있음")
     void withdraw_fail_hasActiveBid() {
         // given
-        User user = User.of("test@test.com", "encodedPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(userRepository.findByIdAndDeletedFalse(1L)).willReturn(Optional.of(user));

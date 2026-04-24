@@ -78,7 +78,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
 
         try {
-            User newUser = User.ofSocial(authAttributes.getEmail(), UserRole.USER);
+            User newUser = User.ofSocial(authAttributes.getEmail());
             userRepository.save(newUser);
 
             UserSocialAccount newSocialAccount = UserSocialAccount.of(newUser.getId(), authAttributes.getProvider(), authAttributes.getProviderId());
