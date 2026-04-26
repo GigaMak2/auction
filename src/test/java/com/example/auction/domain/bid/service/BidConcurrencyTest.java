@@ -9,6 +9,8 @@ import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.domain.user.repository.UserRepository;
+import com.example.auction.testutils.BaseIntegrationTest;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @SpringBootTest
 @ActiveProfiles("test")
-class BidConcurrencyTest {
+class BidConcurrencyTest extends BaseIntegrationTest {
 
     @Autowired
     private BidCommandFacade bidCommandFacade;

@@ -5,6 +5,8 @@ import com.example.auction.common.config.QuerydslConfig;
 import com.example.auction.domain.category.service.CategoryService;
 import com.example.auction.domain.chat.entity.ChatMessage;
 import com.example.auction.domain.chat.entity.MessageRole;
+import com.example.auction.testutils.BaseIntegrationTest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class})
-class ChatMessageRepositoryImplTest {
+class ChatMessageRepositoryImplTest extends BaseIntegrationTest {
 
     @Autowired
     private ChatMessageRepository chatMessageRepository;

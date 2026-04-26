@@ -74,6 +74,11 @@ dependencies {
     implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:4.0.0')
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
 
+    // testcontainers
+    implementation platform('org.testcontainers:testcontainers-bom:2.0.5')
+    testImplementation "org.testcontainers:testcontainers-postgresql"
+    testImplementation "com.redis:testcontainers-redis:2.2.4"
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
