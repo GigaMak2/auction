@@ -1,11 +1,14 @@
 package com.example.auction.domain.ai.service;
 
 import com.example.auction.domain.auction.eventBridge.AuctionEventBridgeService;
+import com.example.auction.testutils.BaseIntegrationTest;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -23,14 +26,18 @@ import java.util.function.Predicate;
 
 /**
  * HyDE + Contextual Retrieval 효과를 실제 pgvector 검색 결과로 확인하는 데모
- * 실행 전 docker-compose-test.yml (PostgreSQL+pgvector) 기동 필요
  * 실행: ./gradlew test --tests "*.RagComparisonDemoTest" --info
  */
 @SpringBootTest
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.DisplayName.class)
 @DisplayName("RAG 기법 효과 비교 — HyDE + Contextual Retrieval")
-class RagComparisonDemoTest {
+@DisabledIfEnvironmentVariable(
+    named="IN_CI",
+    matches="\\s*((true)|(TRUE))\\s*",
+    disabledReason="CI 환경 입니다. 외부 AI API를 호출하는 테스트는 안돌리겠습니다."
+)
+class RagComparisonDemoTest extends BaseIntegrationTest {
 
     @Autowired private VectorStore             vectorStore;
     @Autowired private ChatModel               chatModel;
