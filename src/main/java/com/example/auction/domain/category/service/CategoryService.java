@@ -11,10 +11,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +41,10 @@ public class CategoryService {
         Category category = categoryRepository.findById(categoryId).orElseThrow(
                 () -> new ServiceErrorException(CategoryErrorEnum.CATEGORY_NOT_FOUND));
 
+        if (category.getName().equals(request.name())) {
+            throw new ServiceErrorException(CategoryErrorEnum.SAME_NAME_CATEGORY);
+        }
+
         if (category.getParentId() == null) {
             if (categoryRepository.existsByParentIdIsNullAndName(request.name())) {
                 throw new ServiceErrorException(CategoryErrorEnum.DUPLICATED_CATEGORY);
@@ -64,6 +65,10 @@ public class CategoryService {
     public CategoryMoveResponse moveCategory(Long categoryId, CategoryMoveRequest request) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(
                 () -> new ServiceErrorException(CategoryErrorEnum.CATEGORY_NOT_FOUND));
+
+        if (Objects.equals(category.getParentId(), request.parentId())) {
+            throw new ServiceErrorException(CategoryErrorEnum.SAME_LOCATION_CATEGORY);
+        }
 
         if (request.parentId() != null && category.getId().equals(request.parentId())) {
             throw new ServiceErrorException(CategoryErrorEnum.CATEGORY_CANNOT_BE_OWN_PARENT);

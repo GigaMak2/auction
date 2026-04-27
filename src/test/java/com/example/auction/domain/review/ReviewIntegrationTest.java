@@ -286,7 +286,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
     // ========================
 
     private void signup(String email, String password) throws Exception {
-        AuthSignupRequest request = new AuthSignupRequest(email, password, UserRole.USER);
+        AuthSignupRequest request = new AuthSignupRequest(email, password);
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

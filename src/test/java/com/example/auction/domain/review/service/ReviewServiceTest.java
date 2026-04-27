@@ -10,7 +10,6 @@ import com.example.auction.domain.review.entity.Review;
 import com.example.auction.domain.review.exception.ReviewErrorEnum;
 import com.example.auction.domain.review.repository.ReviewRepository;
 import com.example.auction.domain.user.entity.User;
-import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -87,7 +86,7 @@ class ReviewServiceTest {
         AuctionResult auctionResult = AuctionResult.of(BigDecimal.valueOf(1000), auctionId, buyerId, sellerId, bidId);
         ReflectionTestUtils.setField(auctionResult, "id", 1L);
 
-        User reviewee = User.of("seller@test.com", "encodedPassword", UserRole.USER);
+        User reviewee = User.of("seller@test.com", "encodedPassword");
         ReflectionTestUtils.setField(reviewee, "id", sellerId);
 
         given(reviewRepository.existsByAuctionIdAndReviewerId(auctionId, buyerId)).willReturn(false);
@@ -195,7 +194,7 @@ class ReviewServiceTest {
 
         AuctionResult auctionResult = AuctionResult.of(BigDecimal.valueOf(1000), auctionId, buyerId, sellerId, bidId);
 
-        User reviewee = User.of("seller@test.com", "encodedPassword", UserRole.USER);
+        User reviewee = User.of("seller@test.com", "encodedPassword");
         ReflectionTestUtils.setField(reviewee, "id", sellerId);
 
         given(reviewRepository.existsByAuctionIdAndReviewerId(auctionId, buyerId)).willReturn(false);
@@ -395,7 +394,7 @@ class ReviewServiceTest {
         Review review = Review.of(10L, userId, 2L, 5, "좋아요");
         ReflectionTestUtils.setField(review, "id", reviewId);
 
-        User reviewee = User.of("seller@test.com", "encodedPassword", UserRole.USER);
+        User reviewee = User.of("seller@test.com", "encodedPassword");
         ReflectionTestUtils.setField(reviewee, "id", 2L);
 
         given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
@@ -500,7 +499,7 @@ class ReviewServiceTest {
         Review review = Review.of(10L, userId, 2L, 5, "좋아요");
         ReflectionTestUtils.setField(review, "id", reviewId);
 
-        User reviewee = User.of("seller@test.com", "encodedPassword", UserRole.USER);
+        User reviewee = User.of("seller@test.com", "encodedPassword");
         ReflectionTestUtils.setField(reviewee, "id", 2L);
         ReflectionTestUtils.setField(reviewee, "rating", BigDecimal.valueOf(3.0));
 
@@ -526,7 +525,7 @@ class ReviewServiceTest {
         Review review = Review.of(10L, userId, 2L, 5, "좋아요");
         ReflectionTestUtils.setField(review, "id", reviewId);
 
-        User reviewee = User.of("seller@test.com", "encodedPassword", UserRole.USER);
+        User reviewee = User.of("seller@test.com", "encodedPassword");
         ReflectionTestUtils.setField(reviewee, "id", 2L);
         ReflectionTestUtils.setField(reviewee, "rating", BigDecimal.valueOf(5.0));
 
@@ -552,7 +551,7 @@ class ReviewServiceTest {
         Review review = Review.of(10L, userId, 2L, 5, "좋아요");
         ReflectionTestUtils.setField(review, "id", reviewId);
 
-        User reviewee = User.of("seller@test.com", "encodedPassword", UserRole.USER);
+        User reviewee = User.of("seller@test.com", "encodedPassword");
         ReflectionTestUtils.setField(reviewee, "id", 2L);
         ReflectionTestUtils.setField(reviewee, "deleted", true);
 

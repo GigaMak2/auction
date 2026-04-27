@@ -7,7 +7,6 @@ import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.repository.BidRepository;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.domain.user.entity.User;
-import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.domain.user.repository.UserRepository;
 import com.example.auction.testutils.BaseIntegrationTest;
 
@@ -64,7 +63,7 @@ class BidConcurrencyTest extends BaseIntegrationTest {
     void setUp() {
         userIds.clear();
         for (long i = 1; i <= 50; i++) {
-            User user = User.of("user" + i + "@test.com", "password", UserRole.USER);
+            User user = User.of("user" + i + "@test.com", "password");
             User saved = userRepository.save(user);
             userIds.add(saved.getId()); // 실제 저장된 ID 기록
         }

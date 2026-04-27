@@ -5,9 +5,10 @@ import com.example.auction.domain.auth.dto.AuthSignupRequest;
 import com.example.auction.domain.category.dto.CategoryCreateRequest;
 import com.example.auction.domain.category.dto.CategoryMoveRequest;
 import com.example.auction.domain.category.dto.CategoryRenameRequest;
+import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.testutils.BaseIntegrationTest;
-
+import com.example.auction.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +18,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
@@ -41,13 +44,22 @@ public class CategoryIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private String adminToken;
     private String userToken;
 
     @BeforeEach
     void setUp() throws Exception {
-        signup("admin@test.com", "password123", UserRole.ADMIN);
-        signup("user@test.com", "password123", UserRole.USER);
+        User admin = User.of("admin@test.com", passwordEncoder.encode("password123"));
+        ReflectionTestUtils.setField(admin, "role", UserRole.ADMIN);
+        userRepository.save(admin);
+
+        signup("user@test.com", "password123");
 
         adminToken = getAccessToken("admin@test.com", "password123");
         userToken = getAccessToken("user@test.com", "password123");
@@ -266,8 +278,8 @@ public class CategoryIntegrationTest extends BaseIntegrationTest {
     // 헬퍼 메서드
     // ========================
 
-    private void signup(String email, String password, UserRole role) throws Exception {
-        AuthSignupRequest request = new AuthSignupRequest(email, password, role);
+    private void signup(String email, String password) throws Exception {
+        AuthSignupRequest request = new AuthSignupRequest(email, password);
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

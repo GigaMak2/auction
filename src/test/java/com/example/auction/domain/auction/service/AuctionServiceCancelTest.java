@@ -193,7 +193,7 @@ class AuctionServiceCancelTest {
     }
 
     private User createMockUser() {
-        User user = User.of("test@test.com", "encodedPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
         given(userRepository.findByIdAndDeletedFalse(user.getId())).willReturn(Optional.of(user));
 

@@ -32,21 +32,21 @@ public class User extends DeletableEntity {
     @Column(precision = 2, scale = 1)
     private BigDecimal rating;
 
-    public static User of(String email, String encodedPassword, UserRole role) {
+    public static User of(String email, String encodedPassword) {
         User user = new User();
         user.email = email;
         user.password = encodedPassword;
-        user.role = role;
+        user.role = UserRole.USER;
         user.rating = null;
 
         return user;
     }
 
-    public static User ofSocial(String email, UserRole role) {
+    public static User ofSocial(String email) {
         User user = new User();
         user.email = email;
         user.password = null;
-        user.role = role;
+        user.role = UserRole.USER;
         user.rating = null;
 
         return user;

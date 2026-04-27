@@ -2,9 +2,7 @@ package com.example.auction.domain.auth;
 
 import com.example.auction.domain.auth.dto.AuthLoginRequest;
 import com.example.auction.domain.auth.dto.AuthSignupRequest;
-import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.testutils.BaseIntegrationTest;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,7 +38,7 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        AuthSignupRequest signupRequest = new AuthSignupRequest("test@test.com", "password123", UserRole.USER);
+        AuthSignupRequest signupRequest = new AuthSignupRequest("test@test.com", "password123");
         mockMvc.perform(post("/api/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signupRequest)));
@@ -64,7 +62,7 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
     @DisplayName("회원가입 성공")
     void signup_success() throws Exception {
         // given
-        AuthSignupRequest request = new AuthSignupRequest("signup@test.com", "password123", UserRole.USER);
+        AuthSignupRequest request = new AuthSignupRequest("signup@test.com", "password123");
 
         // when & then
         mockMvc.perform(post("/api/auth/signup")
@@ -80,7 +78,7 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
     @DisplayName("회원가입 실패 - 이메일 중복")
     void signup_fail_duplicatedEmail() throws Exception {
         // given
-        AuthSignupRequest request = new AuthSignupRequest("signup@test.com", "password123", UserRole.USER);
+        AuthSignupRequest request = new AuthSignupRequest("signup@test.com", "password123");
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)));
@@ -125,9 +123,9 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("비밀번호가 일치하지 않습니다"));
+                .andExpect(jsonPath("$.message").value("이메일 또는 비밀번호가 일치하지 않습니다"));
     }
 
     @Test
@@ -140,9 +138,9 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다"));
+                .andExpect(jsonPath("$.message").value("이메일 또는 비밀번호가 일치하지 않습니다"));
     }
 
 
