@@ -1,6 +1,6 @@
 name: CI-BASIC
 
-# build가 되는지 확인
+# build가 되고 테스트가 통과 되는지 확인
 
 on:
   push:
@@ -32,4 +32,4 @@ jobs:
       - name: check if builds
         run: |
           chmod +x gradlew
-          ./gradlew build -x test
+          ./gradlew build 
