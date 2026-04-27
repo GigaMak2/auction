@@ -33,7 +33,7 @@ public class AuthService {
 
     private static final String LOGIN_FAIL_PREFIX = "login:fail:";
     private static final int MAX_LOGIN_FAIL_COUNT = 5;
-    private static final long LOGIN_LOCK_DURATION = 5L;
+    private static final long LOGIN_LOCK_DURATION_MINUTES = 5L;
 
     @Value("${jwt.refreshExpire}")
     private long refreshTokenExpireTime;
@@ -123,8 +123,8 @@ public class AuthService {
 
     private void incrementFailCount(String failKey) {
         Long count = redisTemplate.opsForValue().increment(failKey);
-        if (count == 1) {
-            redisTemplate.expire(failKey, LOGIN_LOCK_DURATION, TimeUnit.MINUTES);
+        if (count != null && count == 1L) {
+            redisTemplate.expire(failKey, LOGIN_LOCK_DURATION_MINUTES, TimeUnit.MINUTES);
         }
     }
 }
