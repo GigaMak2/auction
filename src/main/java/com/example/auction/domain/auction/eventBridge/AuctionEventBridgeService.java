@@ -1,5 +1,7 @@
 package com.example.auction.domain.auction.eventBridge;
 
+import com.example.auction.common.exception.ServiceErrorException;
+import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Service
@@ -32,6 +35,9 @@ public class AuctionEventBridgeService {
     // 이벤트브릿지가 람다함수 실행권한이 있음을 증명할 때 사용
     @Value("${aws.eventbridge.role-arn}")
     private String roleArn;
+
+    private static final DateTimeFormatter TARGET_TIME_FMT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     // 트랜잭션 커밋 이후 eventBridge 스케줄 등록하여 고아 스케줄 방지(db에는 없고 aws 스케줄에만 있는 경우 방지)
     // 3회 재시도
@@ -82,10 +88,20 @@ public class AuctionEventBridgeService {
     }
 
     private void registerSchedule(
-            Long auctionId, LocalDateTime dateTime,LocalDateTime targetTime, String action
+            Long auctionId, LocalDateTime dateTime, LocalDateTime targetTime, String action
     ) {
         String scheduleName = "auction-" + action.toLowerCase() + "-" + auctionId;
         String atExpression = toAt(dateTime);
+        String input;
+        try {
+            input = objectMapper.writeValueAsString(Map.of(
+                    "auctionId", auctionId,
+                    "action", action,
+                    "targetTime", targetTime.format(TARGET_TIME_FMT)
+            ));
+        } catch (Exception e) {
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_SCHEDULE_SERIALIZATION_FAILED);
+        }
 
         try {
             schedulerClient.createSchedule(r -> r
@@ -96,11 +112,7 @@ public class AuctionEventBridgeService {
                     .target(t -> t
                             .arn(lambdaArn)
                             .roleArn(roleArn)
-                            .input(objectMapper.writeValueAsString(
-                                    Map.of("auctionId", auctionId,
-                                            "action", action,
-                                            "targetTime", targetTime.toString()
-                                    ))))
+                            .input(input))
                     .actionAfterCompletion(ActionAfterCompletion.DELETE) // 실행 후 자동 삭제(경매 시작/종료는 1번씩이니까)
             );
         } catch (ConflictException e) {
@@ -113,12 +125,7 @@ public class AuctionEventBridgeService {
                     .target(t -> t
                             .arn(lambdaArn)
                             .roleArn(roleArn)
-                            .input(objectMapper.writeValueAsString(
-                                    Map.of("auctionId", auctionId,
-                                            "action", action,
-                                            "targetTime", targetTime.toString()
-
-                                    ))))
+                            .input(input))
                     .actionAfterCompletion(ActionAfterCompletion.DELETE) // 실행 후 자동 삭제(경매 시작/종료는 1번씩이니까)
             );
         }
