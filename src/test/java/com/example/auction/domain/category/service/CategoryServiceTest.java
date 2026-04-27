@@ -224,6 +224,23 @@ class CategoryServiceTest {
     }
 
     @Test
+    @DisplayName("카테고리 이름 수정 실패 - 동일한 이름")
+    void renameCategory_fail_sameName() {
+        // given
+        Long categoryId = 1L;
+        Category category = Category.root("전자제품");
+        ReflectionTestUtils.setField(category, "id", categoryId);
+        CategoryRenameRequest request = new CategoryRenameRequest("전자제품");
+
+        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(category));
+
+        // when & then
+        assertThatThrownBy(() -> categoryService.renameCategory(categoryId, request))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(CategoryErrorEnum.SAME_NAME_CATEGORY.getMessage());
+    }
+
+    @Test
     @DisplayName("카테고리 이름 수정 실패 - root 중복")
     void renameCategory_fail_rootDuplicated() {
         // given
@@ -335,6 +352,23 @@ class CategoryServiceTest {
         assertThatThrownBy(() -> categoryService.moveCategory(categoryId, request))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(CategoryErrorEnum.CATEGORY_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("카테고리 이동 실패 - 동일한 위치")
+    void moveCategory_fail_sameLocation() {
+        // given
+        Long categoryId = 1L;
+        Category category = Category.root("전자제품");
+        ReflectionTestUtils.setField(category, "id", categoryId);
+        CategoryMoveRequest request = new CategoryMoveRequest(null); // root → root
+
+        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(category));
+
+        // when & then
+        assertThatThrownBy(() -> categoryService.moveCategory(categoryId, request))
+                .isInstanceOf(ServiceErrorException.class)
+                .hasMessage(CategoryErrorEnum.SAME_LOCATION_CATEGORY.getMessage());
     }
 
     @Test
