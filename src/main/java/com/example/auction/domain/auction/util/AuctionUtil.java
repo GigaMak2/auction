@@ -44,5 +44,10 @@ public class AuctionUtil {
         if (req.getEndedAt().isBefore(req.getStartedAt())) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_CREATE_ENDED_AT_BEFORE_STARTED_AT);
         }
+
+        // 경매 시작 시간이 현재 시간으로부터 최소 10분 이후인지 검증
+        if (req.getStartedAt().isBefore(now.plusMinutes(10))) {
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_CREATE_STARTED_AT_TOO_SOON);
+        }
     }
 }
