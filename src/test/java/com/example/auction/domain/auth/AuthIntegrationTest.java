@@ -3,6 +3,8 @@ package com.example.auction.domain.auth;
 import com.example.auction.domain.auth.dto.AuthLoginRequest;
 import com.example.auction.domain.auth.dto.AuthSignupRequest;
 import com.example.auction.domain.user.enums.UserRole;
+import com.example.auction.testutils.BaseIntegrationTest;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-public class AuthIntegrationTest {
+public class AuthIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
