@@ -6,6 +6,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.TestcontainersConfiguration;
 
 /**
  * pgvector와 Redis를 Testcontainers로 실행하는 통합 테스트 기반 클래스입니다.
@@ -23,15 +24,34 @@ public abstract class BaseIntegrationTest {
     static PostgreSQLContainer postgres = new PostgreSQLContainer(
             DockerImageName.parse("pgvector/pgvector:pg17")
                 .asCompatibleSubstituteFor("postgres")
-    );
+        )
+        .withDatabaseName("auction_test")
+        .withUsername("postgres")
+        .withPassword("1234");
 
     static RedisContainer redis = new RedisContainer(
             DockerImageName.parse("redis:8.6.2")
     );
 
     static  {
-        postgres.start();
-        redis.start();
+        // Testcontainers는 기본적으로 테스트가 끝난후 테스트에 쓰인 container를 없애버립니다.
+        // 
+        // 이게 마음에 안드신다면 환경변수에
+        //
+        // TESTCONTAINERS_REUSE_ENABLE=true
+        //
+        // 를 추가로 설정해 주세요.
+        //
+        // 더 자세한 사항은 https://java.testcontainers.org/features/reuse/ 참고
+        boolean reuseEnabled = TestcontainersConfiguration.getInstance().environmentSupportsReuse();
+
+        if (reuseEnabled) {
+            postgres.withReuse(true).start();
+            redis.withReuse(true).start();
+        }else {
+            postgres.start();
+            redis.start();
+        }
     }
 
     @DynamicPropertySource
