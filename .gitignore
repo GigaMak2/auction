@@ -38,7 +38,6 @@ out/
 
 ### yml ###
 application-local.yml
-src/test/resources/application-test.yml
 
 ### env ###
 .env

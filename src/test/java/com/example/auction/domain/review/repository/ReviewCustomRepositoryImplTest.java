@@ -5,6 +5,8 @@ import com.example.auction.common.config.QuerydslConfig;
 import com.example.auction.domain.category.service.CategoryService;
 import com.example.auction.domain.review.dto.ReviewListGetResponse;
 import com.example.auction.domain.review.entity.Review;
+import com.example.auction.testutils.BaseIntegrationTest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class})
-class ReviewCustomRepositoryImplTest {
+class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
 
     @Autowired
     private ReviewRepository reviewRepository;

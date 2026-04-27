@@ -6,6 +6,8 @@ import com.example.auction.domain.category.dto.CategoryCreateRequest;
 import com.example.auction.domain.category.dto.CategoryMoveRequest;
 import com.example.auction.domain.category.dto.CategoryRenameRequest;
 import com.example.auction.domain.user.enums.UserRole;
+import com.example.auction.testutils.BaseIntegrationTest;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-public class CategoryIntegrationTest {
+public class CategoryIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

@@ -8,6 +8,8 @@ import com.example.auction.domain.review.dto.ReviewCreateRequest;
 import com.example.auction.domain.review.dto.ReviewModifyRequest;
 import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.domain.user.repository.UserRepository;
+import com.example.auction.testutils.BaseIntegrationTest;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-public class ReviewIntegrationTest {
+public class ReviewIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
