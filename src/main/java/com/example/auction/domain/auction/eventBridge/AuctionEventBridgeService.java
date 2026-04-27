@@ -40,6 +40,7 @@ public class AuctionEventBridgeService {
         int maxAttempts = 3;
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
+                // 경매 시작/종료 5분전으로 세팅
                 registerStartSchedule(event.auctionId(), event.startedAt());
                 registerEndSchedule(event.auctionId(), event.endedAt());
                 return; // 성공하면 종료
@@ -54,22 +55,22 @@ public class AuctionEventBridgeService {
         }
     }
 
-    // 경매 시작 스케줄 등록
+    // 경매 시작 스케줄 등록(5분 전)
     public void registerStartSchedule(Long auctionId, LocalDateTime startedAt) {
-        if (isPast(startedAt)) {
+        if (isPast(startedAt.minusMinutes(5))) {
             log.warn("[EventBridge] 현재보다 과거로 시작 시간 등록: auctionId={}", auctionId);
             return;
         }
-        registerSchedule(auctionId, startedAt, "START");
+        registerSchedule(auctionId, startedAt.minusMinutes(5), startedAt, "START");
     }
 
-    // 경매 종료 스케줄 등록
+    // 경매 종료 스케줄 등록(5분 전)
     public void registerEndSchedule(Long auctionId, LocalDateTime endedAt) {
-        if (isPast(endedAt)) {
+        if (isPast(endedAt.minusMinutes(5))) {
             log.warn("[EventBridge] 현재보다 과거로 종료 시간 등록: auctionId={}", auctionId);
             return;
         }
-        registerSchedule(auctionId, endedAt, "END");
+        registerSchedule(auctionId, endedAt.minusMinutes(5), endedAt, "END");
     }
 
     // KST 기준 시간이 현재 UTC보다 과거인지 확인
@@ -80,7 +81,9 @@ public class AuctionEventBridgeService {
         return utc.isBefore(LocalDateTime.now(ZoneOffset.UTC));
     }
 
-    private void registerSchedule(Long auctionId, LocalDateTime dateTime, String action) {
+    private void registerSchedule(
+            Long auctionId, LocalDateTime dateTime,LocalDateTime targetTime, String action
+    ) {
         String scheduleName = "auction-" + action.toLowerCase() + "-" + auctionId;
         String atExpression = toAt(dateTime);
 
@@ -93,7 +96,10 @@ public class AuctionEventBridgeService {
                     .target(t -> t
                             .arn(lambdaArn)
                             .roleArn(roleArn)
-                            .input(objectMapper.writeValueAsString(Map.of("auctionId", auctionId, "action", action)))
+                            .input(objectMapper.writeValueAsString(
+                                    Map.of("auctionId", auctionId,
+                                            "action", action,
+                                            "targetTime", targetTime.toString())))
                     )
                     .actionAfterCompletion(ActionAfterCompletion.DELETE) // 실행 후 자동 삭제(경매 시작/종료는 1번씩이니까)
             );
