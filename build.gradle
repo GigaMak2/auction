@@ -75,7 +75,7 @@ dependencies {
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
 
     // testcontainers
-    implementation platform('org.testcontainers:testcontainers-bom:2.0.5')
+    testImplementation platform('org.testcontainers:testcontainers-bom:2.0.5')
     testImplementation "org.testcontainers:testcontainers-postgresql"
     testImplementation "com.redis:testcontainers-redis:2.2.4"
 

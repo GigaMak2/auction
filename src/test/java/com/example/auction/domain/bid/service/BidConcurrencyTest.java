@@ -95,7 +95,7 @@ class BidConcurrencyTest extends BaseIntegrationTest {
     @DisplayName("v1 -50명 동시 입찰 시 중복 최저가 발생")
     @DisabledIfEnvironmentVariable(
         named="IN_CI",
-        matches="\\s*((true)|(TRUE))\\s*",
+        matches="(?i)\\s*true\\s*",
         disabledReason="CI 환경 입니다. 실패를 보여주기 위해 작성된 테스트라 안돌리겠습니다."
     )
     void concurrency_v1_noLock() throws InterruptedException {

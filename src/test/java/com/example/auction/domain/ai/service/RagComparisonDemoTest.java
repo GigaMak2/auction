@@ -34,7 +34,7 @@ import java.util.function.Predicate;
 @DisplayName("RAG 기법 효과 비교 — HyDE + Contextual Retrieval")
 @DisabledIfEnvironmentVariable(
     named="IN_CI",
-    matches="\\s*((true)|(TRUE))\\s*",
+    matches="(?i)\\s*true\\s*",
     disabledReason="CI 환경 입니다. 외부 AI API를 호출하는 테스트는 안돌리겠습니다."
 )
 class RagComparisonDemoTest extends BaseIntegrationTest {

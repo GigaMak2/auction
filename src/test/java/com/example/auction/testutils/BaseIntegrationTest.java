@@ -6,6 +6,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 import org.testcontainers.utility.TestcontainersConfiguration;
 
 /**
@@ -27,7 +28,11 @@ public abstract class BaseIntegrationTest {
         )
         .withDatabaseName("auction_test")
         .withUsername("postgres")
-        .withPassword("1234");
+        .withPassword("1234")
+        .withCopyFileToContainer(
+                MountableFile.forHostPath("init.sql"),
+                "/docker-entrypoint-initdb.d/"
+        );
 
     static RedisContainer redis = new RedisContainer(
             DockerImageName.parse("redis:8.6.2")
