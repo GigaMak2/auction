@@ -189,6 +189,17 @@ class ReviewControllerTest {
     }
 
     @Test
+    @DisplayName("작성한 리뷰 목록 조회 실패 - size 100 초과")
+    void getWrittenReviewList_fail_sizeTooLarge() throws Exception {
+        // when & then
+        mockMvc.perform(get("/api/reviews/written")
+                        .param("size", "101"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("페이지 크기는 100 이하여야 합니다"));
+    }
+
+    @Test
     @DisplayName("작성한 리뷰 목록 조회 실패 - startDate가 endDate 이후")
     void getWrittenReviewList_fail_invalidDateRange() throws Exception {
         // when & then
@@ -246,6 +257,17 @@ class ReviewControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("페이지 크기는 1 이상이어야 합니다"));
+    }
+
+    @Test
+    @DisplayName("받은 리뷰 목록 조회 실패 - size 100 초과")
+    void getReceivedReviewList_fail_sizeTooLarge() throws Exception {
+        // when & then
+        mockMvc.perform(get("/api/reviews/received")
+                        .param("size", "101"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("페이지 크기는 100 이하여야 합니다"));
     }
 
     @Test
