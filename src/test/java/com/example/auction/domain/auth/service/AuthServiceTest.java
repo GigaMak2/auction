@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -130,6 +131,9 @@ class AuthServiceTest {
         AuthLoginRequest request = new AuthLoginRequest("test@test.com", "password123");
 
         given(userRepository.findByEmailAndDeletedFalse(request.email())).willReturn(Optional.empty());
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(valueOperations.get(anyString())).willReturn(null);
+        given(valueOperations.increment(anyString())).willReturn(1L);
 
         // when & then
         assertThatThrownBy(() -> authService.login(request))
@@ -147,6 +151,9 @@ class AuthServiceTest {
 
         given(userRepository.findByEmailAndDeletedFalse(request.email())).willReturn(Optional.of(user));
         given(passwordEncoder.matches(request.password(), user.getPassword())).willReturn(false);
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(valueOperations.get(anyString())).willReturn(null);
+        given(valueOperations.increment(anyString())).willReturn(1L);
 
         // when & then
         assertThatThrownBy(() -> authService.login(request))

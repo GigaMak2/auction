@@ -31,6 +31,10 @@ public class AuthService {
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
     private static final String BLACKLIST_PREFIX = "blacklist:";
 
+    private static final String LOGIN_FAIL_PREFIX = "login:fail:";
+    private static final int MAX_LOGIN_FAIL_COUNT = 5;
+    private static final long LOGIN_LOCK_DURATION = 5L;
+
     @Value("${jwt.refreshExpire}")
     private long refreshTokenExpireTime;
 
@@ -50,12 +54,25 @@ public class AuthService {
 
     @Transactional
     public AuthLoginResponse login(AuthLoginRequest request) {
+        String failKey = LOGIN_FAIL_PREFIX + request.email();
+
+        Number failCount = (Number) redisTemplate.opsForValue().get(failKey);
+        if (failCount != null && failCount.intValue() >= MAX_LOGIN_FAIL_COUNT) {
+            throw new ServiceErrorException(AuthErrorEnum.LOGIN_LOCKED);
+        }
+
         User user = userRepository.findByEmailAndDeletedFalse(request.email()).orElseThrow(
-                () -> new ServiceErrorException(AuthErrorEnum.INVALID_CREDENTIALS));
+                () -> {
+                    incrementFailCount(failKey);
+                    return new ServiceErrorException(AuthErrorEnum.INVALID_CREDENTIALS);
+                });
 
         if (user.getPassword() == null || !passwordEncoder.matches(request.password(), user.getPassword())) {
+            incrementFailCount(failKey);
             throw new ServiceErrorException(AuthErrorEnum.INVALID_CREDENTIALS);
         }
+
+        redisTemplate.delete(failKey);
 
         String accessToken = jwtProvider.createAccessToken(user.getId(), user.getRole().name());
         String refreshToken = jwtProvider.createRefreshToken(user.getId());
@@ -102,5 +119,12 @@ public class AuthService {
                 remainingTtl,
                 TimeUnit.MILLISECONDS
         );
+    }
+
+    private void incrementFailCount(String failKey) {
+        Long count = redisTemplate.opsForValue().increment(failKey);
+        if (count == 1) {
+            redisTemplate.expire(failKey, LOGIN_LOCK_DURATION, TimeUnit.MINUTES);
+        }
     }
 }

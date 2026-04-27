@@ -123,9 +123,9 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("비밀번호가 일치하지 않습니다"));
+                .andExpect(jsonPath("$.message").value("이메일 또는 비밀번호가 일치하지 않습니다"));
     }
 
     @Test
@@ -138,9 +138,9 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다"));
+                .andExpect(jsonPath("$.message").value("이메일 또는 비밀번호가 일치하지 않습니다"));
     }
 
 
