@@ -30,6 +30,8 @@ jobs:
           cache: "gradle"
 
       - name: check if builds
+        env:
+          IN_CI: true
         run: |
           chmod +x gradlew
           ./gradlew build 
