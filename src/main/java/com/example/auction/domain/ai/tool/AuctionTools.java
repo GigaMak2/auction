@@ -32,7 +32,7 @@ public class AuctionTools {
     // 특정 경매의 입찰 목록과 최저가를 조회 — 경쟁 입찰 분석에 활용
     @Tool(description = "특정 경매의 현재 입찰 경쟁 현황을 파악할 때 사용합니다. 입찰가 목록, 최저가, 입찰자 수를 확인할 수 있습니다. auctionId는 숫자 ID입니다. '경매 N번 경쟁 심해?', '지금 최저 입찰가 얼마야?' 같은 질문에 호출하세요.")
     public List<AuctionBidInfo> getBidsByAuctionId(Long auctionId) {
-        log.info("[Tool] getBidsByAuctionId called — auctionId={}", auctionId);
+        log.info("[Tool] getBidsByAuctionId called — auctionId={}", auctionId); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         if (auctionId == null || auctionId <= 0) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
@@ -49,11 +49,9 @@ public class AuctionTools {
         if (itemName == null || itemName.isBlank()) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
-        log.info("[Tool] getRecentAuctionResults called — itemName={}", itemName);
+        log.info("[Tool] getRecentAuctionResults called — itemName={}", itemName); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<AuctionResultInfo> results = aiToolRepository.findRecentAuctionResultsByItemName(itemName.trim());
-        log.info("[Tool] getRecentAuctionResults result count={}", results.size());
         if (results.isEmpty()) {
-            log.warn("[Tool] getRecentAuctionResults — no data, itemName length={}", itemName.length());
             throw new ToolEmptyResultException("해당 상품의 낙찰 이력이 없습니다. 시세나 낙찰가를 추측하지 마세요.");
         }
         return results;
@@ -62,15 +60,14 @@ public class AuctionTools {
     // 판매자 후기 의미 검색 — RAG 기반으로 질문과 관련 있는 후기 텍스트 반환
     @Tool(description = "판매자 후기 중 특정 키워드(배송, 포장, 상품 상태 등)와 관련된 후기를 의미 기반으로 검색할 때 사용합니다. '배송 빠른 편이야?', '포장 꼼꼼해?' 같이 구체적인 항목을 물을 때 호출하세요. 일반적인 신뢰도 조회는 getSellerStats를 사용하세요. query는 검색할 키워드나 질문을 한국어로 전달하세요.")
     public List<String> getSellerReviewInsights(Long sellerId, String query) {
-        log.debug("[Tool] getSellerReviewInsights called — sellerId={}, queryLength={}", sellerId, query != null ? query.length() : 0);
         if (sellerId == null || sellerId <= 0) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
         if (query == null || query.isBlank()) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
+        log.info("[Tool] getSellerReviewInsights called — sellerId={}, queryLength={}", sellerId, query.length()); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<String> results = reviewEmbeddingService.search(sellerId, query);
-        log.info("[Tool] getSellerReviewInsights result count={}", results.size());
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("판매자(ID: " + sellerId + ")의 관련 후기가 없습니다. 데이터를 추측하지 마세요.");
         }
@@ -82,7 +79,7 @@ public class AuctionTools {
     public List<MyAuctionInfo> getMyAuctions(ToolContext toolContext) {
         Long userId = (Long) toolContext.getContext().get("userId");
         if (userId == null) throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
-        log.info("[Tool] getMyAuctions called — userId={}", userId);
+        log.info("[Tool] getMyAuctions called — userId={}", userId); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<MyAuctionInfo> results = aiToolRepository.findMyAuctions(userId);
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("등록한 경매가 없습니다. 데이터를 추측하지 마세요.");
@@ -95,7 +92,7 @@ public class AuctionTools {
     public List<MyBidInfo> getMyBids(ToolContext toolContext) {
         Long userId = (Long) toolContext.getContext().get("userId");
         if (userId == null) throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
-        log.info("[Tool] getMyBids called — userId={}", userId);
+        log.info("[Tool] getMyBids called — userId={}", userId); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<MyBidInfo> results = aiToolRepository.findMyBids(userId);
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("입찰한 경매가 없습니다. 데이터를 추측하지 마세요.");
@@ -109,7 +106,7 @@ public class AuctionTools {
         if (categoryName == null || categoryName.isBlank()) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
-        log.info("[Tool] getAuctionStatsByCategory called — categoryName={}", categoryName);
+        log.info("[Tool] getAuctionStatsByCategory called — categoryName={}", categoryName); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<CategoryAuctionStats> results = aiToolRepository.findAuctionStatsByCategory(categoryName.trim());
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("해당 카테고리의 낙찰 이력이 없습니다. 데이터를 추측하지 마세요.");
@@ -123,7 +120,7 @@ public class AuctionTools {
         if (query == null || query.isBlank()) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
-        log.info("[Tool] searchAuctionDescriptions called — queryLength={}", query.length());
+        log.info("[Tool] searchAuctionDescriptions called — queryLength={}", query.length()); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<String> results = auctionEmbeddingService.search(query);
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("관련 상품 설명이 없습니다. 데이터를 추측하지 마세요.");
@@ -134,10 +131,10 @@ public class AuctionTools {
     // 판매자의 낙찰 횟수, 평균 평점, 최근 후기를 종합 조회 — 판매자 신뢰도 분석에 활용
     @Tool(description = "판매자의 낙찰 횟수, 평균 평점, 최근 후기를 종합 조회할 때 사용합니다. '판매자 N번 믿을 수 있어?', '거래 이력 어때?' 같은 일반적인 신뢰도 질문에 호출하세요. 배송·포장 등 특정 키워드 관련 후기 분석은 getSellerReviewInsights를 사용하세요.")
     public SellerStatsInfo getSellerStats(Long sellerId) {
-        log.info("[Tool] getSellerStats called — sellerId={}", sellerId);
         if (sellerId == null || sellerId <= 0) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
+        log.info("[Tool] getSellerStats called — sellerId={}", sellerId); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         long totalSales = aiToolRepository.countSellerSales(sellerId);
         SellerReviewSummary summary = aiToolRepository.findSellerReviewSummary(sellerId);
 

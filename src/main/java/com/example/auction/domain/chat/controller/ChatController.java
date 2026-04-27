@@ -8,6 +8,7 @@ import com.example.auction.domain.chat.dto.ChatRoomUpdateRequest;
 import com.example.auction.domain.chat.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class ChatController {
     public ResponseEntity<BaseResponse<ChatRoomResponse>> createRoom(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        log.info("[ChatController] createRoom — userId={}", userDetails.getUserId()); // 채팅방 생성 이벤트 추적 — 유저별 채팅방 생성 빈도 모니터링용
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success(
                         HttpStatus.CREATED.name(),
@@ -69,6 +72,7 @@ public class ChatController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long roomId
     ) {
+        log.info("[ChatController] deleteRoom — userId={}, roomId={}", userDetails.getUserId(), roomId); // 채팅방 삭제 이벤트 추적 — 대화 이력 소멸 감지용
         chatService.deleteRoom(roomId, userDetails.getUserId());
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(

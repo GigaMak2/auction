@@ -221,7 +221,7 @@ public class AiService {
             Flux<ServerSentEvent<String>> topicStream = isFirstMessage
                     ? Flux.defer(() -> generateTitle(chatRoom, content))
                             .onErrorResume(e -> {
-                                log.warn("[AiService] 채팅방 제목 생성 실패 roomId={}: {}", roomId, e.getMessage());
+                                log.warn("[AiService] 채팅방 제목 생성 실패 roomId={}: {}", roomId, e.getMessage(), e); // 제목 생성 실패는 채팅 기능에 영향 없으나 AI 호출 이상 감지용
                                 return Flux.empty();
                             })
                     : Flux.empty();
@@ -239,7 +239,7 @@ public class AiService {
         }) // Flux.defer end
         // 8. Fallback — 검증 실패·AI 장애 시 ERROR 이벤트로 오류 안내 후 DONE으로 스트림 종료
         .onErrorResume(e -> {
-            log.error("[AiService] 스트리밍 오류: {}", e.getMessage());
+            log.error("[AiService] 스트리밍 오류: {}", e.getMessage(), e); // AI 장애 또는 예외 발생 시 Fallback 진입 감지용
             String errorMessage;
             if (e instanceof ServiceErrorException) {
                 errorMessage = e.getMessage();

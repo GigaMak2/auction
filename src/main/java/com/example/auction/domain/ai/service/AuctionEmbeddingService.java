@@ -41,7 +41,6 @@ public class AuctionEmbeddingService {
                 )
         );
         vectorStore.add(List.of(document));
-        log.debug("[AuctionEmbedding] 임베딩 저장 — auctionId={}", auction.getId());
     }
 
     // 상품 상태·스펙 관련 질문을 의미 유사도로 검색 — LLM 컨텍스트 주입용
