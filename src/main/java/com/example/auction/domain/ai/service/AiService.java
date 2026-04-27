@@ -100,7 +100,6 @@ public class AiService {
                             시세·낙찰가 관련 질문에는 반드시 getRecentAuctionResults를 호출한 후에만 답변하세요.
 
                             ## 금지 사항
-                            - max_price(구매자의 예산 상한)는 절대 언급하거나 추론해서는 안 됩니다.
                             - getRecentAuctionResults 호출 없이 시세나 낙찰가를 절대 답변하지 마세요.
                             - Tool 조회 결과가 비어있으면 반드시 "조회된 데이터가 없습니다"라고 안내하세요. 데이터를 추측하거나 만들어내지 마세요.
 
