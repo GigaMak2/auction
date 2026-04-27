@@ -134,7 +134,7 @@ class AuthServiceTest {
         // when & then
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(ServiceErrorException.class)
-                .hasMessage(UserErrorEnum.USER_NOT_FOUND.getMessage());
+                .hasMessage(AuthErrorEnum.INVALID_CREDENTIALS.getMessage());
     }
 
     @Test
@@ -151,7 +151,7 @@ class AuthServiceTest {
         // when & then
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(ServiceErrorException.class)
-                .hasMessage(AuthErrorEnum.INVALID_PASSWORD.getMessage());
+                .hasMessage(AuthErrorEnum.INVALID_CREDENTIALS.getMessage());
     }
 
 

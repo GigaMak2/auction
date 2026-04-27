@@ -51,10 +51,10 @@ public class AuthService {
     @Transactional
     public AuthLoginResponse login(AuthLoginRequest request) {
         User user = userRepository.findByEmailAndDeletedFalse(request.email()).orElseThrow(
-                () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
+                () -> new ServiceErrorException(AuthErrorEnum.INVALID_CREDENTIALS));
 
         if (user.getPassword() == null || !passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new ServiceErrorException(AuthErrorEnum.INVALID_PASSWORD);
+            throw new ServiceErrorException(AuthErrorEnum.INVALID_CREDENTIALS);
         }
 
         String accessToken = jwtProvider.createAccessToken(user.getId(), user.getRole().name());
