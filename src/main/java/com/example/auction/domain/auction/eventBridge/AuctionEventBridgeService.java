@@ -99,8 +99,8 @@ public class AuctionEventBridgeService {
                             .input(objectMapper.writeValueAsString(
                                     Map.of("auctionId", auctionId,
                                             "action", action,
-                                            "targetTime", targetTime.toString())))
-                    )
+                                            "targetTime", targetTime.toString()
+                                    ))))
                     .actionAfterCompletion(ActionAfterCompletion.DELETE) // 실행 후 자동 삭제(경매 시작/종료는 1번씩이니까)
             );
         } catch (ConflictException e) {
@@ -113,8 +113,12 @@ public class AuctionEventBridgeService {
                     .target(t -> t
                             .arn(lambdaArn)
                             .roleArn(roleArn)
-                            .input(objectMapper.writeValueAsString(Map.of("auctionId", auctionId, "action", action)))
-                    )
+                            .input(objectMapper.writeValueAsString(
+                                    Map.of("auctionId", auctionId,
+                                            "action", action,
+                                            "targetTime", targetTime.toString()
+
+                                    ))))
                     .actionAfterCompletion(ActionAfterCompletion.DELETE) // 실행 후 자동 삭제(경매 시작/종료는 1번씩이니까)
             );
         }
