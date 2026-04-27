@@ -16,6 +16,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -92,6 +93,11 @@ class BidConcurrencyTest extends BaseIntegrationTest {
 
     @Test
     @DisplayName("v1 -50명 동시 입찰 시 중복 최저가 발생")
+    @DisabledIfEnvironmentVariable(
+        named="IN_CI",
+        matches="\\s*((true)|(TRUE))\\s*",
+        disabledReason="CI 환경 입니다. 실패를 보여주기 위해 작성된 테스트라 안돌리겠습니다."
+    )
     void concurrency_v1_noLock() throws InterruptedException {
         // given
         int threadCount = 50;
