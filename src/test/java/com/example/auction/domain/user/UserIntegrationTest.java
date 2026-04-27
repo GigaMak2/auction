@@ -3,7 +3,6 @@ package com.example.auction.domain.user;
 import com.example.auction.domain.auth.dto.AuthLoginRequest;
 import com.example.auction.domain.auth.dto.AuthSignupRequest;
 import com.example.auction.domain.user.dto.UserChangePasswordRequest;
-import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.testutils.BaseIntegrationTest;
 
 import org.junit.jupiter.api.AfterEach;
@@ -151,7 +150,7 @@ public class UserIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다"));
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("이메일 또는 비밀번호가 일치하지 않습니다"));
     }
 }
