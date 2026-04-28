@@ -2,22 +2,27 @@ package com.example.auction.domain.auction.repository;
 import static com.example.auction.domain.auction.entity.QAuction.auction;
 
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
+import com.example.auction.domain.auction.dto.GetManyAuctionsResponse;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.category.service.CategoryService;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -44,6 +49,43 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
         return findByConditionImpl(userId, condition);
     }
 
+    @Override
+    public Page<GetManyAuctionsResponse> findAuctionWithConditions(Pageable pageable, AuctionStatus auctionStatus, String keyword) {
+        List<GetManyAuctionsResponse> list = queryFactory
+                .select(Projections.constructor(GetManyAuctionsResponse.class,
+                        auction.id,
+                        auction.userId,
+                        auction.maxPrice,
+                        auction.itemName,
+                        auction.status,
+                        auction.startedAt,
+                        auction.endedAt,
+                        auction.cancelledAt,
+                        auction.categoryId,
+                        auction.createdAt))
+                .from(auction)
+                .where(
+                        statusEq(auctionStatus),
+                        keywordContains(keyword)
+                )
+                .orderBy(auction.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long total = queryFactory
+                .select(auction.count())
+                .from(auction)
+                .where(
+                        statusEq(auctionStatus),
+                        keywordContains(keyword)
+                )
+                .fetchOne();
+
+        if (total == null) total = 0L;
+
+        return new PageImpl<>(list, pageable, total);
+    }
 
     private Page<@NonNull Auction> findByConditionImpl(
             @Nullable Long userId,
@@ -130,5 +172,13 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
         }
 
         return null;
+    }
+
+    private BooleanExpression statusEq(AuctionStatus status) {
+        return status != null ? auction.status.eq(status) : null;
+    }
+
+    private BooleanExpression keywordContains(String keyword) {
+        return StringUtils.hasText(keyword) ? auction.itemName.containsIgnoreCase(keyword) : null;
     }
 }
