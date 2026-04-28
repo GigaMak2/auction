@@ -19,7 +19,7 @@ public class AuctionUtil {
                 condition.getMaxPriceMax() != null &&
                 condition.getMaxPriceMax().compareTo(condition.getMaxPriceMin()) < 0
         ) {
-            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_SEARCH_INVLID_PRICE_RANGE);
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_SEARCH_INVALID_PRICE_RANGE);
         }
     }
 

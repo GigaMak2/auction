@@ -31,7 +31,7 @@ public enum AuctionErrorEnum implements ErrorEnumInterface {
             HttpStatus.BAD_REQUEST, 
             "취소된 경매는 전체조회에서 볼 수 없습니다"
     ),
-    AUCTION_SEARCH_INVLID_PRICE_RANGE(
+    AUCTION_SEARCH_INVALID_PRICE_RANGE(
             HttpStatus.BAD_REQUEST, 
             "조회 최소 금액이 최대 금액보다 클 수는 없습니다"
     ),
