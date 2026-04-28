@@ -1,10 +1,16 @@
 package com.example.auction.domain.auction.service;
 
 import com.example.auction.common.dto.PageResponse;
+import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.dto.AuctionAdminSearchCondition;
 import com.example.auction.domain.auction.dto.GetManyAuctionsResponse;
+import com.example.auction.domain.auction.entity.Auction;
+import com.example.auction.domain.auction.enums.AuctionStatus;
+import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -25,5 +31,21 @@ public class AuctionAdminService {
         );
 
         return PageResponse.create(auctionList);
+    }
+
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = {"getManyAuctionsPublic"}, allEntries = true),
+            @CacheEvict(cacheNames = {"getAuction"}, key = "#auctionId"),
+    })
+    public void forceCancel(Long auctionId) {
+        Auction auction = auctionRepository.findById(auctionId).orElseThrow(
+                () -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));
+
+        if (auction.getStatus() != AuctionStatus.READY && auction.getStatus() != AuctionStatus.ACTIVE) {
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_STATUS_NOT_CANCELLABLE);
+        }
+
+        auction.forceCancel();
     }
 }
