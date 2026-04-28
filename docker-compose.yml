@@ -81,6 +81,41 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: auction-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--query.lookback-delta=15m'
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - app
+
+  cloudwatch-exporter:
+    image: prom/cloudwatch-exporter:latest
+    container_name: auction-cloudwatch-exporter
+    ports:
+      - "9106:9106"
+    volumes:
+      - ./cloudwatch_exporter_config.yml:/config/config.yml
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      - prometheus
+
+
   influxdb:
     image: influxdb:1.8
     container_name: auction-influxdb
@@ -100,10 +135,15 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
-      - influxdb
+      influxdb:
+        condition: service_started
+      prometheus:
+        condition: service_healthy
 
 volumes:
   postgres-data:
   influxdb-data:
   grafana-data:
+  prometheus-data:
