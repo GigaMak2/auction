@@ -2,6 +2,7 @@ package com.example.auction.domain.user.controller;
 
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
+import com.example.auction.domain.user.dto.UserDetailGetResponse;
 import com.example.auction.domain.user.dto.UserListGetResponse;
 import com.example.auction.domain.user.dto.UserSearchCondition;
 import com.example.auction.domain.user.service.UserAdminService;
@@ -9,10 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,5 +25,13 @@ public class UserAdminController {
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "유저 목록 조회 요청 성공", userAdminService.getUserList(condition)));
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<BaseResponse<UserDetailGetResponse>> getUserDetail(
+            @PathVariable Long userId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
+                HttpStatus.OK.name(), "유저 상세 조회 요청 성공", userAdminService.getUserDetail(userId)));
     }
 }
