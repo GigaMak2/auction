@@ -126,7 +126,7 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
     private BooleanExpression hasKeyword(AuctionSearchCondition condition) {
         // TODO: 일단 간단한 like 키워드로만 검색
         if (condition.getKeyword() != null) {
-            return auction.itemName.likeIgnoreCase(condition.getKeyword());
+            return auction.itemName.containsIgnoreCase(condition.getKeyword());
         }
 
         return null;
