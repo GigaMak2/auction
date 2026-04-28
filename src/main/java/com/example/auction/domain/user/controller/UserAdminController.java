@@ -5,6 +5,7 @@ import com.example.auction.common.dto.PageResponse;
 import com.example.auction.domain.user.dto.UserDetailGetResponse;
 import com.example.auction.domain.user.dto.UserListGetResponse;
 import com.example.auction.domain.user.dto.UserSearchCondition;
+import com.example.auction.domain.user.dto.UserWithdrawResponse;
 import com.example.auction.domain.user.service.UserAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +34,13 @@ public class UserAdminController {
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "유저 상세 조회 요청 성공", userAdminService.getUserDetail(userId)));
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<BaseResponse<UserWithdrawResponse>> forceWithdraw(
+            @PathVariable Long userId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
+                HttpStatus.OK.name(), "유저 강제 탈퇴 요청 성공", userAdminService.forceWithdraw(userId)));
     }
 }
