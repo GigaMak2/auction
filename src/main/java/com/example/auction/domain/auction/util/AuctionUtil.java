@@ -1,8 +1,6 @@
 package com.example.auction.domain.auction.util;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.stream.Collectors;
 
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
@@ -28,6 +26,11 @@ public class AuctionUtil {
     public static void throwIfCreateAuctionRequestNotValid(
             CreateAuctionRequest req
     ) {
+        // 경매 최대 가격은 정수여야 함
+        if (req.getMaxPrice().stripTrailingZeros().scale() > 0) {
+            throw new ServiceErrorException(AuctionErrorEnum.AUCTION_CREATE_MAX_PRICE_NOT_WHOLE_NUMBER);
+        }
+
         LocalDateTime now = LocalDateTime.now();
 
         // 경매 시작 시간이 현재 시간 보다 과거이면 에러를 던지기
