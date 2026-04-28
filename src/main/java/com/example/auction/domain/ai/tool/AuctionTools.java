@@ -32,10 +32,10 @@ public class AuctionTools {
     // 특정 경매의 입찰 목록과 최저가를 조회 — 경쟁 입찰 분석에 활용
     @Tool(description = "특정 경매의 현재 입찰 경쟁 현황을 파악할 때 사용합니다. 입찰가 목록, 최저가, 입찰자 수를 확인할 수 있습니다. auctionId는 숫자 ID입니다. '경매 N번 경쟁 심해?', '지금 최저 입찰가 얼마야?' 같은 질문에 호출하세요.")
     public List<AuctionBidInfo> getBidsByAuctionId(Long auctionId) {
-        log.info("[Tool] getBidsByAuctionId called — auctionId={}", auctionId); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         if (auctionId == null || auctionId <= 0) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
+        log.info("[Tool] getBidsByAuctionId called — auctionId={}", auctionId); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<AuctionBidInfo> results = aiToolRepository.findBidsByAuctionId(auctionId);
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("해당 경매(ID: " + auctionId + ")의 입찰 내역이 없습니다. 입찰가나 경쟁 현황을 추측하지 마세요.");

@@ -16,7 +16,30 @@
     <!-- 운영 환경: CloudWatch Logs Insights 검색용 JSON 포맷 -->
     <springProfile name="prod">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <!-- CloudWatch Logs Insights에서 service/env 필드로 필터링 가능 -->
+                <customFields>{"service":"auction","env":"prod"}</customFields>
+                <!-- MDC 컨텍스트(userId 등) JSON 출력 -->
+                <provider class="net.logstash.logback.composite.loggingevent.MdcJsonProvider"/>
+                <!-- 스택트레이스 20줄 제한 — CloudWatch 로그 용량 절약 -->
+                <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                    <maxDepthPerThrowable>20</maxDepthPerThrowable>
+                    <rootCauseFirst>true</rootCauseFirst>
+                </throwableConverter>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <!-- dev/prod 외 프로파일(테스트 등) — appender 미등록으로 인한 무로깅 방지 -->
+    <springProfile name="!dev &amp; !prod">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
         </appender>
 
         <root level="INFO">

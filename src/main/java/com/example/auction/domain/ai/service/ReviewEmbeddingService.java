@@ -146,7 +146,7 @@ public class ReviewEmbeddingService {
             hydeCache.put(query, result);
             return result;
         } catch (Exception e) {
-            log.warn("[RAG] HyDE 가상 후기 생성 실패, 원본 쿼리로 폴백: {}", e.getMessage(), e); // AI 호출 실패 또는 타임아웃 — 폴백 빈도로 AI 상태 모니터링 가능
+            log.warn("[RAG] HyDE 가상 후기 생성 실패, 원본 쿼리로 폴백", e); // AI 호출 실패 또는 타임아웃 — 폴백 빈도로 AI 상태 모니터링 가능
             return query;
         }
     }
@@ -166,7 +166,7 @@ public class ReviewEmbeddingService {
                 return String.join(" ", reviews);
             }
         } catch (Exception e) {
-            log.warn("[RAG] HyDE JSON 파싱 실패, 후처리로 폴백: {}", e.getMessage(), e); // LLM이 JSON 형식을 지키지 않은 경우 — 프롬프트 준수율 모니터링 가능
+            log.warn("[RAG] HyDE JSON 파싱 실패, 후처리로 폴백", e); // LLM이 JSON 형식을 지키지 않은 경우 — 프롬프트 준수율 모니터링 가능
         }
 
         String cleaned = cleanHydeResult(raw);

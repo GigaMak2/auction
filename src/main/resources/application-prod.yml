@@ -43,6 +43,9 @@ aws:
 
 # actuator 관련
 management:
+  server:
+    port: 9001
+    address: 0.0.0.0  # ECS awsvpc — Prometheus 컨테이너가 별도 IP에서 접근하므로 필요
   endpoints:
     web:
       exposure:

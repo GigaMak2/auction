@@ -46,7 +46,7 @@ public class AuctionEmbedListener implements MessageListener {
             }
             auctionId = tree.get("auctionId").asLong();
         } catch (Exception e) {
-            log.error("[AuctionEmbed] 메시지 파싱 실패: body={}, error={}", body, e.getMessage(), e); // Redis Pub/Sub 메시지 형식 이상 감지 — body 포함으로 원인 추적 가능
+            log.error("[AuctionEmbed] 메시지 파싱 실패: body={}", body, e); // Redis Pub/Sub 메시지 형식 이상 감지 — body 포함으로 원인 추적 가능
             return;
         }
 
@@ -78,12 +78,12 @@ public class AuctionEmbedListener implements MessageListener {
                     stringRedisTemplate.opsForValue().set(doneKey, "1", 30, TimeUnit.DAYS);
                     log.info("[AuctionEmbed] 임베딩 완료 — auctionId={}", finalAuctionId); // 낙찰 경매 임베딩 파이프라인 정상 완료 확인용 — RAG 검색 가능 상태 진입
                 } catch (Exception e) {
-                    log.error("[AuctionEmbed] 임베딩 처리 실패 — auctionId={}, error={}", finalAuctionId, e.getMessage(), e); // OpenAI 임베딩 API 실패 또는 pgvector 저장 실패 감지용
+                    log.error("[AuctionEmbed] 임베딩 처리 실패 — auctionId={}", finalAuctionId, e); // OpenAI 임베딩 API 실패 또는 pgvector 저장 실패 감지용
                 } finally {
                     stringRedisTemplate.delete(lockKey);
                 }
             } catch (Exception e) {
-                log.error("[AuctionEmbed] 처리 중 예외 — auctionId={}, error={}", finalAuctionId, e.getMessage(), e); // 예상치 못한 예외 — 스택 트레이스 포함으로 원인 추적 가능
+                log.error("[AuctionEmbed] 처리 중 예외 — auctionId={}", finalAuctionId, e); // 예상치 못한 예외 — 스택 트레이스 포함으로 원인 추적 가능
             }
         }, embedExecutor);
     }

@@ -28,3 +28,8 @@ aws:
   eventbridge:
     lambda-arn: ${lambdaArn:}
     role-arn: ${roleArn:}
+
+management:
+  server:
+    port: 9001
+    address: 0.0.0.0  # Docker 내부 네트워크 — Prometheus 컨테이너 접근 허용 (호스트 미노출)
