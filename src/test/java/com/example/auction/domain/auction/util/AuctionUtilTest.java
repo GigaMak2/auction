@@ -39,17 +39,22 @@ class AuctionUtilTest {
     }
 
     @Test
+    @DisplayName("정상적인 경매 생성 요청은 통과")
+    void noThrowForNormalCreation() {
+        // GIVEN
+        CreateAuctionRequest req = getNormalCreationRequest(LocalDateTime.now());
+
+        // WHEN & THEN
+        AuctionUtil.throwIfCreateAuctionRequestNotValid(req);
+    }
+
+    @Test
     @DisplayName("경매 생성 요청의 시작일은 과거여서는 안됩니다")
     void createRequestNoPastStart() {
         // GIVEN
         LocalDateTime now = LocalDateTime.now();
-
-        LocalDateTime startedAt = now.minusSeconds(2);
-        LocalDateTime endedAt = now.plusSeconds(2);
-
-        CreateAuctionRequest req = new CreateAuctionRequest();
-        req.setStartedAt(startedAt);
-        req.setEndedAt(endedAt);
+        CreateAuctionRequest req = getNormalCreationRequest(now);
+        req.setStartedAt(now.minusSeconds(2));
 
         // WHEN & THEN
         assertThrows(ServiceErrorException.class, () -> {
@@ -62,17 +67,48 @@ class AuctionUtilTest {
     void createRequestNoEndBeforeStart() {
         // GIVEN
         LocalDateTime now = LocalDateTime.now();
-
-        LocalDateTime startedAt = now.plusSeconds(4);
-        LocalDateTime endedAt = now.plusSeconds(2);
-
-        CreateAuctionRequest req = new CreateAuctionRequest();
-        req.setStartedAt(startedAt);
-        req.setEndedAt(endedAt);
+        CreateAuctionRequest req = getNormalCreationRequest(now);
+        req.setEndedAt(req.getStartedAt().minusSeconds(1));
 
         // WHEN & THEN
         assertThrows(ServiceErrorException.class, () -> {
             AuctionUtil.throwIfCreateAuctionRequestNotValid(req);
         });
+    }
+
+    @Test
+    @DisplayName("경매 생성 요청의 시작시간은 현재 시간보다 10분 후여야 합니다")
+    void createRequestThrowOnTooSoon() {
+        // GIVEN
+        LocalDateTime now = LocalDateTime.now();
+        CreateAuctionRequest req = getNormalCreationRequest(now);
+        req.setStartedAt(now.plusMinutes(5));
+
+        // WHEN & THEN
+        assertThrows(ServiceErrorException.class, () -> {
+            AuctionUtil.throwIfCreateAuctionRequestNotValid(req);
+        });
+    }
+
+    @Test
+    @DisplayName("경매 생성 요청의 최대 가격은 정수여야 합니다")
+    void createRequestMustBeWholeNumber() {
+        // GIVEN
+        CreateAuctionRequest req = getNormalCreationRequest(LocalDateTime.now());
+        req.setMaxPrice(new BigDecimal("1000.2"));
+
+        // WHEN & THEN
+        assertThrows(ServiceErrorException.class, () -> {
+            AuctionUtil.throwIfCreateAuctionRequestNotValid(req);
+        });
+    }
+
+    private CreateAuctionRequest getNormalCreationRequest(LocalDateTime now) {
+        CreateAuctionRequest req = new CreateAuctionRequest();
+        req.setMaxPrice(new BigDecimal("1000"));
+        req.setStartedAt(now.plusMinutes(20));
+        req.setEndedAt(now.plusMinutes(30));
+
+        return req;
     }
 }
