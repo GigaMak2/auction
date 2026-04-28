@@ -82,7 +82,7 @@ class AuctionUtilTest {
         // GIVEN
         LocalDateTime now = LocalDateTime.now();
         CreateAuctionRequest req = getNormalCreationRequest(now);
-        req.setEndedAt(now.plusMinutes(5));
+        req.setStartedAt(now.plusMinutes(5));
 
         // WHEN & THEN
         assertThrows(ServiceErrorException.class, () -> {
