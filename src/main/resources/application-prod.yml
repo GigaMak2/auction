@@ -40,6 +40,7 @@ aws:
   eventbridge:
     lambda-arn: ${LAMBDA_ARN}
     role-arn: ${ROLE_ARN}
+    legacy-lambda-arn: ${LEGACY_LAMBDA_ARN}
 
 # actuator 관련
 management:

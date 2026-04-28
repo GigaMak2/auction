@@ -26,5 +26,6 @@ spring:
     defer-datasource-initialization: true
 aws:
   eventbridge:
-    lambda-arn: ${lambdaArn:}
-    role-arn: ${roleArn:}
+    lambda-arn: ${LAMBDA_ARN:}
+    role-arn: ${ROLE_ARN:}
+    legacy-lambda-arn: ${LEGACY_LAMBDA_ARN:}

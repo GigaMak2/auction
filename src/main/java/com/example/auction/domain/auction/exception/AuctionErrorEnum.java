@@ -56,15 +56,7 @@ public enum AuctionErrorEnum implements ErrorEnumInterface {
     AUCTION_CREATE_STARTED_AT_TOO_SOON(
             HttpStatus.BAD_REQUEST,
             "경매 시작 시간은 현재 시간으로부터 최소 10분 이후여야 합니다"
-    ),
-
-    // 직렬화에 실패하는 건 서버 코드 문제
-    AUCTION_SCHEDULE_SERIALIZATION_FAILED(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            "경매 시간 직렬화에 실패하였습니다"
-
     )
-
 
     ;
 
