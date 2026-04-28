@@ -47,8 +47,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/reviews/{reviewId}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/actuator/health").permitAll() // spring actuator health check는 모두가 가능
-                        .requestMatchers("/actuator/**").hasRole("ADMIN") // 그외에 것은 관리자만 가능
+                        .requestMatchers("/health").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(endpoint -> endpoint

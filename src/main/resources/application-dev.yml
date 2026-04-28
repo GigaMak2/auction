@@ -28,3 +28,8 @@ aws:
   eventbridge:
     lambda-arn: ${lambdaArn:}
     role-arn: ${roleArn:}
+
+management:
+  server:
+    port: 9001
+    address: 0.0.0.0  # 모든 인터페이스 바인딩 — Docker 내부 및 호스트(9001:9001 매핑) 모두 접근 가능

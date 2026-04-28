@@ -18,5 +18,5 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long>,
     // 스케줄러 - 30일 이전 메시지 bulk 삭제
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM ChatMessage m WHERE m.createdAt < :dateTime")
-    void deleteAllByCreatedAtBefore(@Param("dateTime") LocalDateTime dateTime);
+    int deleteAllByCreatedAtBefore(@Param("dateTime") LocalDateTime dateTime);
 }

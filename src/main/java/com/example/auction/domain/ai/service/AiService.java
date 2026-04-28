@@ -100,7 +100,6 @@ public class AiService {
                             시세·낙찰가 관련 질문에는 반드시 getRecentAuctionResults를 호출한 후에만 답변하세요.
 
                             ## 금지 사항
-                            - max_price(구매자의 예산 상한)는 절대 언급하거나 추론해서는 안 됩니다.
                             - getRecentAuctionResults 호출 없이 시세나 낙찰가를 절대 답변하지 마세요.
                             - Tool 조회 결과가 비어있으면 반드시 "조회된 데이터가 없습니다"라고 안내하세요. 데이터를 추측하거나 만들어내지 마세요.
 
@@ -222,7 +221,7 @@ public class AiService {
             Flux<ServerSentEvent<String>> topicStream = isFirstMessage
                     ? Flux.defer(() -> generateTitle(chatRoom, content))
                             .onErrorResume(e -> {
-                                log.warn("[AiService] 채팅방 제목 생성 실패 roomId={}: {}", roomId, e.getMessage());
+                                log.warn("[AiService] 채팅방 제목 생성 실패 roomId={}: {}", roomId, e.getMessage(), e); // 제목 생성 실패는 채팅 기능에 영향 없으나 AI 호출 이상 감지용
                                 return Flux.empty();
                             })
                     : Flux.empty();
@@ -240,7 +239,7 @@ public class AiService {
         }) // Flux.defer end
         // 8. Fallback — 검증 실패·AI 장애 시 ERROR 이벤트로 오류 안내 후 DONE으로 스트림 종료
         .onErrorResume(e -> {
-            log.error("[AiService] 스트리밍 오류: {}", e.getMessage());
+            log.error("[AiService] 스트리밍 오류: {}", e.getMessage(), e); // AI 장애 또는 예외 발생 시 Fallback 진입 감지용
             String errorMessage;
             if (e instanceof ServiceErrorException) {
                 errorMessage = e.getMessage();
