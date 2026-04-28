@@ -1,6 +1,7 @@
 package com.example.auction.domain.review.dto;
 
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
@@ -16,7 +17,8 @@ public class ReviewSearchCondition {
     private int page = 0;
 
     @Positive(message = "페이지 크기는 1 이상이어야 합니다")
-    private int size = 10;
+    @Max(value = 100, message = "페이지 크기는 100 이하여야 합니다")
+    private int size = 20;
 
     private LocalDate startDate;
     private LocalDate endDate;

@@ -40,15 +40,22 @@ aws:
   eventbridge:
     lambda-arn: ${LAMBDA_ARN}
     role-arn: ${ROLE_ARN}
+    legacy-lambda-arn: ${LEGACY_LAMBDA_ARN}
 
 # actuator 관련
 management:
+  server:
+    port: 9001
+    address: 0.0.0.0  # ECS awsvpc — Prometheus 컨테이너가 별도 IP에서 접근하므로 필요
   endpoints:
     web:
       exposure:
         include:
           - health
+          - prometheus
 
   endpoint:
     health:
       show-details: never
+    prometheus:
+      enabled: true

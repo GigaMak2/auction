@@ -43,6 +43,7 @@ services:
     container_name: auction-app
     ports:
       - "8080:8080"
+      - "9001:9001"
     environment:
       SPRING_PROFILES_ACTIVE: dev
       POSTGRES_URL: ${POSTGRES_URL}

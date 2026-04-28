@@ -22,7 +22,7 @@ public class ChatScheduler {
     @Scheduled(cron = "0 0 0 * * *")
     public void deleteOldMessages() {
         LocalDateTime threshold = LocalDateTime.now().minusDays(30);
-        chatMessageRepository.deleteAllByCreatedAtBefore(threshold);
-        log.info("[ChatScheduler] 30일 이전 메시지 삭제 완료 | 기준시각: {}", threshold);
+        int deleted = chatMessageRepository.deleteAllByCreatedAtBefore(threshold);
+        log.info("[ChatScheduler] 30일 이전 메시지 삭제 완료 | 기준시각: {}, 삭제건수: {}건", threshold, deleted); // 스케줄러 정상 실행 확인 + 삭제량 이상 급증 감지용
     }
 }

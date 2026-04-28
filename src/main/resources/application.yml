@@ -64,10 +64,17 @@ management:
       exposure:
         include:
           - health
+          - prometheus
 
   endpoint:
     health:
       show-details: never
+    prometheus:
+      enabled: true
+
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 jwt:
   secret:

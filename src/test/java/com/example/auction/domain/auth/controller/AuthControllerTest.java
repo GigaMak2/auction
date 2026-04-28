@@ -60,7 +60,7 @@ class AuthControllerTest {
     @DisplayName("회원가입 성공")
     void signup_success() throws Exception {
         // given
-        AuthSignupRequest request = new AuthSignupRequest("test@test.com", "password123", UserRole.USER);
+        AuthSignupRequest request = new AuthSignupRequest("test@test.com", "password123");
         AuthSignupResponse response = new AuthSignupResponse(1L, "test@test.com", UserRole.USER, LocalDateTime.now());
 
         given(authService.signup(any(AuthSignupRequest.class))).willReturn(response);
@@ -79,7 +79,7 @@ class AuthControllerTest {
     @DisplayName("회원가입 실패 - 이메일 형식 불일치")
     void signup_fail_invalidEmail() throws Exception {
         // given
-        AuthSignupRequest request = new AuthSignupRequest("testEmail", "password123", UserRole.USER);
+        AuthSignupRequest request = new AuthSignupRequest("testEmail", "password123");
 
         // when & then
         mockMvc.perform(post("/api/auth/signup")
@@ -94,7 +94,7 @@ class AuthControllerTest {
     @DisplayName("회원가입 실패 - 비밀번호 8자 미만")
     void signup_fail_shortPassword() throws Exception {
         // given
-        AuthSignupRequest request = new AuthSignupRequest("test@test.com", "pw123", UserRole.USER);
+        AuthSignupRequest request = new AuthSignupRequest("test@test.com", "pw123");
 
         // when & then
         mockMvc.perform(post("/api/auth/signup")
@@ -103,21 +103,6 @@ class AuthControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("비밀번호는 8자 이상이어야 합니다"));
-    }
-
-    @Test
-    @DisplayName("회원가입 실패 - role 누락")
-    void signup_fail_nullRole() throws Exception {
-        // given
-        AuthSignupRequest request = new AuthSignupRequest("test@test.com", "password123", null);
-
-        // when & then
-        mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("역할을 선택해주세요"));
     }
 
 

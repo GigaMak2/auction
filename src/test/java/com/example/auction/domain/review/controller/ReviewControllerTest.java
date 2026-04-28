@@ -125,6 +125,21 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.message").value("별점은 최대 5점입니다"));
     }
 
+    @Test
+    @DisplayName("리뷰 작성 실패 - 설명 500자 초과")
+    void createReview_fail_descriptionTooLong() throws Exception {
+        // given
+        ReviewCreateRequest request = new ReviewCreateRequest(1L, 5, "a".repeat(501));
+
+        // when & then
+        mockMvc.perform(post("/api/reviews")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("리뷰 내용은 500자 이하로 입력해주세요"));
+    }
+
 
     // ========================
     // 작성한 리뷰 목록 조회
@@ -171,6 +186,17 @@ class ReviewControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("페이지 크기는 1 이상이어야 합니다"));
+    }
+
+    @Test
+    @DisplayName("작성한 리뷰 목록 조회 실패 - size 100 초과")
+    void getWrittenReviewList_fail_sizeTooLarge() throws Exception {
+        // when & then
+        mockMvc.perform(get("/api/reviews/written")
+                        .param("size", "101"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("페이지 크기는 100 이하여야 합니다"));
     }
 
     @Test
@@ -231,6 +257,17 @@ class ReviewControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("페이지 크기는 1 이상이어야 합니다"));
+    }
+
+    @Test
+    @DisplayName("받은 리뷰 목록 조회 실패 - size 100 초과")
+    void getReceivedReviewList_fail_sizeTooLarge() throws Exception {
+        // when & then
+        mockMvc.perform(get("/api/reviews/received")
+                        .param("size", "101"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("페이지 크기는 100 이하여야 합니다"));
     }
 
     @Test
@@ -321,6 +358,21 @@ class ReviewControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("별점은 최대 5점입니다"));
+    }
+
+    @Test
+    @DisplayName("리뷰 수정 실패 - 설명 500자 초과")
+    void modifyReview_fail_descriptionTooLong() throws Exception {
+        // given
+        ReviewModifyRequest request = new ReviewModifyRequest(null, "a".repeat(501));
+
+        // when & then
+        mockMvc.perform(patch("/api/reviews/{reviewId}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("리뷰 내용은 500자 이하로 입력해주세요"));
     }
 
 

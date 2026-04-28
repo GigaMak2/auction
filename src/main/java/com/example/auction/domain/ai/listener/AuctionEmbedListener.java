@@ -46,7 +46,7 @@ public class AuctionEmbedListener implements MessageListener {
             }
             auctionId = tree.get("auctionId").asLong();
         } catch (Exception e) {
-            log.error("[AuctionEmbed] 메시지 파싱 실패: body={}, error={}", body, e.getMessage());
+            log.error("[AuctionEmbed] 메시지 파싱 실패: body={}", body, e); // Redis Pub/Sub 메시지 형식 이상 감지 — body 포함으로 원인 추적 가능
             return;
         }
 
@@ -55,12 +55,11 @@ public class AuctionEmbedListener implements MessageListener {
             try {
                 var optionalAuction = auctionRepository.findById(finalAuctionId);
                 if (optionalAuction.isEmpty()) {
-                    log.warn("[AuctionEmbed] 경매 없음 — auctionId={}", finalAuctionId);
+                    log.warn("[AuctionEmbed] 경매 없음 — auctionId={}", finalAuctionId); // Lambda 이벤트는 왔는데 DB에 경매가 없는 데이터 정합성 이상 감지용
                     return;
                 }
                 var auction = optionalAuction.get();
                 if (auction.getStatus() != AuctionStatus.DONE) {
-                    log.debug("[AuctionEmbed] 낙찰 상태 아님, 스킵 — auctionId={}, status={}", finalAuctionId, auction.getStatus());
                     return;
                 }
 
@@ -68,25 +67,23 @@ public class AuctionEmbedListener implements MessageListener {
                 String lockKey = EMBED_LOCK_KEY_PREFIX + finalAuctionId;
 
                 if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(doneKey))) {
-                    log.info("[AuctionEmbed] 이미 임베딩 완료됨, 스킵 — auctionId={}", finalAuctionId);
                     return;
                 }
                 Boolean locked = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", 10, TimeUnit.MINUTES);
                 if (Boolean.FALSE.equals(locked)) {
-                    log.info("[AuctionEmbed] 처리 중인 임베딩 있음, 스킵 — auctionId={}", finalAuctionId);
                     return;
                 }
                 try {
                     auctionEmbeddingService.embed(auction);
                     stringRedisTemplate.opsForValue().set(doneKey, "1", 30, TimeUnit.DAYS);
-                    log.info("[AuctionEmbed] 임베딩 완료 — auctionId={}", finalAuctionId);
+                    log.info("[AuctionEmbed] 임베딩 완료 — auctionId={}", finalAuctionId); // 낙찰 경매 임베딩 파이프라인 정상 완료 확인용 — RAG 검색 가능 상태 진입
                 } catch (Exception e) {
-                    log.error("[AuctionEmbed] 임베딩 처리 실패 — auctionId={}, error={}", finalAuctionId, e.getMessage(), e);
+                    log.error("[AuctionEmbed] 임베딩 처리 실패 — auctionId={}", finalAuctionId, e); // OpenAI 임베딩 API 실패 또는 pgvector 저장 실패 감지용
                 } finally {
                     stringRedisTemplate.delete(lockKey);
                 }
             } catch (Exception e) {
-                log.error("[AuctionEmbed] 처리 중 예외 — auctionId={}, error={}", finalAuctionId, e.getMessage(), e);
+                log.error("[AuctionEmbed] 처리 중 예외 — auctionId={}", finalAuctionId, e); // 예상치 못한 예외 — 스택 트레이스 포함으로 원인 추적 가능
             }
         }, embedExecutor);
     }

@@ -4,6 +4,8 @@ import com.example.auction.domain.auction.dto.AuctionSearchCondition;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.category.service.CategoryService;
+import com.example.auction.testutils.BaseIntegrationTest;
+
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 // H2좀 그만 불러!!
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class})
-class AuctionRepositoryTest {
+class AuctionRepositoryTest extends BaseIntegrationTest {
 
     // TODO: 현재 DB를 초기화 하지 않고 @Transactional에만 의존하고 있습니다.
     //  나중에 DB를 초기화 하는 방법을 구현해야 합니다.
