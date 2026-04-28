@@ -25,8 +25,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -141,14 +143,17 @@ class UserControllerTest {
                 1L, "test@test.com", UserRole.USER, LocalDateTime.now(), LocalDateTime.now()
         );
 
-        given(userService.withdraw(1L)).willReturn(response);
+        given(userService.withdraw(eq(1L), any())).willReturn(response);
 
         // when & then
-        mockMvc.perform(delete("/api/users"))
+        mockMvc.perform(delete("/api/users")
+                        .requestAttr("accessToken", "accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("탈퇴 요청 성공"))
                 .andExpect(jsonPath("$.data.email").value("test@test.com"))
                 .andExpect(jsonPath("$.data.role").value("USER"));
+
+        verify(userService).withdraw(eq(1L), eq("accessToken"));
     }
 }

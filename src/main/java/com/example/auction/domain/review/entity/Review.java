@@ -33,6 +33,7 @@ public class Review extends ModifiableEntity {
     @Column(nullable = false)
     private int score;
 
+    @Column(length = 500)
     private String description;
 
     public static Review of(Long auctionId, Long reviewerId, Long revieweeId, int score, String description) {

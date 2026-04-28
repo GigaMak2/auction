@@ -41,7 +41,7 @@ public class ChatContextCacheService {
                 // deserialize 실패(손상) — DB 재조회로 폴백
             }
         } catch (Exception e) {
-            log.warn("[ChatContextCacheService] Redis 조회 실패, DB 폴백 key={}", key, e);
+            log.warn("[ChatContextCacheService] Redis 조회 실패, DB 폴백 key={}", key, e); // Redis 장애 감지 — 폴백 빈도로 Redis 상태 모니터링 가능
         }
 
         // 캐시 미스 or Redis 장애 — DB에서 최근 N개 조회 후 캐시 적재 (첫 메시지 or Redis 만료 후)
@@ -71,7 +71,7 @@ public class ChatContextCacheService {
             stringRedisTemplate.opsForList().trim(key, -MAX_MESSAGES, -1); // 슬라이딩 윈도우
             stringRedisTemplate.expire(key, TTL);
         } catch (Exception e) {
-            log.warn("[ChatContextCacheService] 캐시 추가 실패, 다음 턴 DB 폴백으로 복구 key={}", key, e);
+            log.warn("[ChatContextCacheService] 캐시 추가 실패, 다음 턴 DB 폴백으로 복구 key={}", key, e); // Redis 장애 감지 — AI 응답 저장 실패 빈도 모니터링 가능
         }
     }
 
@@ -81,7 +81,7 @@ public class ChatContextCacheService {
         try {
             stringRedisTemplate.delete(KEY_PREFIX + roomId);
         } catch (Exception e) {
-            log.warn("[ChatContextCacheService] 캐시 evict 실패 roomId={}", roomId, e);
+            log.warn("[ChatContextCacheService] 캐시 evict 실패 roomId={}", roomId, e); // Redis 장애 감지 — 채팅방 삭제 시 캐시 미제거는 TTL 만료 시 자동 해소
         }
     }
 
@@ -100,7 +100,7 @@ public class ChatContextCacheService {
                 stringRedisTemplate.expire(key, TTL);
             }
         } catch (Exception e) {
-            log.warn("[ChatContextCacheService] 캐시 저장 실패 key={}", key, e);
+            log.warn("[ChatContextCacheService] 캐시 저장 실패 key={}", key, e); // Redis 장애 감지 — DB 폴백 후 캐시 백필 실패, 다음 요청에서 재시도됨
         }
     }
 
@@ -113,7 +113,7 @@ public class ChatContextCacheService {
             }
             return result;
         } catch (JacksonException e) {
-            log.warn("[ChatContextCacheService] 캐시 역직렬화 실패, 손상된 키 제거 후 DB 재조회 key={}", key, e);
+            log.warn("[ChatContextCacheService] 캐시 역직렬화 실패, 손상된 키 제거 후 DB 재조회 key={}", key, e); // Redis 데이터 손상 감지 — 반복 발생 시 직렬화 스키마 변경 의심
             stringRedisTemplate.delete(key);
             return null;
         }

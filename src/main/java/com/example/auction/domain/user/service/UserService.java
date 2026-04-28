@@ -1,5 +1,6 @@
 package com.example.auction.domain.user.service;
 
+import com.example.auction.common.config.security.JwtProvider;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.repository.AuctionRepository;
@@ -13,11 +14,13 @@ import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,11 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
+    private final JwtProvider jwtProvider;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private static final String REFRESH_TOKEN_PREFIX = "refresh:";
+    private static final String BLACKLIST_PREFIX = "blacklist:";
 
     @Transactional(readOnly = true)
     public UserGetResponse myPage(Long userId) {
@@ -59,7 +67,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserWithdrawResponse withdraw(Long userId) {
+    public UserWithdrawResponse withdraw(Long userId, String accessToken) {
         User user = userRepository.findByIdAndDeletedFalse(userId).orElseThrow(
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
@@ -72,6 +80,16 @@ public class UserService {
         }
 
         user.delete();
+
+        redisTemplate.delete(REFRESH_TOKEN_PREFIX + userId);
+
+        long remainingTtl = jwtProvider.getRemainingTtl(accessToken);
+        redisTemplate.opsForValue().set(
+                BLACKLIST_PREFIX + accessToken,
+                "withdraw",
+                remainingTtl,
+                TimeUnit.MILLISECONDS
+        );
 
         return new UserWithdrawResponse(
                 user.getId(),

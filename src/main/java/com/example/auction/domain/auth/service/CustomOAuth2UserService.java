@@ -54,7 +54,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         principalAttributes.put("userId", user.getId());
 
         return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(user.getRole().name())),
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())),
                 principalAttributes,
                 authAttributes.getNameAttributeKey()
         );
@@ -78,7 +78,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
 
         try {
-            User newUser = User.ofSocial(authAttributes.getEmail(), UserRole.USER);
+            User newUser = User.ofSocial(authAttributes.getEmail());
             userRepository.save(newUser);
 
             UserSocialAccount newSocialAccount = UserSocialAccount.of(newUser.getId(), authAttributes.getProvider(), authAttributes.getProviderId());

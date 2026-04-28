@@ -10,13 +10,12 @@ import software.amazon.awssdk.services.scheduler.SchedulerClient;
 import software.amazon.awssdk.services.scheduler.model.ActionAfterCompletion;
 import software.amazon.awssdk.services.scheduler.model.ConflictException;
 import software.amazon.awssdk.services.scheduler.model.FlexibleTimeWindowMode;
-import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +23,6 @@ import java.util.Map;
 public class AuctionEventBridgeService {
 
     private final SchedulerClient schedulerClient;
-    private final ObjectMapper objectMapper;
 
     // 이벤트브릿지가 어떤 람다 함수를 실행할지 찾을 때 쓰는 경로. 계정번호와 실제 람다함수이름이 필요함
     @Value("${aws.eventbridge.lambda-arn}")
@@ -33,6 +31,16 @@ public class AuctionEventBridgeService {
     @Value("${aws.eventbridge.role-arn}")
     private String roleArn;
 
+    @Value("${aws.eventbridge.legacy-lambda-arn}")
+    private String legacyLambdaArn;
+
+    private static final DateTimeFormatter TARGET_TIME_FMT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    private static final String newArnSuffix = "NEW";
+    private static final String legacyArnSuffix = "LEGACY";
+
+
     // 트랜잭션 커밋 이후 eventBridge 스케줄 등록하여 고아 스케줄 방지(db에는 없고 aws 스케줄에만 있는 경우 방지)
     // 3회 재시도
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -40,6 +48,7 @@ public class AuctionEventBridgeService {
         int maxAttempts = 3;
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
+                // 경매 시작/종료 5분전으로 세팅
                 registerStartSchedule(event.auctionId(), event.startedAt());
                 registerEndSchedule(event.auctionId(), event.endedAt());
                 return; // 성공하면 종료
@@ -54,22 +63,26 @@ public class AuctionEventBridgeService {
         }
     }
 
-    // 경매 시작 스케줄 등록
+    // 경매 시작 스케줄 등록(5분 전)
     public void registerStartSchedule(Long auctionId, LocalDateTime startedAt) {
-        if (isPast(startedAt)) {
+        if (isPast(startedAt.minusMinutes(5))) {
             log.warn("[EventBridge] 현재보다 과거로 시작 시간 등록: auctionId={}", auctionId);
             return;
         }
-        registerSchedule(auctionId, startedAt, "START");
+        // 신규와 레거시 둘다 등록
+        registerSchedule(auctionId, startedAt.minusMinutes(5), startedAt, "START", lambdaArn, newArnSuffix);
+        registerSchedule(auctionId, startedAt, startedAt,"START", legacyLambdaArn, legacyArnSuffix);
     }
 
-    // 경매 종료 스케줄 등록
+    // 경매 종료 스케줄 등록(5분 전)
     public void registerEndSchedule(Long auctionId, LocalDateTime endedAt) {
-        if (isPast(endedAt)) {
+        if (isPast(endedAt.minusMinutes(5))) {
             log.warn("[EventBridge] 현재보다 과거로 종료 시간 등록: auctionId={}", auctionId);
             return;
         }
-        registerSchedule(auctionId, endedAt, "END");
+        registerSchedule(auctionId, endedAt.minusMinutes(5), endedAt, "END", lambdaArn, newArnSuffix);
+        registerSchedule(auctionId, endedAt, endedAt, "END", legacyLambdaArn, legacyArnSuffix);
+
     }
 
     // KST 기준 시간이 현재 UTC보다 과거인지 확인
@@ -80,9 +93,16 @@ public class AuctionEventBridgeService {
         return utc.isBefore(LocalDateTime.now(ZoneOffset.UTC));
     }
 
-    private void registerSchedule(Long auctionId, LocalDateTime dateTime, String action) {
-        String scheduleName = "auction-" + action.toLowerCase() + "-" + auctionId;
-        String atExpression = toAt(dateTime);
+    private void registerSchedule(
+            Long auctionId, LocalDateTime minusTime, LocalDateTime realTime, String action, String targetArn, String suffix
+    ) {
+        String scheduleName = "auction-" + action.toLowerCase() + "-" + auctionId + "-" + suffix;
+        String atExpression = toAt(minusTime);
+        String input = String.format(
+                    "{\"auctionId\":%d,\"action\":\"%s\",\"targetTime\":\"%s\"}",
+                    auctionId, action, realTime.format(TARGET_TIME_FMT)
+            );
+
 
         try {
             schedulerClient.createSchedule(r -> r
@@ -91,10 +111,9 @@ public class AuctionEventBridgeService {
                     .scheduleExpressionTimezone("UTC")
                     .flexibleTimeWindow(w -> w.mode(FlexibleTimeWindowMode.OFF))
                     .target(t -> t
-                            .arn(lambdaArn)
+                            .arn(targetArn)
                             .roleArn(roleArn)
-                            .input(objectMapper.writeValueAsString(Map.of("auctionId", auctionId, "action", action)))
-                    )
+                            .input(input))
                     .actionAfterCompletion(ActionAfterCompletion.DELETE) // 실행 후 자동 삭제(경매 시작/종료는 1번씩이니까)
             );
         } catch (ConflictException e) {
@@ -105,10 +124,9 @@ public class AuctionEventBridgeService {
                     .scheduleExpressionTimezone("UTC")
                     .flexibleTimeWindow(w -> w.mode(FlexibleTimeWindowMode.OFF))
                     .target(t -> t
-                            .arn(lambdaArn)
+                            .arn(targetArn)
                             .roleArn(roleArn)
-                            .input(objectMapper.writeValueAsString(Map.of("auctionId", auctionId, "action", action)))
-                    )
+                            .input(input))
                     .actionAfterCompletion(ActionAfterCompletion.DELETE) // 실행 후 자동 삭제(경매 시작/종료는 1번씩이니까)
             );
         }

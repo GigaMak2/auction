@@ -31,11 +31,15 @@ public enum AuctionErrorEnum implements ErrorEnumInterface {
             HttpStatus.BAD_REQUEST, 
             "취소된 경매는 전체조회에서 볼 수 없습니다"
     ),
-    AUCTION_SEARCH_INVLID_PRICE_RANGE(
+    AUCTION_SEARCH_INVALID_PRICE_RANGE(
             HttpStatus.BAD_REQUEST, 
             "조회 최소 금액이 최대 금액보다 클 수는 없습니다"
     ),
 
+    AUCTION_CREATE_MAX_PRICE_NOT_WHOLE_NUMBER(
+            HttpStatus.BAD_REQUEST,
+            "경매 최대 가격은 정수여야 합니다"
+    ),
     AUCTION_CREATE_STARTED_AT_IN_PAST(
             HttpStatus.BAD_REQUEST,
             "경매 시작 시간은 현재 시간 이후여야 합니다"
@@ -51,7 +55,14 @@ public enum AuctionErrorEnum implements ErrorEnumInterface {
     AUCTION_INVALID_STATUS(
             HttpStatus.CONFLICT,
             "경매 상태가 유효하지 않습니다"
-    );
+    ),
+
+    AUCTION_CREATE_STARTED_AT_TOO_SOON(
+            HttpStatus.BAD_REQUEST,
+            "경매 시작 시간은 현재 시간으로부터 최소 10분 이후여야 합니다"
+    )
+
+    ;
 
     private final HttpStatus status;
     private final String message;

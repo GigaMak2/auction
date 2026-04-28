@@ -9,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 
 import com.example.auction.domain.auction.enums.AuctionStatus;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
@@ -31,10 +32,11 @@ public class AuctionSearchCondition {
     @Positive(message = "카테고리 아이디는 1 이상이어야 합니다")
     private @Nullable Long categoryId;
 
-    @PositiveOrZero(message = "페이지 0 이상이어야 커야합니다")
+    @PositiveOrZero(message = "페이지는 0 이상이어야 합니다")
     private Integer page = 0;
 
-    @Positive(message = "페이지 크기는 0보다 커야합니다")
+    @Positive(message = "페이지 크기는 1 이상이어야 합니다")
+    @Max(value = 100, message = "페이지 크기는 100 이하여야 합니다")
     private Integer pageSize = 10;
 
     public void setDefaultStatusesIfEmpty(AuctionStatus... statuses) {

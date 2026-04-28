@@ -6,6 +6,7 @@ import com.example.auction.domain.user.dto.UserChangePasswordRequest;
 import com.example.auction.domain.user.dto.UserGetResponse;
 import com.example.auction.domain.user.dto.UserWithdrawResponse;
 import com.example.auction.domain.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,10 +43,12 @@ public class UserController {
 
     @DeleteMapping
     public ResponseEntity<BaseResponse<UserWithdrawResponse>> withdraw(
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpServletRequest request
     ) {
+        String accessToken = (String) request.getAttribute("accessToken");
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "탈퇴 요청 성공", userService.withdraw(userId)));
+                HttpStatus.OK.name(), "탈퇴 요청 성공", userService.withdraw(userId, accessToken)));
     }
 }

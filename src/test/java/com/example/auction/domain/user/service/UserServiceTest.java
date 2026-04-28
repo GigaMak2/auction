@@ -1,5 +1,6 @@
 package com.example.auction.domain.user.service;
 
+import com.example.auction.common.config.security.JwtProvider;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.auth.exception.AuthErrorEnum;
@@ -17,6 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -44,6 +47,15 @@ class UserServiceTest {
     @Mock
     private BidRepository bidRepository;
 
+    @Mock
+    private JwtProvider jwtProvider;
+
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Mock
+    private ValueOperations<String, Object> valueOperations;
+
     // ========================
     // 마이페이지 조회
     // ========================
@@ -52,7 +64,7 @@ class UserServiceTest {
     @DisplayName("마이페이지 조회 성공")
     void myPage_success() {
         // given
-        User user = User.of("test@test.com", "encodedPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(userRepository.findByIdAndDeletedFalse(1L)).willReturn(Optional.of(user));
@@ -86,7 +98,7 @@ class UserServiceTest {
     @DisplayName("비밀번호 변경 성공")
     void changePassword_success() {
         // given
-        User user = User.of("test@test.com", "encodedOldPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedOldPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
         UserChangePasswordRequest request = new UserChangePasswordRequest("oldPassword", "newPassword");
 
@@ -116,7 +128,7 @@ class UserServiceTest {
     @DisplayName("비밀번호 변경 실패 - 새 비밀번호가 기존과 동일")
     void changePassword_fail_sameAsOldPassword() {
         // given
-        User user = User.of("test@test.com", "encodedOldPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedOldPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
         UserChangePasswordRequest request = new UserChangePasswordRequest("samePassword", "samePassword");
 
@@ -132,7 +144,7 @@ class UserServiceTest {
     @DisplayName("비밀번호 변경 실패 - 기존 비밀번호 불일치")
     void changePassword_fail_invalidOldPassword() {
         // given
-        User user = User.of("test@test.com", "encodedOldPassword", UserRole.USER);
+        User user = User.of("test@test.com", "encodedOldPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
         UserChangePasswordRequest request = new UserChangePasswordRequest("wrongOldPassword", "newPassword");
 
@@ -154,29 +166,35 @@ class UserServiceTest {
     @DisplayName("회원 탈퇴 성공")
     void withdraw_success() {
         // given
-        User user = User.of("test@test.com", "encodedPassword", UserRole.USER);
+        String accessToken = "accessToken";
+        User user = User.of("test@test.com", "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
+        long remainingTtl = 300000L;
 
         given(userRepository.findByIdAndDeletedFalse(1L)).willReturn(Optional.of(user));
         given(auctionRepository.existsByUserIdAndStatusIn(any(), any())).willReturn(false);
         given(bidRepository.existsByUserIdAndStatus(any(), any())).willReturn(false);
+        given(jwtProvider.getRemainingTtl(accessToken)).willReturn(remainingTtl);
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
 
         // when
-        UserWithdrawResponse response = userService.withdraw(1L);
+        UserWithdrawResponse response = userService.withdraw(1L, accessToken);
 
         // then
         assertThat(response.email()).isEqualTo("test@test.com");
         assertThat(response.role()).isEqualTo(UserRole.USER);
+        assertThat(response.deletedAt()).isNotNull();
     }
 
     @Test
     @DisplayName("회원 탈퇴 실패 - 유저 없음")
     void withdraw_fail_userNotFound() {
         // given
+        String accessToken = "accessToken";
         given(userRepository.findByIdAndDeletedFalse(1L)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> userService.withdraw(1L))
+        assertThatThrownBy(() -> userService.withdraw(1L, accessToken))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(UserErrorEnum.USER_NOT_FOUND.getMessage());
     }
@@ -185,14 +203,15 @@ class UserServiceTest {
     @DisplayName("회원 탈퇴 실패 - 진행 중인 경매 있음")
     void withdraw_fail_hasActiveAuction() {
         // given
-        User user = User.of("test@test.com", "encodedPassword", UserRole.USER);
+        String accessToken = "accessToken";
+        User user = User.of("test@test.com", "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(userRepository.findByIdAndDeletedFalse(1L)).willReturn(Optional.of(user));
         given(auctionRepository.existsByUserIdAndStatusIn(any(), any())).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> userService.withdraw(1L))
+        assertThatThrownBy(() -> userService.withdraw(1L, accessToken))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(UserErrorEnum.HAS_ACTIVE_AUCTION.getMessage());
     }
@@ -201,7 +220,8 @@ class UserServiceTest {
     @DisplayName("회원 탈퇴 실패 - 진행 중인 입찰 있음")
     void withdraw_fail_hasActiveBid() {
         // given
-        User user = User.of("test@test.com", "encodedPassword", UserRole.USER);
+        String accessToken = "accessToken";
+        User user = User.of("test@test.com", "encodedPassword");
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(userRepository.findByIdAndDeletedFalse(1L)).willReturn(Optional.of(user));
@@ -209,7 +229,7 @@ class UserServiceTest {
         given(bidRepository.existsByUserIdAndStatus(any(), any())).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> userService.withdraw(1L))
+        assertThatThrownBy(() -> userService.withdraw(1L, accessToken))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(UserErrorEnum.HAS_ACTIVE_BID.getMessage());
     }

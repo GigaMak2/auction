@@ -7,13 +7,15 @@ import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.repository.BidRepository;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.domain.user.entity.User;
-import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.domain.user.repository.UserRepository;
+import com.example.auction.testutils.BaseIntegrationTest;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -41,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @SpringBootTest
 @ActiveProfiles("test")
-class BidConcurrencyTest {
+class BidConcurrencyTest extends BaseIntegrationTest {
 
     @Autowired
     private BidCommandFacade bidCommandFacade;
@@ -61,7 +63,7 @@ class BidConcurrencyTest {
     void setUp() {
         userIds.clear();
         for (long i = 1; i <= 50; i++) {
-            User user = User.of("user" + i + "@test.com", "password", UserRole.USER);
+            User user = User.of("user" + i + "@test.com", "password");
             User saved = userRepository.save(user);
             userIds.add(saved.getId()); // 실제 저장된 ID 기록
         }
@@ -90,6 +92,11 @@ class BidConcurrencyTest {
 
     @Test
     @DisplayName("v1 -50명 동시 입찰 시 중복 최저가 발생")
+    @DisabledIfEnvironmentVariable(
+        named="IN_CI",
+        matches="(?i)\\s*true\\s*",
+        disabledReason="CI 환경 입니다. 실패를 보여주기 위해 작성된 테스트라 안돌리겠습니다."
+    )
     void concurrency_v1_noLock() throws InterruptedException {
         // given
         int threadCount = 50;
