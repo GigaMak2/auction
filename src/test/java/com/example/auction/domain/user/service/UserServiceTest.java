@@ -12,6 +12,7 @@ import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
+import com.example.auction.domain.user.repository.UserSocialAccountRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +49,9 @@ class UserServiceTest {
     private BidRepository bidRepository;
 
     @Mock
+    private UserSocialAccountRepository userSocialAccountRepository;
+
+    @Mock
     private JwtProvider jwtProvider;
 
     @Mock
@@ -68,6 +72,7 @@ class UserServiceTest {
         ReflectionTestUtils.setField(user, "id", 1L);
 
         given(userRepository.findByIdAndDeletedFalse(1L)).willReturn(Optional.of(user));
+        given(userSocialAccountRepository.findByUserId(1L)).willReturn(Optional.empty());
 
         // when
         UserGetResponse response = userService.myPage(1L);

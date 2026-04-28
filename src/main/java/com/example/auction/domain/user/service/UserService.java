@@ -11,8 +11,11 @@ import com.example.auction.domain.user.dto.UserChangePasswordRequest;
 import com.example.auction.domain.user.dto.UserGetResponse;
 import com.example.auction.domain.user.dto.UserWithdrawResponse;
 import com.example.auction.domain.user.entity.User;
+import com.example.auction.domain.user.entity.UserSocialAccount;
+import com.example.auction.domain.user.enums.AuthProvider;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
+import com.example.auction.domain.user.repository.UserSocialAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,17 +38,24 @@ public class UserService {
 
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
     private static final String BLACKLIST_PREFIX = "blacklist:";
+    private final UserSocialAccountRepository userSocialAccountRepository;
 
     @Transactional(readOnly = true)
     public UserGetResponse myPage(Long userId) {
         User user = userRepository.findByIdAndDeletedFalse(userId).orElseThrow(
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
+        AuthProvider authProvider = userSocialAccountRepository.findByUserId(userId)
+                .map(UserSocialAccount::getProvider)
+                .orElse(null);
+
         return new UserGetResponse(
                 user.getId(),
                 user.getEmail(),
                 user.getRating(),
-                user.getRole()
+                user.getRole(),
+                authProvider,
+                user.getCreatedAt()
         );
     }
 
