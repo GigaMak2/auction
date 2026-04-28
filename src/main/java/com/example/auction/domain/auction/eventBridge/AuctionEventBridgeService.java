@@ -14,7 +14,6 @@ import software.amazon.awssdk.services.scheduler.model.FlexibleTimeWindowMode;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -56,7 +55,7 @@ public class AuctionEventBridgeService {
                 log.warn("[EventBridge] 스케줄 등록 실패 {}/{}회 - auctionId={}",
                         attempt, maxAttempts, event.auctionId(), e);
                 if (attempt == maxAttempts) {
-                    log.error("[EventBridge] 스케줄 등록 최종 실패 - auctionId={}, 수동 확인 필요",
+                    log.error("[EventBridge] 스케줄 등록 최종 실패 - auctionId={}, 일부 성공 여부 확인 필요",
                             event.auctionId(), e);
                 }
             }
@@ -100,7 +99,7 @@ public class AuctionEventBridgeService {
         String atExpression = toAt(minusTime);
         String input = String.format(
                     "{\"auctionId\":%d,\"action\":\"%s\",\"targetTime\":\"%s\"}",
-                    auctionId, action, realTime.format(TARGET_TIME_FMT)
+                    auctionId, action, toUtcString(realTime)
             );
 
 
@@ -137,16 +136,13 @@ public class AuctionEventBridgeService {
      * at(yyyy-MM-ddTHH:mm:ss) 형식
      * at(2026-04-16T08:43:30) -> 2026년 4월 16일 08시 43분 30초에 1회 실행
      */
-    private String toAt(LocalDateTime dateTime) {
-        ZonedDateTime kst = dateTime.atZone(ZoneId.of("Asia/Seoul"));
-        ZonedDateTime utc = kst.withZoneSameInstant(ZoneId.of("UTC"));
+    private String toUtcString(LocalDateTime kstTime) {
+        return kstTime.atZone(ZoneId.of("Asia/Seoul"))
+                .withZoneSameInstant(ZoneId.of("UTC"))
+                .format(TARGET_TIME_FMT);
+    }
 
-        return String.format("at(%d-%02d-%02dT%02d:%02d:%02d)",
-                utc.getYear(),
-                utc.getMonthValue(),
-                utc.getDayOfMonth(),
-                utc.getHour(),
-                utc.getMinute(),
-                utc.getSecond());
+    private String toAt(LocalDateTime dateTime) {
+        return "at(" + toUtcString(dateTime) + ")";
     }
 }
