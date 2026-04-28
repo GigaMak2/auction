@@ -8,6 +8,7 @@ import com.example.auction.domain.chat.dto.ChatRoomUpdateRequest;
 import com.example.auction.domain.chat.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class ChatController {
     public ResponseEntity<BaseResponse<ChatRoomResponse>> createRoom(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        log.debug("[ChatController] createRoom — userId={}", userDetails.getUserId()); // 채팅방 생성 이벤트 추적 — 유저별 채팅방 생성 빈도 모니터링용
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success(
                         HttpStatus.CREATED.name(),
@@ -40,6 +43,7 @@ public class ChatController {
     public ResponseEntity<BaseResponse<List<ChatRoomResponse>>> getRooms(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        log.debug("[ChatController] getRooms — userId={}", userDetails.getUserId()); // 채팅방 목록 조회 추적 — 유저별 사용 빈도 모니터링용
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(
                         HttpStatus.OK.name(),
@@ -55,6 +59,7 @@ public class ChatController {
             @PathVariable Long roomId,
             @RequestBody @Valid ChatRoomUpdateRequest request
     ) {
+        log.debug("[ChatController] updateRoom — userId={}, roomId={}", userDetails.getUserId(), roomId); // 채팅방 제목 수정 추적 — 비정상 요청 감지용
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(
                         HttpStatus.OK.name(),
@@ -69,6 +74,7 @@ public class ChatController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long roomId
     ) {
+        log.debug("[ChatController] deleteRoom — userId={}, roomId={}", userDetails.getUserId(), roomId); // 채팅방 삭제 이벤트 추적 — 대화 이력 소멸 감지용
         chatService.deleteRoom(roomId, userDetails.getUserId());
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(
@@ -86,6 +92,7 @@ public class ChatController {
             @RequestParam(required = false) Long cursor,
             @RequestParam(defaultValue = "20") int size
     ) {
+        log.debug("[ChatController] getMessages — userId={}, roomId={}", userDetails.getUserId(), roomId); // 메시지 목록 조회 추적 — 유저별 대화 접근 빈도 모니터링용
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(
                         HttpStatus.OK.name(),

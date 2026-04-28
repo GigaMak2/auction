@@ -1,0 +1,48 @@
+region: ap-northeast-2
+
+metrics:
+  # Lambda — 경매 마감 및 알림 파이프라인
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Invocations
+    aws_dimensions: [FunctionName]
+    aws_dimension_select:
+      FunctionName: [auction-scheduler, auction-sqs-handler, auction-sqs-consumer]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Errors
+    aws_dimensions: [FunctionName]
+    aws_dimension_select:
+      FunctionName: [auction-scheduler, auction-sqs-handler, auction-sqs-consumer]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Duration
+    aws_dimensions: [FunctionName]
+    aws_dimension_select:
+      FunctionName: [auction-scheduler, auction-sqs-handler, auction-sqs-consumer]
+    aws_statistics: [Average, Maximum]
+
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Throttles
+    aws_dimensions: [FunctionName]
+    aws_dimension_select:
+      FunctionName: [auction-scheduler, auction-sqs-handler, auction-sqs-consumer]
+    aws_statistics: [Sum]
+
+  # ECS — Spring 서버 + Notification 서비스
+  - aws_namespace: AWS/ECS
+    aws_metric_name: CPUUtilization
+    aws_dimensions: [ClusterName, ServiceName]
+    aws_dimension_select:
+      ClusterName: [reverse-auction-cluster]
+      ServiceName: [reverse-auction-ecs-cluster, reverse-auction-notification-ecs-cluster]
+    aws_statistics: [Average]
+
+  - aws_namespace: AWS/ECS
+    aws_metric_name: MemoryUtilization
+    aws_dimensions: [ClusterName, ServiceName]
+    aws_dimension_select:
+      ClusterName: [reverse-auction-cluster]
+      ServiceName: [reverse-auction-ecs-cluster, reverse-auction-notification-ecs-cluster]
+    aws_statistics: [Average]
