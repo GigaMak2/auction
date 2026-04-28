@@ -32,4 +32,4 @@ aws:
 management:
   server:
     port: 9001
-    address: 0.0.0.0  # Docker 내부 네트워크 — Prometheus 컨테이너 접근 허용 (호스트 미노출)
+    address: 0.0.0.0  # 모든 인터페이스 바인딩 — Docker 내부 및 호스트(9001:9001 매핑) 모두 접근 가능

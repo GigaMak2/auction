@@ -154,6 +154,9 @@ public class ReviewEmbeddingService {
     // JSON 추출 → cleanHydeResult → 원본 쿼리 순으로 폴백
     // LLM이 JSON 외 텍스트를 앞뒤에 붙이는 경우에도 배열 부분만 추출해 파싱
     private String parseAndJoin(String raw, String fallback) {
+        if (raw == null) {
+            return fallback;
+        }
         try {
             String json = raw.trim();
             int start = json.indexOf('[');
