@@ -64,6 +64,7 @@ management:
       exposure:
         include:
           - health
+          - prometheus
 
   endpoint:
     health:
