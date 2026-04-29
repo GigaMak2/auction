@@ -9,10 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,5 +24,13 @@ public class ReviewAdminController {
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "리뷰 목록 조회 요청 성공", reviewAdminService.getReviewList(condition)));
+    }
+
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<BaseResponse<Void>> forceDelete(
+            @PathVariable Long reviewId
+    ) {
+        reviewAdminService.forceDelete(reviewId);
+        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "리뷰 강제 삭제 요청 성공", null));
     }
 }
