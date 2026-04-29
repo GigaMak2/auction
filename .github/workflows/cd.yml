@@ -147,6 +147,21 @@ jobs:
 
           echo "✅ Pushed: $IMAGE_URI:$SHORT_SHA"
 
+      # Grafana Alloy 사이드카 이미지 빌드 및 push
+      - name: Build and push Alloy image
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ALLOY_ECR_REPOSITORY: ${{ secrets.ALLOY_ECR_REPOSITORY }}
+        run: |
+          set -euo pipefail
+
+          ALLOY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ALLOY_ECR_REPOSITORY}"
+
+          docker buildx build --platform linux/arm64 -t $ALLOY_URI:latest --push ./alloy
+
+          echo "✅ Pushed Alloy: $ALLOY_URI:latest"
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -183,10 +198,16 @@ jobs:
           AWS_ECS_SERVICE_ARN: ${{ secrets.AWS_ECS_SERVICE_ARN }}
           AWS_ECS_CLUSTER_ARN: ${{ secrets.AWS_ECS_CLUSTER_ARN }}
 
+          ALLOY_ECR_REPOSITORY: ${{ secrets.ALLOY_ECR_REPOSITORY }}
+          GRAFANA_CLOUD_PUSH_URL: ${{ secrets.GRAFANA_CLOUD_PUSH_URL }}
+          GRAFANA_CLOUD_USERNAME: ${{ secrets.GRAFANA_CLOUD_USERNAME }}
+          GRAFANA_CLOUD_API_KEY: ${{ secrets.GRAFANA_CLOUD_API_KEY }}
+
         run: |
           set -euo pipefail
 
           ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
+          ALLOY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ALLOY_ECR_REPOSITORY}:latest"
 
           # task_definition.json에 적혀 있는 secret들을
           # 실제 값으로 치환
@@ -197,6 +218,10 @@ jobs:
             | sed -e "s|__AWS_EXECUTION_ROLE_ARN__|${AWS_EXECUTION_ROLE_ARN}|g" \
             | sed -e "s|__ECR_URI__|${ECR_URI}|g" \
             | sed -e "s|__AWS_REGION__|${AWS_REGION}|g" \
+            | sed -e "s|__ALLOY_ECR_URI__|${ALLOY_URI}|g" \
+            | sed -e "s|__GRAFANA_CLOUD_PUSH_URL__|${GRAFANA_CLOUD_PUSH_URL}|g" \
+            | sed -e "s|__GRAFANA_CLOUD_USERNAME__|${GRAFANA_CLOUD_USERNAME}|g" \
+            | sed -e "s|__GRAFANA_CLOUD_API_KEY__|${GRAFANA_CLOUD_API_KEY}|g" \
           )
 
           echo "$TASK_DEF" > task-definition-out.json
