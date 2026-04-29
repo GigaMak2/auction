@@ -150,6 +150,7 @@ jobs:
       # Grafana Alloy 사이드카 이미지 빌드 및 push
       - name: Build and push Alloy image
         env:
+          SHORT_SHA: ${{ steps.vars.outputs.short_sha }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           ALLOY_ECR_REPOSITORY: ${{ secrets.ALLOY_ECR_REPOSITORY }}
@@ -158,9 +159,9 @@ jobs:
 
           ALLOY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ALLOY_ECR_REPOSITORY}"
 
-          docker buildx build --platform linux/arm64 -t $ALLOY_URI:latest --push ./alloy
+          docker buildx build --platform linux/arm64 -t $ALLOY_URI:$SHORT_SHA --push ./alloy
 
-          echo "✅ Pushed Alloy: $ALLOY_URI:latest"
+          echo "✅ Pushed Alloy: $ALLOY_URI:$SHORT_SHA"
 
   deploy:
     needs: build
@@ -207,7 +208,7 @@ jobs:
           set -euo pipefail
 
           ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
-          ALLOY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ALLOY_ECR_REPOSITORY}:latest"
+          ALLOY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ALLOY_ECR_REPOSITORY}:${IMAGE_TAG}"
 
           # task_definition.json에 적혀 있는 secret들을
           # 실제 값으로 치환

@@ -59,6 +59,12 @@ services:
       NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+    healthcheck:
+      test: "curl --fail --silent localhost:8080/health || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     depends_on:
       postgres:
         condition: service_healthy
@@ -101,7 +107,8 @@ services:
       timeout: 5s
       retries: 5
     depends_on:
-      - app
+      app:
+        condition: service_healthy
 
   cloudwatch-exporter:
     image: prom/cloudwatch-exporter:latest
