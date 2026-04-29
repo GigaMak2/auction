@@ -2,8 +2,8 @@ package com.example.auction.domain.auction.controller;
 
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
+import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
 import com.example.auction.domain.auction.dto.AuctionAdminSearchCondition;
-import com.example.auction.domain.auction.dto.GetManyAuctionsResponse;
 import com.example.auction.domain.auction.service.AuctionAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class AuctionAdminController {
     private final AuctionAdminService auctionAdminService;
 
     @GetMapping
-    public ResponseEntity<BaseResponse<PageResponse<GetManyAuctionsResponse>>> getAuctionList(
+    public ResponseEntity<BaseResponse<PageResponse<AuctionAdminListResponse>>> getAuctionList(
             @Valid @ModelAttribute AuctionAdminSearchCondition condition
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
