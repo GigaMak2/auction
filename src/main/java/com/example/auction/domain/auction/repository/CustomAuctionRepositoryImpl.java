@@ -1,8 +1,8 @@
 package com.example.auction.domain.auction.repository;
 import static com.example.auction.domain.auction.entity.QAuction.auction;
 
+import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
-import com.example.auction.domain.auction.dto.GetManyAuctionsResponse;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.category.service.CategoryService;
@@ -50,19 +50,18 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
     }
 
     @Override
-    public Page<GetManyAuctionsResponse> findAuctionWithConditions(Pageable pageable, AuctionStatus auctionStatus, String keyword) {
-        List<GetManyAuctionsResponse> list = queryFactory
-                .select(Projections.constructor(GetManyAuctionsResponse.class,
+    public Page<AuctionAdminListResponse> findAuctionWithConditions(Pageable pageable, AuctionStatus auctionStatus, String keyword) {
+        List<AuctionAdminListResponse> list = queryFactory
+                .select(Projections.constructor(AuctionAdminListResponse.class,
                         auction.id,
                         auction.userId,
-                        auction.maxPrice,
                         auction.itemName,
+                        auction.categoryId,
                         auction.status,
+                        auction.createdAt,
                         auction.startedAt,
                         auction.endedAt,
-                        auction.cancelledAt,
-                        auction.categoryId,
-                        auction.createdAt))
+                        auction.cancelledAt))
                 .from(auction)
                 .where(
                         statusEq(auctionStatus),

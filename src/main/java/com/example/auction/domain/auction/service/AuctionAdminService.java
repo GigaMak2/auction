@@ -2,8 +2,8 @@ package com.example.auction.domain.auction.service;
 
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
+import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
 import com.example.auction.domain.auction.dto.AuctionAdminSearchCondition;
-import com.example.auction.domain.auction.dto.GetManyAuctionsResponse;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
@@ -23,8 +23,8 @@ public class AuctionAdminService {
     private final AuctionRepository auctionRepository;
 
     @Transactional(readOnly = true)
-    public PageResponse<GetManyAuctionsResponse> getAuctionList(AuctionAdminSearchCondition condition) {
-        Page<GetManyAuctionsResponse> auctionList = auctionRepository.findAuctionWithConditions(
+    public PageResponse<AuctionAdminListResponse> getAuctionList(AuctionAdminSearchCondition condition) {
+        Page<AuctionAdminListResponse> auctionList = auctionRepository.findAuctionWithConditions(
                 PageRequest.of(condition.getPage(), condition.getSize()),
                 condition.getAuctionStatus(),
                 condition.getKeyword()
