@@ -29,7 +29,8 @@ public class BidCustomRepositoryImpl implements BidCustomRepository {
                 .join(user).on(bid.userId.eq(user.id))
                 .where(
                         bid.auctionId.eq(auctionId),
-                        user.deleted.isFalse()
+                        user.deleted.isFalse(),
+                        bid.status.eq(BidAuctionStatus.ACTIVE)
                 )
                 .orderBy(bid.price.asc(), bid.createdAt.asc())
                 .limit(1)
