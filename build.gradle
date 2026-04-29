@@ -69,13 +69,11 @@ dependencies {
     implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
 
     // parameter-store
-    implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store:4.0.0'
+    implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:4.0.0')
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
 
     // AWS EventBridge Scheduler
     implementation 'software.amazon.awssdk:scheduler:2.42.20'
-
-    implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:4.0.0')
-    implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
 
     // testcontainers
     testImplementation platform('org.testcontainers:testcontainers-bom:2.0.5')

@@ -57,6 +57,35 @@
                 "startPeriod": 300
             },
             "systemControls": []
+        },
+        {
+            "name": "grafana-alloy",
+            "image": "__ALLOY_ECR_URI__",
+            "essential": false,
+            "environment": [
+                {
+                    "name": "GRAFANA_CLOUD_PUSH_URL",
+                    "value": "__GRAFANA_CLOUD_PUSH_URL__"
+                },
+                {
+                    "name": "GRAFANA_CLOUD_USERNAME",
+                    "value": "__GRAFANA_CLOUD_USERNAME__"
+                },
+                {
+                    "name": "GRAFANA_CLOUD_API_KEY",
+                    "value": "__GRAFANA_CLOUD_API_KEY__"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "fargate-alloy",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "__AWS_REGION__",
+                    "awslogs-stream-prefix": "alloy"
+                }
+            },
+            "systemControls": []
         }
     ],
     "requiresCompatibilities": [ "FARGATE" ],

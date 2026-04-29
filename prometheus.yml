@@ -1,12 +1,13 @@
 global:
   scrape_interval: 15s
 
-scrape_configs:
+scrape_configs:  
   - job_name: 'auction-app'
     static_configs:
-      - targets: ['app:9001']
+      - targets: ['host.docker.internal:9001']
     metrics_path: '/actuator/prometheus'
 
   - job_name: 'cloudwatch-exporter'
+    scrape_interval: 10m
     static_configs:
       - targets: ['cloudwatch-exporter:9106']
