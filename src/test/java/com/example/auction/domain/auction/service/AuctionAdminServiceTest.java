@@ -54,7 +54,7 @@ class AuctionAdminServiceTest {
         List<AuctionAdminListResponse> auctionList = List.of(
                 new AuctionAdminListResponse(1L, 1L, "상품1", 1L, AuctionStatus.ACTIVE, now, now, now.plusDays(1), null),
                 new AuctionAdminListResponse(2L, 2L, "상품2", 2L, AuctionStatus.READY, now, now, now.plusDays(1), null),
-                new AuctionAdminListResponse(3L, 3L, "상품3", 3L, AuctionStatus.CANCELLED, now, now, now.plusDays(1), null)
+                new AuctionAdminListResponse(3L, 3L, "상품3", 3L, AuctionStatus.CANCELLED, now, now, now.plusDays(1), now.plusMinutes(30))
         );
         Page<AuctionAdminListResponse> page = new PageImpl<>(auctionList, PageRequest.of(0,20), 3);
 
