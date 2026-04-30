@@ -64,16 +64,8 @@
             "essential": false,
             "environment": [
                 {
-                    "name": "GRAFANA_CLOUD_PUSH_URL",
-                    "value": "__GRAFANA_CLOUD_PUSH_URL__"
-                },
-                {
-                    "name": "GRAFANA_CLOUD_USERNAME",
-                    "value": "__GRAFANA_CLOUD_USERNAME__"
-                },
-                {
-                    "name": "GRAFANA_CLOUD_API_KEY",
-                    "value": "__GRAFANA_CLOUD_API_KEY__"
+                    "name": "AMP_REMOTE_WRITE_URL",
+                    "value": "__AMP_REMOTE_WRITE_URL__"
                 }
             ],
             "logConfiguration": {
@@ -84,6 +76,16 @@
                     "awslogs-region": "__AWS_REGION__",
                     "awslogs-stream-prefix": "alloy"
                 }
+            },
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "wget --quiet --tries=1 --spider http://localhost:12345/-/ready || exit 1"
+                ],
+                "interval": 15,
+                "timeout": 5,
+                "retries": 3,
+                "startPeriod": 30
             },
             "systemControls": []
         }

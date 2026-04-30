@@ -2,15 +2,14 @@ prometheus.scrape "spring" {
   targets         = [{"__address__" = "localhost:9001"}]
   metrics_path    = "/actuator/prometheus"
   scrape_interval = "15s"
-  forward_to      = [prometheus.remote_write.grafanacloud.receiver]
+  forward_to      = [prometheus.remote_write.amp.receiver]
 }
 
-prometheus.remote_write "grafanacloud" {
+prometheus.remote_write "amp" {
   endpoint {
-    url = env("GRAFANA_CLOUD_PUSH_URL")
-    basic_auth {
-      username = env("GRAFANA_CLOUD_USERNAME")
-      password = env("GRAFANA_CLOUD_API_KEY")
+    url = env("AMP_REMOTE_WRITE_URL")
+    sigv4 {
+      region = "ap-northeast-2"
     }
   }
 }
