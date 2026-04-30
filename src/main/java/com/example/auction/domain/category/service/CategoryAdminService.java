@@ -7,6 +7,7 @@ import com.example.auction.domain.category.exception.CategoryErrorEnum;
 import com.example.auction.domain.category.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +26,12 @@ public class CategoryAdminService {
     @CacheEvict(cacheNames = "getCategoryList", key = "'all'")
     public CategoryCreateResponse createCategory(CategoryCreateRequest request) {
         Category category = request.parentId() == null ? rootCategory(request.name()) : childCategory(request.parentId(), request.name());
-        categoryRepository.save(category);
+
+        try {
+            categoryRepository.save(category);
+        } catch (DataIntegrityViolationException e) {
+            throw new ServiceErrorException(CategoryErrorEnum.DUPLICATED_CATEGORY);
+        }
 
         return new CategoryCreateResponse(
                 category.getId(),
