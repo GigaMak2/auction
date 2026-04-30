@@ -66,7 +66,8 @@ class UserControllerTest {
     @DisplayName("마이페이지 조회 성공")
     void myPage_success() throws Exception {
         // given
-        UserGetResponse response = new UserGetResponse(1L, "test@test.com", BigDecimal.valueOf(4.5), UserRole.USER);
+        UserGetResponse response = new UserGetResponse(
+                1L, "test@test.com", BigDecimal.valueOf(4.5), UserRole.USER, null, LocalDateTime.now());
 
         given(userService.myPage(1L)).willReturn(response);
 

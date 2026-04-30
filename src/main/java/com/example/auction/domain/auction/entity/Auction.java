@@ -110,4 +110,11 @@ public class Auction extends CreatableEntity {
         }
     }
 
+    // 관리자 전용 강제 취소
+    public void forceCancel() {
+        if (this.status == AuctionStatus.READY || this.status == AuctionStatus.ACTIVE) {
+            this.status = AuctionStatus.CANCELLED;
+            this.cancelledAt = LocalDateTime.now();
+        }
+    }
 }

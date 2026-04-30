@@ -52,6 +52,16 @@ public class User extends DeletableEntity {
         return user;
     }
 
+    public static User ofAdmin(String email, String encodedPassword) {
+        User user = new User();
+        user.email = email;
+        user.password = encodedPassword;
+        user.role = UserRole.ADMIN;
+        user.rating = null;
+
+        return user;
+    }
+
     public void changePassword(String encodedNewPassword) {
         this.password = encodedNewPassword;
     }

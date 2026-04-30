@@ -6,11 +6,13 @@ import com.example.auction.domain.user.enums.UserRole;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record UserGetResponse(
+public record UserDetailGetResponse(
         Long userId,
         String email,
         BigDecimal rating,
         UserRole role,
         AuthProvider provider,
-        LocalDateTime createdAt
+        boolean deleted,
+        LocalDateTime createdAt,
+        LocalDateTime deletedAt
 ) {}
