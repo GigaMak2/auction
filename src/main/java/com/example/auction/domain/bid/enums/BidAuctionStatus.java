@@ -4,5 +4,5 @@ package com.example.auction.domain.bid.enums;
 public enum BidAuctionStatus {
     ACTIVE, // 입찰 가능(경매가 진행중)
     CLOSED, // 입찰 불가(경매가 준비중 낙찰 유찰 취소)
-    CANCELLED   // 입찰 취소(강제 회원 탈퇴)
+    CANCELLED   // 입찰 취소(강제 회원 탈퇴 / 관리자 강제 취소)
 }
