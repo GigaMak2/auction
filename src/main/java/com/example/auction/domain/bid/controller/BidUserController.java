@@ -34,6 +34,6 @@ public class BidUserController {
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
         PageResponse<BidListResponse> data = queryService.getMyBids(userDetails, pageable);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.value()), "내 입찰 조회가 완료되었습니다.", data));
+                .body(BaseResponse.success(HttpStatus.OK.name(), "내 입찰 조회가 완료되었습니다.", data));
     }
 }
