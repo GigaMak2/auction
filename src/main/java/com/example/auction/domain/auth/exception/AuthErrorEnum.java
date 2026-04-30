@@ -16,7 +16,8 @@ public enum AuthErrorEnum implements ErrorEnumInterface {
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다"),
     LOGIN_LOCKED(HttpStatus.TOO_MANY_REQUESTS, "로그인 시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요"),
 
-    INVALID_ADMIN_SECRET_KEY(HttpStatus.FORBIDDEN, "관리자 인증 키가 일치하지 않습니다");
+    INVALID_ADMIN_SECRET_KEY(HttpStatus.FORBIDDEN, "관리자 인증 키가 일치하지 않습니다"),
+    ADMIN_SIGNUP_LOCKED(HttpStatus.TOO_MANY_REQUESTS, "관리자 회원가입 시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요");
 
     private final HttpStatus status;
     private final String message;
