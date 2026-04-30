@@ -1,6 +1,5 @@
 package com.example.auction.domain.user.repository;
 
-import ch.qos.logback.core.testUtil.MockInitialContext;
 import com.example.auction.domain.user.entity.UserSocialAccount;
 import com.example.auction.domain.user.enums.AuthProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
