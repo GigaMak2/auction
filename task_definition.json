@@ -64,16 +64,8 @@
             "essential": false,
             "environment": [
                 {
-                    "name": "GRAFANA_CLOUD_PUSH_URL",
-                    "value": "__GRAFANA_CLOUD_PUSH_URL__"
-                },
-                {
-                    "name": "GRAFANA_CLOUD_USERNAME",
-                    "value": "__GRAFANA_CLOUD_USERNAME__"
-                },
-                {
-                    "name": "GRAFANA_CLOUD_API_KEY",
-                    "value": "__GRAFANA_CLOUD_API_KEY__"
+                    "name": "AMP_REMOTE_WRITE_URL",
+                    "value": "__AMP_REMOTE_WRITE_URL__"
                 }
             ],
             "logConfiguration": {
