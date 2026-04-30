@@ -3,6 +3,7 @@ package com.example.auction.domain.auction.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import com.example.auction.domain.auction.eventBridge.AuctionCancelledEventBridge;
 import com.example.auction.domain.auction.eventBridge.AuctionCreatedEventBridge;
 import com.example.auction.domain.auction.eventBridge.AuctionEventBridgeService;
 import com.example.auction.domain.category.exception.CategoryErrorEnum;
@@ -213,5 +214,7 @@ public class AuctionService {
         auction.cancel();
 
         auctionRepository.saveAndFlush(auction);
+        // auctionEventBridgeService 의 handleAuctionCancelled 호출
+        eventPublisher.publishEvent(new AuctionCancelledEventBridge(auction.getId()));
     }
 }
