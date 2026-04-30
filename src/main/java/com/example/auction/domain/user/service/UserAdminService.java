@@ -19,6 +19,9 @@ import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 import com.example.auction.domain.user.repository.UserSocialAccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -36,6 +39,7 @@ public class UserAdminService {
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final CacheManager cacheManager;
 
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
 
@@ -73,13 +77,18 @@ public class UserAdminService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = {"getManyAuctionsPublic"}, allEntries = true)
     public UserWithdrawResponse forceWithdraw(Long userId) {
         User user = userRepository.findByIdAndDeletedFalse(userId).orElseThrow(
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
         List<Auction> auctions = auctionRepository.findByUserIdAndStatusIn(userId, List.of(AuctionStatus.READY, AuctionStatus.ACTIVE));
+        Cache auctionCache = cacheManager.getCache("getAuction");
         for (Auction auction : auctions) {
             auction.forceCancel();
+            if (auctionCache != null) {
+                auctionCache.evict(auction.getId());
+            }
             List<Bid> bids = bidRepository.findAllByAuctionIdAndStatus(auction.getId(), BidAuctionStatus.ACTIVE);
             for (Bid bid : bids) {
                 bid.updateStatus(BidAuctionStatus.CANCELLED);
