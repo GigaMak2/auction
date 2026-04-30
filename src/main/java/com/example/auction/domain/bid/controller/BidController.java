@@ -3,6 +3,7 @@ package com.example.auction.domain.bid.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
+import com.example.auction.domain.bid.dto.request.BidPageRequest;
 import com.example.auction.domain.bid.dto.request.BidRequest;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.service.BidCommandFacade;
@@ -44,12 +45,11 @@ public class BidController {
     public ResponseEntity<BaseResponse<PageResponse<BidListResponse>>> getBids(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("auction_id") Long auctionId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
+            @ModelAttribute @Valid BidPageRequest request
+            ) {
         Pageable pageable = PageRequest.of(
-                page,
-                size,
+                request.getPage(),
+                request.getSize(),
                 Sort.by(Sort.Direction.ASC, "price")
                         .and(Sort.by(Sort.Direction.DESC, "createdAt"))
         );
