@@ -24,7 +24,6 @@ public class BidCommandFacade {
 
     private static final String BID_LOCK_PREFIX = "bid:lock:";
     private static final long LOCK_WAIT_TIME = 3L;    // 락 획득 대기 시간 (초)
-    private static final long LOCK_LEASE_TIME = 5L;   // 락 자동 해제 시간 (초)
 
     // 입찰 생성 - 분산락
     public BidResponse placeBidDis(CustomUserDetails userDetails, Long auctionId, BidRequest request) {
@@ -33,7 +32,8 @@ public class BidCommandFacade {
         boolean isLocked;
 
         try {
-            isLocked = lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.SECONDS);
+            // watchdog 사용
+            isLocked = lock.tryLock(LOCK_WAIT_TIME, -1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new ServiceErrorException(BidErrorEnum.BID_LOCK_FAILED);
