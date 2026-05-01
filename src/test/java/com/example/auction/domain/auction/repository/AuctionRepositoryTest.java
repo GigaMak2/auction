@@ -1,5 +1,6 @@
 package com.example.auction.domain.auction.repository;
 
+import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
@@ -7,6 +8,7 @@ import com.example.auction.domain.category.service.CategoryService;
 import com.example.auction.testutils.BaseIntegrationTest;
 
 import org.jspecify.annotations.NonNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -15,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import com.example.auction.common.config.QuerydslConfig;
 import com.example.auction.common.config.JpaConfig;
@@ -192,5 +196,97 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
                 Arguments.of("경매 단일 조건 검색", cond1, new AuctionStatus[]{AuctionStatus.NO_BID}),
                 Arguments.of("경매 다수 조건 검색", cond2, new AuctionStatus[]{AuctionStatus.ACTIVE, AuctionStatus.CANCELLED})
         );
+    }
+
+
+
+    // ========================
+    // 관리자 경매 목록 조회
+    // ========================
+
+    @Test
+    @Transactional
+    @DisplayName("관리자 경매 목록 조회 - 필터 없음 전체 조회")
+    void findAuctionWithConditions_noFilter() {
+        auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+        Auction active = Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(2000), "키보드",
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L);
+        ReflectionTestUtils.setField(active, "status", AuctionStatus.ACTIVE);
+        auctionRepository.save(active);
+
+        Page<AuctionAdminListResponse> result = auctionRepository.findAuctionWithConditions(
+                PageRequest.of(0, 10), null, null);
+
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getContent()).hasSize(2);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("관리자 경매 목록 조회 - 상태 필터링")
+    void findAuctionWithConditions_statusFilter() {
+        auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+        Auction active = Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(2000), "키보드",
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L);
+        ReflectionTestUtils.setField(active, "status", AuctionStatus.ACTIVE);
+        auctionRepository.save(active);
+
+        Page<AuctionAdminListResponse> result = auctionRepository.findAuctionWithConditions(
+                PageRequest.of(0, 10), AuctionStatus.ACTIVE, null);
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).itemName()).isEqualTo("키보드");
+        assertThat(result.getContent().get(0).status()).isEqualTo(AuctionStatus.ACTIVE);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("관리자 경매 목록 조회 - 키워드 필터링")
+    void findAuctionWithConditions_keywordFilter() {
+        auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+        auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(2000), "키보드",
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+
+        Page<AuctionAdminListResponse> result = auctionRepository.findAuctionWithConditions(
+                PageRequest.of(0, 10), null, "노트");
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).itemName()).isEqualTo("노트북");
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("관리자 경매 목록 조회 - 상태 + 키워드 동시 필터링")
+    void findAuctionWithConditions_statusAndKeyword() {
+        auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+        Auction active = Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(2000), "노트북 거치대",
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L);
+        ReflectionTestUtils.setField(active, "status", AuctionStatus.ACTIVE);
+        auctionRepository.save(active);
+
+        Page<AuctionAdminListResponse> result = auctionRepository.findAuctionWithConditions(
+                PageRequest.of(0, 10), AuctionStatus.ACTIVE, "노트북");
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).status()).isEqualTo(AuctionStatus.ACTIVE);
+        assertThat(result.getContent().get(0).itemName()).isEqualTo("노트북 거치대");
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("관리자 경매 목록 조회 - 조건에 맞는 결과 없음")
+    void findAuctionWithConditions_noMatch() {
+        auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+
+        Page<AuctionAdminListResponse> result = auctionRepository.findAuctionWithConditions(
+                PageRequest.of(0, 10), AuctionStatus.ACTIVE, null);
+
+        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result.getContent()).isEmpty();
     }
 }

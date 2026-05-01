@@ -200,9 +200,7 @@ jobs:
           AWS_ECS_CLUSTER_ARN: ${{ secrets.AWS_ECS_CLUSTER_ARN }}
 
           ALLOY_ECR_REPOSITORY: ${{ secrets.ALLOY_ECR_REPOSITORY }}
-          GRAFANA_CLOUD_PUSH_URL: ${{ secrets.GRAFANA_CLOUD_PUSH_URL }}
-          GRAFANA_CLOUD_USERNAME: ${{ secrets.GRAFANA_CLOUD_USERNAME }}
-          GRAFANA_CLOUD_API_KEY: ${{ secrets.GRAFANA_CLOUD_API_KEY }}
+          AMP_REMOTE_WRITE_URL: ${{ secrets.AMP_REMOTE_WRITE_URL }}
 
         run: |
           set -euo pipefail
@@ -220,9 +218,7 @@ jobs:
             | sed -e "s|__ECR_URI__|${ECR_URI}|g" \
             | sed -e "s|__AWS_REGION__|${AWS_REGION}|g" \
             | sed -e "s|__ALLOY_ECR_URI__|${ALLOY_URI}|g" \
-            | sed -e "s|__GRAFANA_CLOUD_PUSH_URL__|${GRAFANA_CLOUD_PUSH_URL}|g" \
-            | sed -e "s|__GRAFANA_CLOUD_USERNAME__|${GRAFANA_CLOUD_USERNAME}|g" \
-            | sed -e "s|__GRAFANA_CLOUD_API_KEY__|${GRAFANA_CLOUD_API_KEY}|g" \
+            | sed -e "s|__AMP_REMOTE_WRITE_URL__|${AMP_REMOTE_WRITE_URL}|g" \
           )
 
           echo "$TASK_DEF" > task-definition-out.json

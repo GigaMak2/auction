@@ -27,7 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {CategoryService.class, CategoryServiceCacheTest.TestConfig.class})
+@SpringBootTest(classes = {CategoryService.class, CategoryAdminService.class, CategoryServiceCacheTest.TestConfig.class})
 public class CategoryServiceCacheTest {
 
     @MockitoBean
@@ -38,6 +38,9 @@ public class CategoryServiceCacheTest {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private CategoryAdminService categoryAdminService;
 
     @Autowired
     private CacheManager cacheManager;
@@ -100,7 +103,7 @@ public class CategoryServiceCacheTest {
             ReflectionTestUtils.setField(c, "id", 2L);
             return c;
         });
-        categoryService.createCategory(new CategoryCreateRequest(null, "가구"));
+        categoryAdminService.createCategory(new CategoryCreateRequest(null, "가구"));
         categoryService.getCategoryList(); // 무효화 후 재조회
 
         // then
@@ -119,7 +122,7 @@ public class CategoryServiceCacheTest {
         // when
         given(categoryRepository.findById(1L)).willReturn(Optional.of(root));
         given(categoryRepository.existsByParentIdIsNullAndName("가전제품")).willReturn(false);
-        categoryService.renameCategory(1L, new CategoryRenameRequest("가전제품"));
+        categoryAdminService.renameCategory(1L, new CategoryRenameRequest("가전제품"));
         categoryService.getCategoryList();
 
         // then
@@ -141,7 +144,7 @@ public class CategoryServiceCacheTest {
         given(categoryRepository.findById(2L)).willReturn(Optional.of(child));
         given(categoryRepository.existsByParentIdIsNullAndName("스마트폰")).willReturn(false);
         given(categoryRepository.findAllByParentId(2L)).willReturn(List.of());
-        categoryService.moveCategory(2L, new CategoryMoveRequest(null));
+        categoryAdminService.moveCategory(2L, new CategoryMoveRequest(null));
         categoryService.getCategoryList();
 
         // then
