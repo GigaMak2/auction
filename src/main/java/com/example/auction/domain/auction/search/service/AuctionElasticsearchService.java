@@ -3,6 +3,7 @@ package com.example.auction.domain.auction.search.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import co.elastic.clients.elasticsearch._types.*;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +22,6 @@ import com.example.auction.domain.auction.search.dto.AuctionCreatedDocument;
 import com.example.auction.domain.auction.search.dto.AuctionSearchResult;
 import com.example.auction.domain.auction.util.AuctionUtil;
 
-import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.NumberRangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
@@ -144,6 +144,19 @@ public class AuctionElasticsearchService {
             finalQuery = QueryBuilders.bool().must(mustQueries).build()._toQuery();
         }
 
+        // TODO:
+        // 
+        // 현재 검색 순위 로직은 keyword가 있을 경우
+        // keyword랑 비슷한 제목의 목록은 점수가 높아 올라가고
+        // 점수가 똑같을 경우 생성된 날을 기준으로 정렬합니다.
+        //
+        // 문제는 한 10년된 경매도 검색어랑 제일 비슷하면 위로 올라간다는 점입니다.
+        //
+        // 오래됬을 경우 penaltiy를 주는 logic이 필요합니다.
+        List<SortOptions> sortOptions = new ArrayList<>();
+        sortOptions.add(SortOptions.of(s -> s.score(sc -> sc.order(SortOrder.Desc))));
+        sortOptions.add(SortOptions.of(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc))));
+
         PageRequest pageRequest = PageRequest.of(
                 condition.getPage(),
                 condition.getPageSize()
@@ -152,6 +165,7 @@ public class AuctionElasticsearchService {
         SearchHits<AuctionDocument> results = elasticsearch.search(
                 NativeQuery.builder()
                 .withQuery(finalQuery)
+                .withSort(sortOptions)
                 .withPageable(pageRequest)
                 .build(),
                 AuctionDocument.class);
