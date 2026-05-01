@@ -59,6 +59,7 @@ services:
       NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
       ELASTICSEARCH_URIS: ${ELASTICSEARCH_URIS}
       ADMIN_SECRET_KEY: ${ADMIN_SECRET_KEY}
     healthcheck:
@@ -71,6 +72,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
 
   notification:
@@ -156,9 +159,19 @@ services:
     container_name: auction-elasticsearch
     environment:
       discovery.type: single-node
-      xpack.security.enabled: false
+      xpack.security.enabled: true
+      xpack.security.http.ssl.enabled: false
+      xpack.security.transport.ssl.enabled: false
+      ELASTIC_PASSWORD: ${ELASTICSEARCH_PASSWORD}
     ports:
       - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -u elastic:${ELASTICSEARCH_PASSWORD} http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     command: >
       bash -c "
         if [ ! -d /usr/share/elasticsearch/plugins/analysis-nori ]; then
@@ -167,18 +180,20 @@ services:
         /usr/local/bin/docker-entrypoint.sh
       "
 
-  kibana:
-    image: kibana:9.3.3
-    container_name: auction-kibana
-    ports:
-      - "5601:5601"
-    environment:
-      ELASTICSEARCH_HOSTS: http://auction-elasticsearch:9200
-    depends_on:
-      - elasticsearch
+  # TODO: kibana랑 elastic 같이 돌리는 방법 알아보기
+  # kibana:
+  #   image: kibana:9.3.3
+  #   container_name: auction-kibana
+  #   ports:
+  #     - "5601:5601"
+  #   environment:
+  #     ELASTICSEARCH_HOSTS: http://auction-elasticsearch:9200
+  #   depends_on:
+  #     - elasticsearch
 
 volumes:
   postgres-data:
   influxdb-data:
   grafana-data:
   prometheus-data:
+  elasticsearch-data:
