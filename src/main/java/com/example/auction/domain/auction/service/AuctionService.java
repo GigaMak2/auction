@@ -3,7 +3,6 @@ package com.example.auction.domain.auction.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import org.jspecify.annotations.NonNull;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -87,7 +86,7 @@ public class AuctionService {
 
         Page<AuctionSearchResult> searchResults = auctionSearchService.searchAuction(condition);
 
-        Page<@NonNull GetManyAuctionsResponse> dtos = searchResults.map(GetManyAuctionsResponse::from);
+        Page<GetManyAuctionsResponse> dtos = searchResults.map(GetManyAuctionsResponse::from);
         
         return PageResponse.create(dtos);
     }
@@ -99,11 +98,11 @@ public class AuctionService {
     ) {
         AuctionUtil.throwIfSearchConditionNotValid(condition);
 
-        Page<@NonNull Auction> auctions = auctionRepository.findByUserIdAndCondition(
+        Page<AuctionSearchResult> searchResults = auctionSearchService.searchAuction(
                 userDetails.getUserId(), condition
         );
 
-        Page<@NonNull GetManyAuctionsResponse> auctionsDto = auctions.map(GetManyAuctionsResponse::from);
+        Page<GetManyAuctionsResponse> auctionsDto = searchResults.map(GetManyAuctionsResponse::from);
         
         return PageResponse.create(auctionsDto);
     }
