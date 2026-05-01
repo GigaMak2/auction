@@ -3,6 +3,7 @@ package com.example.auction.domain.bid.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
+import com.example.auction.domain.bid.dto.request.BidPageRequest;
 import com.example.auction.domain.bid.dto.request.BidRequest;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.service.BidCommandFacade;
@@ -26,18 +27,6 @@ public class BidController {
     private final BidCommandFacade commandService;
     private final BidQueryService queryService;
 
-    // 특정 경매에 입찰 생성 - 기본 버전, before/after 비교용
-    @PostMapping("/v1")
-    public ResponseEntity<BaseResponse<BidResponse>> placeBid(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("auction_id") Long auctionId,
-            @Valid @RequestBody BidRequest request
-    ) {
-        BidResponse data = commandService.placeBid(userDetails, auctionId, request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.CREATED.value()), "입찰이 완료되었습니다", data));
-    }
-
     // 특정 경매에 입찰 생성 - 분산락
     @PostMapping("/v2")
     public ResponseEntity<BaseResponse<BidResponse>> placeBidDis(
@@ -47,7 +36,7 @@ public class BidController {
     ) {
         BidResponse data = commandService.placeBidDis(userDetails, auctionId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.CREATED.value()), "입찰이 완료되었습니다", data));
+                .body(BaseResponse.success(String.valueOf(HttpStatus.CREATED.name()), "입찰이 완료되었습니다", data));
     }
 
 
@@ -56,18 +45,17 @@ public class BidController {
     public ResponseEntity<BaseResponse<PageResponse<BidListResponse>>> getBids(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("auction_id") Long auctionId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
+            @ModelAttribute @Valid BidPageRequest request
+            ) {
         Pageable pageable = PageRequest.of(
-                page,
-                size,
+                request.getPage(),
+                request.getSize(),
                 Sort.by(Sort.Direction.ASC, "price")
                         .and(Sort.by(Sort.Direction.DESC, "createdAt"))
         );
         PageResponse<BidListResponse> data = queryService.getBids(userDetails, auctionId, pageable);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.value()), "입찰 내역 조회가 완료되었습니다", data));
+                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.name()), "입찰 내역 조회가 완료되었습니다", data));
     }
 
     // 입찰 결과 조회(1건)
@@ -78,7 +66,7 @@ public class BidController {
     ) {
         BidResponse data = queryService.getWinnerBid(userDetails, auctionId);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.value()), "입찰 결과 조회가 완료되었습니다", data));
+                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.name()), "입찰 결과 조회가 완료되었습니다", data));
     }
 
     // (경매 진행중) 현재 최저가입찰 조회
@@ -89,6 +77,6 @@ public class BidController {
     ) {
         BidResponse data = queryService.getCurrentMinBid(userDetails, auctionId);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.value()), "현재 최저가 입찰 조회가 완료되었습니다", data));
+                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.name()), "현재 최저가 입찰 조회가 완료되었습니다", data));
     }
 }

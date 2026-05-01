@@ -3,9 +3,11 @@ package com.example.auction.domain.bid.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
+import com.example.auction.domain.bid.dto.request.BidPageRequest;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 import com.example.auction.domain.bid.service.BidQueryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,12 +29,11 @@ public class BidUserController {
     @GetMapping
     public ResponseEntity<BaseResponse<PageResponse<BidListResponse>>> getMyBids(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+            @ModelAttribute @Valid BidPageRequest request
+            ) {
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), Sort.by(Sort.Direction.DESC, "createdAt"));
         PageResponse<BidListResponse> data = queryService.getMyBids(userDetails, pageable);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.value()), "내 입찰 조회가 완료되었습니다.", data));
+                .body(BaseResponse.success(HttpStatus.OK.name(), "내 입찰 조회가 완료되었습니다.", data));
     }
 }

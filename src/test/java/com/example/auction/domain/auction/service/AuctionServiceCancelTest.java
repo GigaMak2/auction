@@ -6,7 +6,6 @@ import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.user.entity.User;
-import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +16,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
@@ -38,6 +38,9 @@ class AuctionServiceCancelTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @Test
     @DisplayName("기본적인 경매 취소")

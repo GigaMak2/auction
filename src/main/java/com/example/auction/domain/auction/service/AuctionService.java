@@ -3,6 +3,12 @@ package com.example.auction.domain.auction.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import com.example.auction.domain.auction.eventBridge.AuctionCancelledEventBridge;
+import com.example.auction.domain.auction.eventBridge.AuctionCreatedEventBridge;
+import com.example.auction.domain.auction.eventBridge.AuctionEventBridgeService;
+import com.example.auction.domain.category.exception.CategoryErrorEnum;
+import com.example.auction.domain.category.repository.CategoryRepository;
+
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,16 +27,12 @@ import com.example.auction.domain.auction.dto.GetAuctionResponse;
 import com.example.auction.domain.auction.dto.GetManyAuctionsResponse;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
-import com.example.auction.domain.auction.eventBridge.AuctionCreatedEventBridge;
-import com.example.auction.domain.auction.eventBridge.AuctionEventBridgeService;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.auction.search.dto.AuctionCreatedDocument;
 import com.example.auction.domain.auction.search.dto.AuctionSearchResult;
 import com.example.auction.domain.auction.search.service.AuctionSearchService;
 import com.example.auction.domain.auction.util.AuctionUtil;
-import com.example.auction.domain.category.exception.CategoryErrorEnum;
-import com.example.auction.domain.category.repository.CategoryRepository;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 
@@ -217,5 +219,7 @@ public class AuctionService {
         auction.cancel();
 
         auctionRepository.saveAndFlush(auction);
+        // auctionEventBridgeService 의 handleAuctionCancelled 호출
+        eventPublisher.publishEvent(new AuctionCancelledEventBridge(auction.getId()));
     }
 }

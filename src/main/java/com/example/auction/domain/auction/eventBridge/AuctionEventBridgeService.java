@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.scheduler.SchedulerClient;
 import software.amazon.awssdk.services.scheduler.model.ActionAfterCompletion;
 import software.amazon.awssdk.services.scheduler.model.ConflictException;
 import software.amazon.awssdk.services.scheduler.model.FlexibleTimeWindowMode;
+import software.amazon.awssdk.services.scheduler.model.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -60,6 +61,11 @@ public class AuctionEventBridgeService {
                 }
             }
         }
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleAuctionCancelled(AuctionCancelledEventBridge event) {
+        deleteSchedules(event.auctionId());
     }
 
     // 경매 시작 스케줄 등록(5분 전)
@@ -130,6 +136,33 @@ public class AuctionEventBridgeService {
             );
         }
     }
+
+    public void deleteSchedules(Long auctionId) {
+        deleteSchedule("auction-start-" + auctionId + "-NEW");
+        deleteSchedule("auction-start-" + auctionId + "-LEGACY");
+        deleteSchedule("auction-end-" + auctionId + "-NEW");
+        deleteSchedule("auction-end-" + auctionId + "-LEGACY");
+    }
+
+    private void deleteSchedule(String scheduleName) {
+        int maxAttempts = 3;
+        for(int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                schedulerClient.deleteSchedule(r -> r.name(scheduleName));
+                log.info("[EventBridge] 스케줄 삭제: {}", scheduleName);
+                return;
+            } catch (ResourceNotFoundException e) {
+                log.warn("[EventBridge] 스케줄 없음 (이미 삭제됐거나 미등록): {}", scheduleName);
+                return;
+            } catch (Exception e) {
+                log.warn("[EventBridge] 스케줄 삭제 실패 {}/{}회: {}", attempt, maxAttempts, scheduleName, e);
+                if (attempt == maxAttempts) {
+                    log.error("[EventBridge] 스케줄 삭제 최종 실패: {}", scheduleName, e);
+                }
+            }
+        }
+    }
+
 
     // KST -> UTC 변환(우리나라시간-9)
     /**
