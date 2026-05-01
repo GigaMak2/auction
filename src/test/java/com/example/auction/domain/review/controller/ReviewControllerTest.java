@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -28,12 +29,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({ReviewController.class, GlobalExceptionHandler.class})
 @AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureRestDocs
 class ReviewControllerTest {
 
     @Autowired
@@ -81,7 +86,11 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("리뷰 생성 요청 성공"))
                 .andExpect(jsonPath("$.data.auctionId").value(10L))
-                .andExpect(jsonPath("$.data.score").value(5));
+                .andExpect(jsonPath("$.data.score").value(5))
+                .andDo(document("review/create-review",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
     }
 
     @Test
@@ -130,7 +139,7 @@ class ReviewControllerTest {
     }
 
     @Test
-    @DisplayName("리뷰 작성 실패 - 설명 500자 초과")
+    @DisplayName("리뷰 생성 실패 - 설명 500자 초과")
     void createReview_fail_descriptionTooLong() throws Exception {
         // given
         ReviewCreateRequest request = new ReviewCreateRequest(1L, 5, "a".repeat(501), null);
@@ -167,7 +176,11 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("작성한 리뷰 목록 조회 요청 성공"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
-                .andExpect(jsonPath("$.data.totalElements").value(2));
+                .andExpect(jsonPath("$.data.totalElements").value(2))
+                .andDo(document("review/get-written-review-list",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
     }
 
     @Test
@@ -238,7 +251,11 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("받은 리뷰 목록 조회 요청 성공"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
-                .andExpect(jsonPath("$.data.totalElements").value(2));
+                .andExpect(jsonPath("$.data.totalElements").value(2))
+                .andDo(document("review/get-received-review-list",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
     }
 
     @Test
@@ -306,7 +323,11 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("리뷰 상세 조회 요청 성공"))
                 .andExpect(jsonPath("$.data.reviewId").value(1L))
-                .andExpect(jsonPath("$.data.score").value(5));
+                .andExpect(jsonPath("$.data.score").value(5))
+                .andDo(document("review/get-review",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
     }
 
 
@@ -331,7 +352,11 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("리뷰 수정 요청 성공"))
                 .andExpect(jsonPath("$.data.reviewId").value(1L))
-                .andExpect(jsonPath("$.data.score").value(1));
+                .andExpect(jsonPath("$.data.score").value(1))
+                .andDo(document("review/modify-review",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
     }
 
     @Test
@@ -394,7 +419,11 @@ class ReviewControllerTest {
         mockMvc.perform(delete("/api/reviews/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 삭제 요청 성공"));
+                .andExpect(jsonPath("$.message").value("리뷰 삭제 요청 성공"))
+                .andDo(document("review/delete-review",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
 
         verify(reviewService).deleteReview(1L, 1L);
     }
