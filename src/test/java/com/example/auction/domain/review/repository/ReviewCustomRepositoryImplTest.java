@@ -3,6 +3,7 @@ package com.example.auction.domain.review.repository;
 import com.example.auction.common.config.JpaConfig;
 import com.example.auction.common.config.QuerydslConfig;
 import com.example.auction.domain.category.service.CategoryService;
+import com.example.auction.domain.review.dto.ReviewAdminListResponse;
 import com.example.auction.domain.review.dto.ReviewListGetResponse;
 import com.example.auction.domain.review.entity.Review;
 import com.example.auction.testutils.BaseIntegrationTest;
@@ -127,5 +128,84 @@ class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
 
         assertThat(inRange.getContent()).hasSize(2);
         assertThat(outOfRange.getContent()).isEmpty();
+    }
+
+
+    // ========================
+    // 관리자 리뷰 목록 조회
+    // ========================
+
+    @Test
+    @DisplayName("관리자 리뷰 목록 조회 - 필터 없음 전체 조회")
+    void findReviewsWithConditions_noFilter() {
+        Page<ReviewAdminListResponse> result = reviewRepository.findReviewsWithConditions(
+                PageRequest.of(0, 10), null, null, null, null);
+
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getContent()).hasSize(3);
+    }
+
+    @Test
+    @DisplayName("관리자 리뷰 목록 조회 - auctionId 필터링")
+    void findReviewsWithConditions_auctionIdFilter() {
+        Page<ReviewAdminListResponse> result = reviewRepository.findReviewsWithConditions(
+                PageRequest.of(0, 10), 10L, null, null, null);
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().getFirst().auctionId()).isEqualTo(10L);
+    }
+
+    @Test
+    @DisplayName("관리자 리뷰 목록 조회 - reviewerId 필터링")
+    void findReviewsWithConditions_reviewerIdFilter() {
+        Page<ReviewAdminListResponse> result = reviewRepository.findReviewsWithConditions(
+                PageRequest.of(0, 10), null, 1L, null, null);
+
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getContent())
+                .extracting(ReviewAdminListResponse::reviewerId)
+                .containsOnly(1L);
+    }
+
+    @Test
+    @DisplayName("관리자 리뷰 목록 조회 - revieweeId 필터링")
+    void findReviewsWithConditions_revieweeIdFilter() {
+        Page<ReviewAdminListResponse> result = reviewRepository.findReviewsWithConditions(
+                PageRequest.of(0, 10), null, null, 2L, null);
+
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getContent())
+                .extracting(ReviewAdminListResponse::revieweeId)
+                .containsOnly(2L);
+    }
+
+    @Test
+    @DisplayName("관리자 리뷰 목록 조회 - score 필터링")
+    void findReviewsWithConditions_scoreFilter() {
+        Page<ReviewAdminListResponse> result = reviewRepository.findReviewsWithConditions(
+                PageRequest.of(0, 10), null, null, null, 5);
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().getFirst().score()).isEqualTo(5);
+    }
+
+    @Test
+    @DisplayName("관리자 리뷰 목록 조회 - reviewerId + score 복합 필터링")
+    void findReviewsWithConditions_reviewerIdAndScore() {
+        Page<ReviewAdminListResponse> result = reviewRepository.findReviewsWithConditions(
+                PageRequest.of(0, 10), null, 1L, null, 4);
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().getFirst().auctionId()).isEqualTo(11L);
+    }
+
+    @Test
+    @DisplayName("관리자 리뷰 목록 조회 - 조건에 맞는 결과 없음")
+    void findReviewsWithConditions_noMatch() {
+        Page<ReviewAdminListResponse> result = reviewRepository.findReviewsWithConditions(
+                PageRequest.of(0, 10), null, null, null, 1);
+
+        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result.getContent()).isEmpty();
     }
 }
