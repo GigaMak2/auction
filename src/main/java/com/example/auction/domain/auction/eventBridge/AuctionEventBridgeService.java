@@ -145,13 +145,21 @@ public class AuctionEventBridgeService {
     }
 
     private void deleteSchedule(String scheduleName) {
-        try {
-            schedulerClient.deleteSchedule(r -> r.name(scheduleName));
-            log.info("[EventBridge] 스케줄 삭제: {}", scheduleName);
-        } catch (ResourceNotFoundException e) {
-            log.warn("[EventBridge] 스케줄 없음 (이미 삭제됐거나 미등록): {}", scheduleName);
-        } catch (Exception e) {
-            log.error("[EventBridge] 스케줄 삭제 실패: {}", scheduleName, e);
+        int maxAttempts = 3;
+        for(int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                schedulerClient.deleteSchedule(r -> r.name(scheduleName));
+                log.info("[EventBridge] 스케줄 삭제: {}", scheduleName);
+                return;
+            } catch (ResourceNotFoundException e) {
+                log.warn("[EventBridge] 스케줄 없음 (이미 삭제됐거나 미등록): {}", scheduleName);
+                return;
+            } catch (Exception e) {
+                log.warn("[EventBridge] 스케줄 삭제 실패 {}/{}회: {}", attempt, maxAttempts, scheduleName, e);
+                if (attempt == maxAttempts) {
+                    log.error("[EventBridge] 스케줄 삭제 최종 실패: {}", scheduleName, e);
+                }
+            }
         }
     }
 

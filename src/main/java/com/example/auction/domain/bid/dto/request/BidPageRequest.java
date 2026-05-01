@@ -4,8 +4,10 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class BidPageRequest {
     @PositiveOrZero(message = "페이지는 0 이상이어야 합니다")
     private int page = 0;
