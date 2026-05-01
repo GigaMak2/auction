@@ -4,10 +4,13 @@ import com.example.auction.domain.auction.repository.AuctionRepository;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
+import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.search.dto.AuctionSearchResult;
 import com.example.auction.domain.auction.util.AuctionUtil;
 
@@ -93,5 +96,22 @@ public class AuctionSearchService {
         }
 
         return auctionElasticsearchService.searchAuctionFromElasticsearch(userId, condition);
+    }
+
+    public Page<AuctionAdminListResponse> searchAuctionWithConditions(
+            Pageable pageable, AuctionStatus auctionStatus, String keyword
+    ) {
+        if (keyword == null || keyword.isBlank()) {
+            try {
+                return auctionRepository.findAuctionWithConditions(pageable, auctionStatus, keyword);
+            } catch (Exception e) {
+                log.error("[AuctionSearch] DB 키워드 없는 검색 실패, elasticsearch로 fallback - pageable={}, auctionStatus={}, keyword={}",
+                        pageable, auctionStatus, keyword, e);
+
+                return auctionElasticsearchService.searchAuctionWithConditionsFromElasticsearch(pageable, auctionStatus, keyword);
+            }
+        }
+
+        return auctionElasticsearchService.searchAuctionWithConditionsFromElasticsearch(pageable, auctionStatus, keyword);
     }
 }

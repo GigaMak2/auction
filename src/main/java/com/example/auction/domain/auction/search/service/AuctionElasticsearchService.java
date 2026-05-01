@@ -7,6 +7,7 @@ import co.elastic.clients.elasticsearch._types.*;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHitSupport;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
+import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.search.document.AuctionDocument;
 import com.example.auction.domain.auction.search.dto.AuctionCreatedDocument;
 import com.example.auction.domain.auction.search.dto.AuctionSearchResult;
@@ -184,5 +187,79 @@ public class AuctionElasticsearchService {
             AuctionSearchCondition condition
     ) {
         return searchAuctionFromElasticsearchImpl(null, condition);
+    }
+
+    public Page<AuctionAdminListResponse> searchAuctionWithConditionsFromElasticsearch (
+            Pageable pageable, AuctionStatus auctionStatus, String keyword
+    ) {
+        List<Query> mustQueries = new ArrayList<>();
+
+        // 경매 상태 조건
+        if (auctionStatus != null) {
+            Query statusQuery = QueryBuilders.term()
+                .field("status")
+                .value(FieldValue.of(auctionStatus))
+                .build()
+                ._toQuery();
+
+            mustQueries.add(statusQuery);
+        }
+
+        // 이름 키워드 조건
+        if (keyword != null && !keyword.isBlank()) {
+            Query nameQuery = QueryBuilders.match()
+                .query(keyword)
+                .field("itemName")
+                .build()
+                ._toQuery();
+
+            mustQueries.add(nameQuery);
+        }
+
+        Query finalQuery;
+
+        if (mustQueries.isEmpty()) {
+            finalQuery = QueryBuilders.matchAll().build()._toQuery();
+        } else {
+            finalQuery = QueryBuilders.bool().must(mustQueries).build()._toQuery();
+        }
+
+        // TODO:
+        // 
+        // 현재 검색 순위 로직은 keyword가 있을 경우
+        // keyword랑 비슷한 제목의 목록은 점수가 높아 올라가고
+        // 점수가 똑같을 경우 생성된 날을 기준으로 정렬합니다.
+        //
+        // 문제는 한 10년된 경매도 검색어랑 제일 비슷하면 위로 올라간다는 점입니다.
+        //
+        // 보시다 시피 위와 똑같은 문제를 겪고 있지만 이 API는 관리자를 위한 API인 만큼
+        // 또 다른 조건이 필요할 수도 있을 듯 합니다.
+        List<SortOptions> sortOptions = new ArrayList<>();
+        sortOptions.add(SortOptions.of(s -> s.score(sc -> sc.order(SortOrder.Desc))));
+        sortOptions.add(SortOptions.of(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc))));
+
+        SearchHits<AuctionDocument> results = elasticsearch.search(
+                NativeQuery.builder()
+                .withQuery(finalQuery)
+                .withSort(sortOptions)
+                .withPageable(pageable)
+                .build(),
+                AuctionDocument.class);
+
+        return SearchHitSupport.searchPageFor(results, pageable)
+            .map(x -> {
+                AuctionDocument doc = x.getContent();
+                return new AuctionAdminListResponse(
+                        doc.getId(),
+                        doc.getUserId(),
+                        doc.getItemName(),
+                        doc.getCategoryId(),
+                        doc.getStatus(),
+                        doc.getCreatedAt(),
+                        doc.getStartedAt(),
+                        doc.getEndedAt(),
+                        doc.getCancelledAt()
+                );
+            });
     }
 }
