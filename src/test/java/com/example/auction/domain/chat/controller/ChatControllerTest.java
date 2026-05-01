@@ -8,6 +8,7 @@ import com.example.auction.common.exception.GlobalExceptionHandler;
 import com.example.auction.domain.chat.dto.ChatMessageListResponse;
 import com.example.auction.domain.chat.dto.ChatMessageResponse;
 import com.example.auction.domain.chat.dto.ChatRoomResponse;
+import com.example.auction.domain.chat.dto.ChatRoomUpdateRequest;
 import com.example.auction.domain.chat.entity.MessageRole;
 import com.example.auction.domain.chat.service.ChatService;
 import org.junit.jupiter.api.AfterEach;
@@ -18,15 +19,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -41,6 +43,9 @@ class ChatControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockitoBean
     private ChatService chatService;
@@ -125,6 +130,56 @@ class ChatControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.length()").value(0));
+    }
+
+
+    @Test
+    @DisplayName("채팅방 제목 수정 성공")
+    void updateRoom_success() throws Exception {
+        // given
+        ChatRoomUpdateRequest request = new ChatRoomUpdateRequest("새제목");
+        ChatRoomResponse response = new ChatRoomResponse(10L, "새제목", LocalDateTime.now());
+        given(chatService.updateTitle(eq(10L), eq(1L), eq("새제목"))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(patch("/api/chat/rooms/10")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("채팅방 제목을 수정했습니다"))
+                .andExpect(jsonPath("$.data.id").value(10L))
+                .andExpect(jsonPath("$.data.title").value("새제목"));
+    }
+
+    @Test
+    @DisplayName("채팅방 제목 수정 실패 - 제목 공백")
+    void updateRoom_fail_titleBlank() throws Exception {
+        // given
+        ChatRoomUpdateRequest request = new ChatRoomUpdateRequest("");
+
+        // when & then
+        mockMvc.perform(patch("/api/chat/rooms/10")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("제목을 입력해 주세요"));
+    }
+
+    @Test
+    @DisplayName("채팅방 제목 수정 실패 - 제목 10자 초과")
+    void updateRoom_fail_titleTooLong() throws Exception {
+        // given
+        ChatRoomUpdateRequest request = new ChatRoomUpdateRequest("12345678901");
+
+        // when & then
+        mockMvc.perform(patch("/api/chat/rooms/10")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("제목은 10자 이하로 입력해 주세요"));
     }
 
 
