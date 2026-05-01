@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,12 +34,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({ChatController.class, GlobalExceptionHandler.class})
 @AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureRestDocs
 class ChatControllerTest {
 
     @Autowired
@@ -91,7 +96,11 @@ class ChatControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("채팅방을 생성했습니다"))
-                .andExpect(jsonPath("$.data.id").value(10L));
+                .andExpect(jsonPath("$.data.id").value(10L))
+                .andDo(document("chat/create-room",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
     }
 
 
@@ -116,7 +125,11 @@ class ChatControllerTest {
                 .andExpect(jsonPath("$.message").value("채팅방 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.length()").value(2))
                 .andExpect(jsonPath("$.data[0].id").value(1L))
-                .andExpect(jsonPath("$.data[1].id").value(2L));
+                .andExpect(jsonPath("$.data[1].id").value(2L))
+                .andDo(document("chat/get-rooms",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
     }
 
     @Test
@@ -132,6 +145,10 @@ class ChatControllerTest {
                 .andExpect(jsonPath("$.data.length()").value(0));
     }
 
+
+    // ========================
+    // 채팅방 제목 수정
+    // ========================
 
     @Test
     @DisplayName("채팅방 제목 수정 성공")
@@ -149,7 +166,11 @@ class ChatControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("채팅방 제목을 수정했습니다"))
                 .andExpect(jsonPath("$.data.id").value(10L))
-                .andExpect(jsonPath("$.data.title").value("새제목"));
+                .andExpect(jsonPath("$.data.title").value("새제목"))
+                .andDo(document("chat/update-room",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
     }
 
     @Test
@@ -197,7 +218,11 @@ class ChatControllerTest {
         mockMvc.perform(delete("/api/chat/rooms/10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("채팅방을 삭제했습니다"));
+                .andExpect(jsonPath("$.message").value("채팅방을 삭제했습니다"))
+                .andDo(document("chat/delete-room",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
 
         verify(chatService).deleteRoom(10L, 1L);
     }
@@ -224,7 +249,11 @@ class ChatControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("메시지 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.messages.length()").value(2))
-                .andExpect(jsonPath("$.data.nextCursor").value((Object) null));
+                .andExpect(jsonPath("$.data.nextCursor").value((Object) null))
+                .andDo(document("chat/get-messages",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
     }
 
     @Test
