@@ -8,6 +8,7 @@ import com.example.auction.domain.user.enums.UserRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -19,12 +20,16 @@ import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({AuthAdminController.class, GlobalExceptionHandler.class})
 @AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureRestDocs
 class AuthAdminControllerTest {
 
     @Autowired
@@ -58,7 +63,11 @@ class AuthAdminControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("관리자 회원가입 요청 성공"))
                 .andExpect(jsonPath("$.data.email").value("admin@test.com"))
-                .andExpect(jsonPath("$.data.role").value("ADMIN"));
+                .andExpect(jsonPath("$.data.role").value("ADMIN"))
+                .andDo(document("auth-admin/signup",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+                ));
     }
 
     @Test
