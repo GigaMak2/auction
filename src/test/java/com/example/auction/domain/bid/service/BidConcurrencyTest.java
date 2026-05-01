@@ -91,64 +91,6 @@ class BidConcurrencyTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("v1 -50명 동시 입찰 시 중복 최저가 발생")
-    @DisabledIfEnvironmentVariable(
-        named="IN_CI",
-        matches="(?i)\\s*true\\s*",
-        disabledReason="CI 환경 입니다. 실패를 보여주기 위해 작성된 테스트라 안돌리겠습니다."
-    )
-    void concurrency_v1_noLock() throws InterruptedException {
-        // given
-        int threadCount = 50;
-        Auction auction = createActiveAuction(99L);
-        Long auctionId = auction.getId();
-        BigDecimal bidPrice = BigDecimal.valueOf(80_000);
-
-        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-        CountDownLatch latch = new CountDownLatch(threadCount);
-        AtomicInteger successCount = new AtomicInteger(0);
-        AtomicInteger failCount = new AtomicInteger(0);
-
-        // when - 50명 동시 입찰
-        for (int i = 0; i < threadCount; i++) {
-            final long userId = userIds.get(i);
-            executor.submit(() -> {
-                try {
-                    CustomUserDetails userDetails = new CustomUserDetails(userId, "USER");
-                    BidRequest request = new BidRequest(bidPrice, null);
-                    bidCommandFacade.placeBid(userDetails, auctionId, request);
-                    successCount.incrementAndGet();
-                } catch (Exception e) {
-                    failCount.incrementAndGet();
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-        latch.await();
-        executor.shutdown();
-
-        // then
-        List<Bid> bids = bidRepository.findAll().stream()
-                .filter(b -> b.getAuctionId().equals(auctionId))
-                .toList();
-
-        long minPriceCount = bids.stream()
-                .filter(b -> b.getPrice().compareTo(bidPrice) == 0)
-                .count();
-
-        log.info("====================================");
-        log.info("[v1 - 락 없음] 동시 입찰 {}명", threadCount);
-        log.info("성공: {}건, 실패: {}건", successCount.get(), failCount.get());
-        log.info("총 입찰 저장: {}건", bids.size());
-        log.info("80,000원 중복 저장: {}건 (1건이 정상)", minPriceCount);
-        log.info("====================================");
-
-        // v1은 중복이 발생할 수 있음을 확인 (1건 초과 가능)
-        assertThat(bids.size()).isGreaterThan(1);
-    }
-
-    @Test
     @DisplayName("v2(분산락) 50명 동시 입찰 시 정확히 1건만 저장")
     void concurrency_v2_withLock() throws InterruptedException {
         // given
