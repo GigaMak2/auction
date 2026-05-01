@@ -180,16 +180,22 @@ services:
         /usr/local/bin/docker-entrypoint.sh
       "
 
-  # TODO: kibana랑 elastic 같이 돌리는 방법 알아보기
-  # kibana:
-  #   image: kibana:9.3.3
-  #   container_name: auction-kibana
-  #   ports:
-  #     - "5601:5601"
-  #   environment:
-  #     ELASTICSEARCH_HOSTS: http://auction-elasticsearch:9200
-  #   depends_on:
-  #     - elasticsearch
+  kibana:
+    image: kibana:9.3.3
+    container_name: auction-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://auction-elasticsearch:9200
+      ELASTICSEARCH_USERNAME: kibana_system
+      ELASTICSEARCH_PASSWORD: kibana
+    command: >
+      bash -c "
+        curl -u elastic:${ELASTICSEARCH_PASSWORD} -X POST http://auction-elasticsearch:9200/_security/user/kibana_system/_password -H 'Content-Type: application/json' -d '{\"password\": \"kibana\"}' ; /usr/local/bin/kibana-docker
+      "
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
 
 volumes:
   postgres-data:
