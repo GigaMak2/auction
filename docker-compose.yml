@@ -59,6 +59,7 @@ services:
       NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ELASTICSEARCH_URIS: ${ELASTICSEARCH_URIS}
       ADMIN_SECRET_KEY: ${ADMIN_SECRET_KEY}
     healthcheck:
       test: "curl --fail --silent localhost:8080/health || exit 1"
@@ -124,7 +125,6 @@ services:
     depends_on:
       - prometheus
 
-
   influxdb:
     image: influxdb:1.8
     container_name: auction-influxdb
@@ -150,6 +150,32 @@ services:
         condition: service_started
       prometheus:
         condition: service_healthy
+
+  elasticsearch:
+    image: elasticsearch:9.3.3
+    container_name: auction-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+    ports:
+      - "9200:9200"
+    command: >
+      bash -c "
+        if [ ! -d /usr/share/elasticsearch/plugins/analysis-nori ]; then
+          bin/elasticsearch-plugin install analysis-nori --batch;
+        fi &&
+        /usr/local/bin/docker-entrypoint.sh
+      "
+
+  kibana:
+    image: kibana:9.3.3
+    container_name: auction-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://auction-elasticsearch:9200
+    depends_on:
+      - elasticsearch
 
 volumes:
   postgres-data:

@@ -43,6 +43,10 @@ spring:
         options:
           model: text-embedding-3-small    # 텍스트 → 벡터 변환 전용 임베딩 모델 (RAG용)
 
+  # Elasticsearch 관련
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS}
+
   cloud:
     # AWS 관련
     aws:

@@ -75,6 +75,9 @@ dependencies {
     // AWS EventBridge Scheduler
     implementation 'software.amazon.awssdk:scheduler:2.42.20'
 
+    // Elasticsearch
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
     // testcontainers
     testImplementation platform('org.testcontainers:testcontainers-bom:2.0.5')
     testImplementation "org.testcontainers:testcontainers-postgresql"

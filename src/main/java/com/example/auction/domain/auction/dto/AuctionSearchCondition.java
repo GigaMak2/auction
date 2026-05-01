@@ -48,4 +48,9 @@ public class AuctionSearchCondition {
             this.status.addAll(Arrays.asList(statuses));
         }
     }
+
+    public String toLogString() {
+        return "keyword=\"%s\", maxPriceMin=%s, maxPriceMax=%s, status=%s, categoryId=%s, page=%s, pageSize=%s"
+            .formatted(this.keyword, this.maxPriceMin, this.maxPriceMax, this.status, this.categoryId, this.page, this.pageSize);
+    }
 }

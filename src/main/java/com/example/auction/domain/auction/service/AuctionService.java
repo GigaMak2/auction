@@ -3,10 +3,6 @@ package com.example.auction.domain.auction.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import com.example.auction.domain.auction.eventBridge.AuctionCreatedEventBridge;
-import com.example.auction.domain.auction.eventBridge.AuctionEventBridgeService;
-import com.example.auction.domain.category.exception.CategoryErrorEnum;
-import com.example.auction.domain.category.repository.CategoryRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -26,11 +22,18 @@ import com.example.auction.domain.auction.dto.GetAuctionResponse;
 import com.example.auction.domain.auction.dto.GetManyAuctionsResponse;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
+import com.example.auction.domain.auction.eventBridge.AuctionCreatedEventBridge;
+import com.example.auction.domain.auction.eventBridge.AuctionEventBridgeService;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
+import com.example.auction.domain.auction.search.dto.AuctionCreatedDocument;
+import com.example.auction.domain.auction.search.dto.AuctionSearchResult;
+import com.example.auction.domain.auction.search.service.AuctionSearchService;
 import com.example.auction.domain.auction.util.AuctionUtil;
-import com.example.auction.domain.user.repository.UserRepository;
+import com.example.auction.domain.category.exception.CategoryErrorEnum;
+import com.example.auction.domain.category.repository.CategoryRepository;
 import com.example.auction.domain.user.exception.UserErrorEnum;
+import com.example.auction.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,6 +45,7 @@ public class AuctionService {
     private final CategoryRepository categoryRepository;
     private final AuctionEventBridgeService auctionEventBridgeService;
     private final ApplicationEventPublisher eventPublisher;
+    private final AuctionSearchService auctionSearchService;
 
     @Transactional(readOnly = true)
     @Cacheable(
@@ -56,7 +60,6 @@ public class AuctionService {
         return GetAuctionResponse.from(auction);
     }
 
-    @Transactional(readOnly = true)
     @Cacheable(
         cacheNames = {"getManyAuctionsPublic"},
         key = "@auctionCacheService.getManyAuctionsPublicCacheKey(#condition)",
@@ -82,13 +85,11 @@ public class AuctionService {
 
         AuctionUtil.throwIfSearchConditionNotValid(condition);
 
-        Page<@NonNull Auction> auctions = auctionRepository.findByCondition(
-                condition
-        );
+        Page<AuctionSearchResult> searchResults = auctionSearchService.searchAuction(condition);
 
-        Page<@NonNull GetManyAuctionsResponse> auctionsDto = auctions.map(GetManyAuctionsResponse::from);
+        Page<@NonNull GetManyAuctionsResponse> dtos = searchResults.map(GetManyAuctionsResponse::from);
         
-        return PageResponse.create(auctionsDto);
+        return PageResponse.create(dtos);
     }
 
     @Transactional(readOnly = true)
@@ -143,9 +144,13 @@ public class AuctionService {
         auction = auctionRepository.saveAndFlush(auction);
 
         // 이벤트퍼블리셔를 활용하여 트랜잭션 밖으로 빼냄
+
         // 트랜잭션 커밋 이후 EventBridge 등록 (고아 스케줄 방지)
         // 이 매서드의 트랜잭션 커밋이 끝나면 event가 발행되고, AuctionEventBridgeService의 handleAuctionCreated 가 실행됨
         eventPublisher.publishEvent(new AuctionCreatedEventBridge(auction.getId(), auction.getStartedAt(), auction.getEndedAt()));
+
+        // 이 매서드의 트랜잭션 커밋이 끝나면 event가 발행되고, AuctionSearchService의 handleAuctionCreated 가 실행됨
+        eventPublisher.publishEvent(AuctionCreatedDocument.from(auction));
 
         return GetAuctionResponse.from(auction);
     }
