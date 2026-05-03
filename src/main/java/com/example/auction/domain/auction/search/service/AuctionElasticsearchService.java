@@ -198,7 +198,7 @@ public class AuctionElasticsearchService {
         if (auctionStatus != null) {
             Query statusQuery = QueryBuilders.term()
                 .field("status")
-                .value(FieldValue.of(auctionStatus))
+                .value(FieldValue.of(auctionStatus.name()))
                 .build()
                 ._toQuery();
 
