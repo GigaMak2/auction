@@ -89,6 +89,6 @@ fi &&
 
         registry.add("spring.elasticsearch.username", ()-> "elastic" );
         registry.add("spring.elasticsearch.password", ()-> "1234" );
-        registry.add("spring.elasticsearch.uris", elasticsearch::getHttpHostAddress);
+        registry.add("spring.elasticsearch.uris", () -> "http://" + elasticsearch.getHttpHostAddress());
     }
 }
