@@ -22,7 +22,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
@@ -56,7 +55,6 @@ class AuctionElasticsearchServiceTest extends BaseIntegrationTest {
      * AuctionSearchCondition이 기본값일 때 모든 데이터를 가지고 오는지 확인합니다.
      */
     @Test
-    @Transactional
     void findSimple() {
         AuctionCreatedDocument event = new AuctionCreatedDocument(
             1L,
@@ -90,7 +88,6 @@ class AuctionElasticsearchServiceTest extends BaseIntegrationTest {
      */
     @ParameterizedTest(name = "{0}")
     @MethodSource("getFindMinMaxPriceRangeSources")
-    @Transactional
     void findMinMaxPriceRange(String name, AuctionSearchCondition condition, int expectingAuction) {
         long[] idCounter = {1};
 
@@ -155,7 +152,6 @@ class AuctionElasticsearchServiceTest extends BaseIntegrationTest {
      */
     @ParameterizedTest(name = "{0}")
     @MethodSource("getFindByStatusSources")
-    @Transactional
     void findByStatus(String name, AuctionSearchCondition condition, AuctionStatus[] statuses) {
         long[] idCounter = {1};
 
