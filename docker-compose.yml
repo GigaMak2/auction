@@ -59,6 +59,7 @@ services:
       NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ELASTICSEARCH_USERNAME: elastic
       ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
       ELASTICSEARCH_URIS: ${ELASTICSEARCH_URIS}
       ADMIN_SECRET_KEY: ${ADMIN_SECRET_KEY}
@@ -162,6 +163,8 @@ services:
       xpack.security.enabled: true
       xpack.security.http.ssl.enabled: false
       xpack.security.transport.ssl.enabled: false
+      # elasticsearch가 쓸 수 있는 최대 ram을 2GB 로 한정
+      ES_JAVA_OPTS: "-Xmx2g"
       ELASTIC_PASSWORD: ${ELASTICSEARCH_PASSWORD}
     ports:
       - "9200:9200"
@@ -191,7 +194,7 @@ services:
       ELASTICSEARCH_PASSWORD: kibana
     command: >
       bash -c "
-        curl -u elastic:${ELASTICSEARCH_PASSWORD} -X POST http://auction-elasticsearch:9200/_security/user/kibana_system/_password -H 'Content-Type: application/json' -d '{\"password\": \"kibana\"}' ; /usr/local/bin/kibana-docker
+        curl -u elastic:${ELASTICSEARCH_PASSWORD} -X POST http://auction-elasticsearch:9200/_security/user/kibana_system/_password -H 'Content-Type: application/json' -d '{\"password\": \"kibana\"}' && /usr/local/bin/kibana-docker
       "
     depends_on:
       elasticsearch:

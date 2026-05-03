@@ -45,7 +45,7 @@ spring:
 
   # Elasticsearch 관련
   elasticsearch:
-    username: elastic
+    username: ${ELASTICSEARCH_USERNAME}
     password: ${ELASTICSEARCH_PASSWORD}
     uris: ${ELASTICSEARCH_URIS}
 
