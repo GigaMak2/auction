@@ -11,7 +11,7 @@ import org.testcontainers.utility.MountableFile;
 import org.testcontainers.utility.TestcontainersConfiguration;
 
 /**
- * pgvector와 Redis를 Testcontainers로 실행하는 통합 테스트 기반 클래스입니다.
+ * pgvector와 Redis, elasticsearch를 Testcontainers로 실행하는 통합 테스트 기반 클래스입니다.
  *
  * <p>컨테이너는 테스트 실행 시 한 번만 시작되며, 모든 하위 클래스가 공유합니다.
  *
@@ -47,7 +47,7 @@ public abstract class BaseIntegrationTest {
         .withEnv("xpack.security.enabled", "true")
         .withEnv("xpack.security.http.ssl.enabled", "false")
         .withEnv("xpack.security.transport.ssl.enabled", "false")
-        .withCommand("bash", "-c", 
+        .withCommand("bash", "-c",
 """
 if [ ! -d /usr/share/elasticsearch/plugins/analysis-nori ]; then
   bin/elasticsearch-plugin install analysis-nori --batch;
@@ -87,6 +87,7 @@ fi &&
         registry.add("spring.data.redis.host", redis::getHost);
         registry.add("spring.data.redis.port", redis::getRedisPort);
 
+        registry.add("spring.elasticsearch.username", ()-> "elastic" );
         registry.add("spring.elasticsearch.password", ()-> "1234" );
         registry.add("spring.elasticsearch.uris", elasticsearch::getHttpHostAddress);
     }
