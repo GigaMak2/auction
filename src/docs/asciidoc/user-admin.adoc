@@ -1,0 +1,19 @@
+== 사용자 관리자 전용API
+
+=== 사용자 목록 조회
+==== 요청
+include::{snippets}/user-admin/get-user-list/http-request.adoc[]
+==== 응답
+include::{snippets}/user-admin/get-user-list/http-response.adoc[]
+
+=== 사용자 상세 조회
+==== 요청
+include::{snippets}/user-admin/get-user-detail/http-request.adoc[]
+==== 응답
+include::{snippets}/user-admin/get-user-detail/http-response.adoc[]
+
+=== 사용자 강제 탈퇴
+==== 요청
+include::{snippets}/user-admin/force-withdraw/http-request.adoc[]
+==== 응답
+include::{snippets}/user-admin/force-withdraw/http-response.adoc[]

@@ -1,0 +1,37 @@
+== 리뷰 API
+
+=== 리뷰 생성
+==== 요청
+include::{snippets}/review/create-review/http-request.adoc[]
+==== 응답
+include::{snippets}/review/create-review/http-response.adoc[]
+
+=== 작성한 리뷰 목록 조회
+==== 요청
+include::{snippets}/review/get-written-review-list/http-request.adoc[]
+==== 응답
+include::{snippets}/review/get-written-review-list/http-response.adoc[]
+
+=== 받은 리뷰 목록 조회
+==== 요청
+include::{snippets}/review/get-received-review-list/http-request.adoc[]
+==== 응답
+include::{snippets}/review/get-received-review-list/http-response.adoc[]
+
+=== 리뷰 상세 조회
+==== 요청
+include::{snippets}/review/get-review/http-request.adoc[]
+==== 응답
+include::{snippets}/review/get-review/http-response.adoc[]
+
+=== 리뷰 수정
+==== 요청
+include::{snippets}/review/modify-review/http-request.adoc[]
+==== 응답
+include::{snippets}/review/modify-review/http-response.adoc[]
+
+=== 리뷰 삭제
+==== 요청
+include::{snippets}/review/delete-review/http-request.adoc[]
+==== 응답
+include::{snippets}/review/delete-review/http-response.adoc[]

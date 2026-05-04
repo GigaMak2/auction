@@ -1,0 +1,7 @@
+== 인증/인가 관리자 전용 API
+
+=== 관리자 회원가입
+==== 요청
+include::{snippets}/auth-admin/signup/http-request.adoc[]
+==== 응답
+include::{snippets}/auth-admin/signup/http-response.adoc[]

@@ -1,0 +1,25 @@
+== 인증/인가 API
+
+=== 회원가입
+==== 요청
+include::{snippets}/auth/signup/http-request.adoc[]
+==== 응답
+include::{snippets}/auth/signup/http-response.adoc[]
+
+=== 로그인
+==== 요청
+include::{snippets}/auth/login/http-request.adoc[]
+==== 응답
+include::{snippets}/auth/login/http-response.adoc[]
+
+=== 토큰 재발급
+==== 요청
+include::{snippets}/auth/refresh-token/http-request.adoc[]
+==== 응답
+include::{snippets}/auth/refresh-token/http-response.adoc[]
+
+=== 로그아웃
+==== 요청
+include::{snippets}/auth/logout/http-request.adoc[]
+==== 응답
+include::{snippets}/auth/logout/http-response.adoc[]
