@@ -34,6 +34,8 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -94,7 +96,12 @@ class ReviewControllerTest {
                 .andDo(document("review/create-review",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        requestFields(
+                                fieldWithPath("auctionId").description("경매 식별자"),
+                                fieldWithPath("score").description("별점 (1 ~ 5)"),
+                                fieldWithPath("description").description("리뷰 내용 (500자 이하)").optional()
+                        )
                 ));
     }
 
@@ -384,7 +391,11 @@ class ReviewControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
-                        pathParameters(parameterWithName("reviewId").description("리뷰 식별자"))
+                        pathParameters(parameterWithName("reviewId").description("리뷰 식별자")),
+                        requestFields(
+                                fieldWithPath("score").description("별점 (1 ~ 5)").optional(),
+                                fieldWithPath("description").description("리뷰 내용 (500자 이하)").optional()
+                        )
                 ));
     }
 

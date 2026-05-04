@@ -3,6 +3,8 @@
 === 리뷰 생성
 ==== 요청 헤더
 include::{snippets}/review/create-review/request-headers.adoc[]
+==== 요청 필드
+include::{snippets}/review/create-review/request-fields.adoc[]
 ==== 요청
 include::{snippets}/review/create-review/http-request.adoc[]
 ==== 응답
@@ -41,6 +43,8 @@ include::{snippets}/review/get-review/http-response.adoc[]
 include::{snippets}/review/modify-review/request-headers.adoc[]
 ==== Path Variable
 include::{snippets}/review/modify-review/path-parameters.adoc[]
+==== 요청 필드
+include::{snippets}/review/modify-review/request-fields.adoc[]
 ==== 요청
 include::{snippets}/review/modify-review/http-request.adoc[]
 ==== 응답
