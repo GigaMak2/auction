@@ -26,9 +26,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -78,7 +81,10 @@ class AuctionAdminControllerTest {
         given(auctionAdminService.getAuctionList(any())).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/admin/auctions"))
+        mockMvc.perform(get("/api/admin/auctions")
+                        .header("Authorization", "Bearer accessToken")
+                        .param("page", "0")
+                        .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("경매 목록 조회 요청 성공"))
@@ -86,7 +92,14 @@ class AuctionAdminControllerTest {
                 .andExpect(jsonPath("$.data.totalElements").value(3))
                 .andDo(document("auction-admin/get-auction-list",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
+                        queryParameters(
+                                parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)").optional(),
+                                parameterWithName("status").description("경매 상태 필터 (READY / ACTIVE / CLOSED / CANCELLED)").optional(),
+                                parameterWithName("keyword").description("검색 키워드").optional()
+                        )
                 ));;
     }
 
@@ -135,14 +148,17 @@ class AuctionAdminControllerTest {
         doNothing().when(auctionAdminService).forceCancel(1L);
 
         // when & then
-        mockMvc.perform(delete("/api/admin/auctions/1"))
+        mockMvc.perform(delete("/api/admin/auctions/{auctionId}", 1L)
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("경매 강제 취소 요청 성공"))
                 .andDo(document("auction-admin/force-cancel",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
-                ));;;
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
+                        pathParameters(parameterWithName("auctionId").description("경매 식별자"))
+                ));
 
         verify(auctionAdminService).forceCancel(1L);
     }

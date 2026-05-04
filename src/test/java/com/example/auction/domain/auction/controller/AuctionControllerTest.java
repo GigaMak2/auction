@@ -31,9 +31,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -82,7 +85,7 @@ class AuctionControllerTest {
         given(auctionService.getAuction(1L)).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/auctions/1"))
+        mockMvc.perform(get("/api/auctions/{auctionId}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("경매 단건조회를 하였습니다"))
@@ -90,7 +93,8 @@ class AuctionControllerTest {
                 .andExpect(jsonPath("$.data.itemName").value("맥북 프로"))
                 .andDo(document("auction/get-auction",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(parameterWithName("auctionId").description("경매 식별자"))
                 ));
     }
 
@@ -113,7 +117,9 @@ class AuctionControllerTest {
         given(auctionService.getManyAuctionsPublic(any())).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/auctions"))
+        mockMvc.perform(get("/api/auctions")
+                        .param("page", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("경매 전체 조회를 하였습니다"))
@@ -121,7 +127,16 @@ class AuctionControllerTest {
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("auction/get-many-auctions-public",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("keyword").description("검색 키워드").optional(),
+                                parameterWithName("maxPriceMin").description("최소 금액 (0 이상)").optional(),
+                                parameterWithName("maxPriceMax").description("최대 금액 (0 초과)").optional(),
+                                parameterWithName("status").description("경매 상태 필터 (READY / ACTIVE / CLOSED / CANCELLED)").optional(),
+                                parameterWithName("categoryId").description("카테고리 식별자 (1 이상)").optional(),
+                                parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
+                                parameterWithName("pageSize").description("페이지 크기 (1 ~ 100)").optional()
+                        )
                 ));
     }
 
@@ -170,7 +185,10 @@ class AuctionControllerTest {
         given(auctionService.getManyAuctionsMe(any(), any())).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/me/auctions"))
+        mockMvc.perform(get("/api/me/auctions")
+                        .header("Authorization", "Bearer accessToken")
+                        .param("page", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("경매 전체 조회를 하였습니다"))
@@ -178,7 +196,17 @@ class AuctionControllerTest {
                 .andExpect(jsonPath("$.data.totalElements").value(1))
                 .andDo(document("auction/get-many-auctions-me",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        queryParameters(
+                                parameterWithName("keyword").description("검색 키워드").optional(),
+                                parameterWithName("maxPriceMin").description("최소 금액 (0 이상)").optional(),
+                                parameterWithName("maxPriceMax").description("최대 금액 (0 초과)").optional(),
+                                parameterWithName("status").description("경매 상태 필터 (READY / ACTIVE / CLOSED / CANCELLED)").optional(),
+                                parameterWithName("categoryId").description("카테고리 식별자 (1 이상)").optional(),
+                                parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
+                                parameterWithName("pageSize").description("페이지 크기 (1 ~ 100)").optional()
+                        )
                 ));
     }
 
@@ -217,6 +245,7 @@ class AuctionControllerTest {
 
         // when & then
         mockMvc.perform(post("/api/auctions")
+                        .header("Authorization", "Bearer accessTokekn")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -226,7 +255,8 @@ class AuctionControllerTest {
                 .andExpect(jsonPath("$.data.itemName").value("맥북 프로"))
                 .andDo(document("auction/create-auction",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
                 ));
     }
 
@@ -294,11 +324,14 @@ class AuctionControllerTest {
     void cancelAuction_success() throws Exception {
         doNothing().when(auctionService).cancelAuction(eq(1L), any());
 
-        mockMvc.perform(delete("/api/auctions/1"))
+        mockMvc.perform(delete("/api/auctions/{auctionId}", 1L)
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isNoContent())
                 .andDo(document("auction/cancel-auction",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        pathParameters(parameterWithName("auctionId").description("경매 식별자"))
                 ));
     }
 }
