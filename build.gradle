@@ -75,6 +75,9 @@ dependencies {
     // AWS EventBridge Scheduler
     implementation 'software.amazon.awssdk:scheduler:2.42.20'
 
+    // AWS S3 — 리뷰 이미지 Presigned URL 발급 및 업로드에 사용
+    implementation 'software.amazon.awssdk:s3:2.42.20'
+
     // Elasticsearch
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 
