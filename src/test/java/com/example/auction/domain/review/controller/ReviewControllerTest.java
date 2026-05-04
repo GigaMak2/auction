@@ -70,6 +70,40 @@ class ReviewControllerTest {
         SecurityContextHolder.clearContext();
     }
 
+
+    // ========================
+    // 리뷰 이미지 Presigned URL 발급
+    // ========================
+
+    @Test
+    @DisplayName("Presigned URL 발급 성공")
+    void getPresignedUrl_success() throws Exception {
+        // given
+        ReviewImagePresignResponse response = new ReviewImagePresignResponse(
+                "https://s3.amazonaws.com/bucket/reviews/1/uuid.jpg?presigned=...",
+                "https://cdn.example.com/reviews/1/uuid.jpg"
+        );
+
+        given(reviewImageService.generatePresignedUrl(eq(1L), eq("image/jpeg"))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/reviews/image/presigned-url")
+                        .header("Authorization", "Bearer accessToken")
+                        .param("contentType", "image/jpeg"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("이미지 업로드 URL 발급 성공"))
+                .andExpect(jsonPath("$.data.presignedUrl").exists())
+                .andExpect(jsonPath("$.data.imageUrl").exists())
+                .andDo(document("review/get-presigned-url",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        queryParameters(parameterWithName("contentType").description("이미지 MIME 타입 (image/jpeg, image/png, image/webp)").optional())
+                ));
+    }
+
+
     // ========================
     // 리뷰 생성
     // ========================
@@ -78,8 +112,8 @@ class ReviewControllerTest {
     @DisplayName("리뷰 생성 성공")
     void createReview_success() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(10L, 5, "좋아요", null);
-        ReviewCreateResponse response = new ReviewCreateResponse(1L, 10L, 1L, 2L, 5, "좋아요", null, LocalDateTime.now());
+        ReviewCreateRequest request = new ReviewCreateRequest(10L, 5, "좋아요", "https://cdn.example.com/image.jpg");
+        ReviewCreateResponse response = new ReviewCreateResponse(1L, 10L, 1L, 2L, 5, "좋아요", "https://cdn.example.com/image.jpg", LocalDateTime.now());
 
         given(reviewService.createReview(eq(1L), any(ReviewCreateRequest.class))).willReturn(response);
 
@@ -100,7 +134,8 @@ class ReviewControllerTest {
                         requestFields(
                                 fieldWithPath("auctionId").description("경매 식별자"),
                                 fieldWithPath("score").description("별점 (1 ~ 5)"),
-                                fieldWithPath("description").description("리뷰 내용 (500자 이하)").optional()
+                                fieldWithPath("description").description("리뷰 내용 (500자 이하)").optional(),
+                                fieldWithPath("imageUrl").description("리뷰 이미지 URL").optional()
                         )
                 ));
     }
@@ -372,8 +407,8 @@ class ReviewControllerTest {
     @DisplayName("리뷰 수정 성공")
     void modifyReview_success() throws Exception {
         // given
-        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요", null);
-        ReviewModifyResponse response = new ReviewModifyResponse(1L, 1, "별로에요", null, LocalDateTime.now(), LocalDateTime.now());
+        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요", "https://cdn.example.com/image.jpg");
+        ReviewModifyResponse response = new ReviewModifyResponse(1L, 1, "별로에요", "https://cdn.example.com/image.jpg", LocalDateTime.now(), LocalDateTime.now());
 
         given(reviewService.modifyReview(eq(1L), eq(1L), any(ReviewModifyRequest.class))).willReturn(response);
 
@@ -394,7 +429,8 @@ class ReviewControllerTest {
                         pathParameters(parameterWithName("reviewId").description("리뷰 식별자")),
                         requestFields(
                                 fieldWithPath("score").description("별점 (1 ~ 5)").optional(),
-                                fieldWithPath("description").description("리뷰 내용 (500자 이하)").optional()
+                                fieldWithPath("description").description("리뷰 내용 (500자 이하)").optional(),
+                                fieldWithPath("imageUrl").description("리뷰 이미지 URL").optional()
                         )
                 ));
     }

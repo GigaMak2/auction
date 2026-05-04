@@ -1,5 +1,15 @@
 == 리뷰 API
 
+=== 리뷰 이미지 업로드 URL 발급
+==== 요청 헤더
+include::{snippets}/review/get-presigned-url/request-headers.adoc[]
+==== Query Parameter
+include::{snippets}/review/get-presigned-url/query-parameters.adoc[]
+==== 요청
+include::{snippets}/review/get-presigned-url/http-request.adoc[]
+==== 응답
+include::{snippets}/review/get-presigned-url/http-response.adoc[]
+
 === 리뷰 생성
 ==== 요청 헤더
 include::{snippets}/review/create-review/request-headers.adoc[]
