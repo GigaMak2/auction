@@ -31,6 +31,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
@@ -194,7 +196,8 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.data.refreshToken").value("refreshToken"))
                 .andDo(document("auth/refresh-token",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Refresh-Token").description("리프레시 토큰"))
                 ));
     }
 
@@ -230,13 +233,15 @@ class AuthControllerTest {
 
         // when & then
         mockMvc.perform(post("/api/auth/logout")
+                        .header("Authorization", "Bearer accessToken")
                         .requestAttr("accessToken", "accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("로그아웃 요청 성공"))
                 .andDo(document("auth/logout",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
                 ));
 
         verify(authService).logout(eq(1L), eq("accessToken"));
