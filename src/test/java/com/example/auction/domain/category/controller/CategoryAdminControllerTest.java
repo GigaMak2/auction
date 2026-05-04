@@ -19,9 +19,13 @@ import java.time.LocalDateTime;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -57,6 +61,7 @@ public class CategoryAdminControllerTest {
 
         // when & then
         mockMvc.perform(post("/api/admin/categories")
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -66,7 +71,8 @@ public class CategoryAdminControllerTest {
                 .andExpect(jsonPath("$.data.name").value("전자기기"))
                 .andDo(document("category-admin/create-category",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)"))
                 ));
     }
 
@@ -115,7 +121,8 @@ public class CategoryAdminControllerTest {
         given(categoryAdminService.renameCategory(eq(1L), any(CategoryRenameRequest.class))).willReturn(response);
 
         // when & then
-        mockMvc.perform(patch("/api/admin/categories/1/name")
+        mockMvc.perform(patch("/api/admin/categories/{categoryId}/name", 1L)
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -125,7 +132,9 @@ public class CategoryAdminControllerTest {
                 .andExpect(jsonPath("$.data.name").value("가전제품"))
                 .andDo(document("category-admin/rename-category",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
+                        pathParameters(parameterWithName("categoryId").description("카테고리 식별자"))
                 ));
     }
 
@@ -159,7 +168,8 @@ public class CategoryAdminControllerTest {
         given(categoryAdminService.moveCategory(eq(1L), any(CategoryMoveRequest.class))).willReturn(response);
 
         // when & then
-        mockMvc.perform(patch("/api/admin/categories/1/parent")
+        mockMvc.perform(patch("/api/admin/categories/{categoryId}/parent", 1L)
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -169,7 +179,9 @@ public class CategoryAdminControllerTest {
                 .andExpect(jsonPath("$.data.parentId").value(2L))
                 .andDo(document("category-admin/move-category",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
+                        pathParameters(parameterWithName("categoryId").description("카테고리 식별자"))
                 ));
     }
 
