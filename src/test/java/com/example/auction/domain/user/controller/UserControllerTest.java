@@ -30,6 +30,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
@@ -77,14 +79,16 @@ class UserControllerTest {
         given(userService.myPage(1L)).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/api/users")
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.email").value("test@test.com"))
                 .andExpect(jsonPath("$.data.role").value("USER"))
                 .andDo(document("user/my-page",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
                 ));
     }
 
@@ -103,6 +107,7 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(patch("/api/users/password")
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -110,7 +115,8 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("비밀번호 변경 요청 성공"))
                 .andDo(document("user/change-password",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
                 ));
     }
 
@@ -161,6 +167,7 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(delete("/api/users")
+                        .header("Authorization", "Bearer accessToken")
                         .requestAttr("accessToken", "accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -169,7 +176,8 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.role").value("USER"))
                 .andDo(document("user/withdraw",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
                 ));
 
         verify(userService).withdraw(eq(1L), eq("accessToken"));
