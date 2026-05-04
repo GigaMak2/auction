@@ -1,12 +1,16 @@
 == 인증/인가 API
 
 === 회원가입
+==== 요청 필드
+include::{snippets}/auth/signup/request-fields.adoc[]
 ==== 요청
 include::{snippets}/auth/signup/http-request.adoc[]
 ==== 응답
 include::{snippets}/auth/signup/http-response.adoc[]
 
 === 로그인
+==== 요청 필드
+include::{snippets}/auth/login/request-fields.adoc[]
 ==== 요청
 include::{snippets}/auth/login/http-request.adoc[]
 ==== 응답
