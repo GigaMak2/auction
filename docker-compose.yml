@@ -151,6 +151,21 @@ services:
       prometheus:
         condition: service_healthy
 
+  k6:
+    image: grafana/k6
+    container_name: auction-k6
+    volumes:
+      - ./k6:/scripts
+    command: run --out influxdb=http://auction-influxdb:8086/k6 /scripts/bid-test.js
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      influxdb:
+        condition: service_started
+      app:
+        condition: service_healthy
+
+
 volumes:
   postgres-data:
   influxdb-data:
