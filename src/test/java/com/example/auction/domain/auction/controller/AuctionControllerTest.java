@@ -36,6 +36,8 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -256,7 +258,15 @@ class AuctionControllerTest {
                 .andDo(document("auction/create-auction",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        requestFields(
+                                fieldWithPath("itemName").description("상품명 (256자 이하)"),
+                                fieldWithPath("description").description("상품 설명 (1024자 이하)").optional(),
+                                fieldWithPath("maxPrice").description("최고 가격 (0 초과)"),
+                                fieldWithPath("categoryId").description("카테고리 식별자 (1 이상)"),
+                                fieldWithPath("startedAt").description("경매 시작일"),
+                                fieldWithPath("endedAt").description("경매 종료일")
+                        )
                 ));
     }
 

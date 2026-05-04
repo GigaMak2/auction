@@ -29,6 +29,8 @@ include::{snippets}/auction/get-many-auctions-me/http-response.adoc[]
 === 경매 생성
 ==== 요청 헤더
 include::{snippets}/auction/create-auction/request-headers.adoc[]
+==== 요청 필드
+include::{snippets}/auction/create-auction/request-fields.adoc[]
 ==== 요청
 include::{snippets}/auction/create-auction/http-request.adoc[]
 ==== 응답
