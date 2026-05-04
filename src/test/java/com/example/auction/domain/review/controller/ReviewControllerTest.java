@@ -4,6 +4,7 @@ import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.GlobalExceptionHandler;
 import com.example.auction.domain.review.dto.*;
+import com.example.auction.domain.review.service.ReviewImageService;
 import com.example.auction.domain.review.service.ReviewService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +45,9 @@ class ReviewControllerTest {
     @MockitoBean
     private ReviewService reviewService;
 
+    @MockitoBean
+    private ReviewImageService reviewImageService;
+
     @BeforeEach
     void setUpSecurityContext() {
         CustomUserDetails userDetails = new CustomUserDetails(1L, "USER");
@@ -64,8 +68,8 @@ class ReviewControllerTest {
     @DisplayName("리뷰 생성 성공")
     void createReview_success() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(10L, 5, "좋아요");
-        ReviewCreateResponse response = new ReviewCreateResponse(1L, 10L, 1L, 2L, 5, "좋아요", LocalDateTime.now());
+        ReviewCreateRequest request = new ReviewCreateRequest(10L, 5, "좋아요", null);
+        ReviewCreateResponse response = new ReviewCreateResponse(1L, 10L, 1L, 2L, 5, "좋아요", null, LocalDateTime.now());
 
         given(reviewService.createReview(eq(1L), any(ReviewCreateRequest.class))).willReturn(response);
 
@@ -84,7 +88,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 생성 실패 - auctionId null")
     void createReview_fail_auctionIdNull() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(null, 5, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(null, 5, "좋아요", null);
 
         // when & then
         mockMvc.perform(post("/api/reviews")
@@ -99,7 +103,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 생성 실패 - score 1 미만")
     void createReview_fail_scoreLessThan1() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(10L, 0, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(10L, 0, "좋아요", null);
 
         // when & then
         mockMvc.perform(post("/api/reviews")
@@ -114,7 +118,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 생성 실패 - score 5 초과")
     void createReview_fail_scoreGreaterThan5() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(10L, 6, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(10L, 6, "좋아요", null);
 
         // when & then
         mockMvc.perform(post("/api/reviews")
@@ -129,7 +133,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 작성 실패 - 설명 500자 초과")
     void createReview_fail_descriptionTooLong() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(1L, 5, "a".repeat(501));
+        ReviewCreateRequest request = new ReviewCreateRequest(1L, 5, "a".repeat(501), null);
 
         // when & then
         mockMvc.perform(post("/api/reviews")
@@ -151,8 +155,8 @@ class ReviewControllerTest {
         // given
         PageResponse<ReviewListGetResponse> response = new PageResponse<>(
                 List.of(
-                        new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now()),
-                        new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now())
+                        new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now(), null),
+                        new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now(), null)
                 ), 0, 1, 2L, 10, true);
 
         given(reviewService.getWrittenReviewList(eq(1L), any(ReviewSearchCondition.class))).willReturn(response);
@@ -222,8 +226,8 @@ class ReviewControllerTest {
         // given
         PageResponse<ReviewListGetResponse> response = new PageResponse<>(
                 List.of(
-                        new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now()),
-                        new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now())
+                        new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now(), null),
+                        new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now(), null)
                 ), 0, 1, 2L, 10, true);
 
         given(reviewService.getReceivedReviewList(eq(1L), any(ReviewSearchCondition.class))).willReturn(response);
@@ -292,7 +296,7 @@ class ReviewControllerTest {
     void getReview_success() throws Exception {
         // given
         ReviewGetResponse response = new ReviewGetResponse(
-                1L, 10L, 1L, 2L, 5, "좋아요", LocalDateTime.now(), LocalDateTime.now());
+                1L, 10L, 1L, 2L, 5, "좋아요", null, LocalDateTime.now(), LocalDateTime.now());
 
         given(reviewService.getReview(1L)).willReturn(response);
 
@@ -314,8 +318,8 @@ class ReviewControllerTest {
     @DisplayName("리뷰 수정 성공")
     void modifyReview_success() throws Exception {
         // given
-        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요");
-        ReviewModifyResponse response = new ReviewModifyResponse(1L, 1, "별로에요", LocalDateTime.now(), LocalDateTime.now());
+        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요", null);
+        ReviewModifyResponse response = new ReviewModifyResponse(1L, 1, "별로에요", null, LocalDateTime.now(), LocalDateTime.now());
 
         given(reviewService.modifyReview(eq(1L), eq(1L), any(ReviewModifyRequest.class))).willReturn(response);
 
@@ -334,7 +338,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 수정 실패 - score 1 미만")
     void modifyReview_fail_scoreLessThan1() throws Exception {
         // given
-        ReviewModifyRequest request = new ReviewModifyRequest(0, "친절해요");
+        ReviewModifyRequest request = new ReviewModifyRequest(0, "친절해요", null);
 
         // when & then
         mockMvc.perform(patch("/api/reviews/1")
@@ -349,7 +353,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 수정 실패 - score 5 초과")
     void modifyReview_fail_scoreGreaterThan5() throws Exception {
         // given
-        ReviewModifyRequest request = new ReviewModifyRequest(6, "친절해요");
+        ReviewModifyRequest request = new ReviewModifyRequest(6, "친절해요", null);
 
         // when & then
         mockMvc.perform(patch("/api/reviews/1")
@@ -364,7 +368,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 수정 실패 - 설명 500자 초과")
     void modifyReview_fail_descriptionTooLong() throws Exception {
         // given
-        ReviewModifyRequest request = new ReviewModifyRequest(null, "a".repeat(501));
+        ReviewModifyRequest request = new ReviewModifyRequest(null, "a".repeat(501), null);
 
         // when & then
         mockMvc.perform(patch("/api/reviews/{reviewId}", 1L)
@@ -395,3 +399,4 @@ class ReviewControllerTest {
         verify(reviewService).deleteReview(1L, 1L);
     }
 }
+
