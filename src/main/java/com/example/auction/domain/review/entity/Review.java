@@ -36,19 +36,25 @@ public class Review extends ModifiableEntity {
     @Column(length = 500)
     private String description;
 
-    public static Review of(Long auctionId, Long reviewerId, Long revieweeId, int score, String description) {
+    // 리뷰 이미지 CloudFront URL — 선택 입력
+    @Column(name = "image_url", length = 512)
+    private String imageUrl;
+
+    public static Review of(Long auctionId, Long reviewerId, Long revieweeId, int score, String description, String imageUrl) {
         Review review = new Review();
         review.auctionId = auctionId;
         review.reviewerId = reviewerId;
         review.revieweeId = revieweeId;
         review.score = score;
         review.description = description;
+        review.imageUrl = imageUrl;
 
         return review;
     }
 
     public void modify(ReviewModifyRequest request) {
-        if (request.score() == null && request.description() == null) {
+        // score, description, imageUrl 중 하나라도 있어야 수정 가능
+        if (request.score() == null && request.description() == null && request.imageUrl() == null) {
             throw new ServiceErrorException(ReviewErrorEnum.REVIEW_MODIFY_NO_CONTENT);
         }
         if (request.score() != null) {
@@ -56,6 +62,9 @@ public class Review extends ModifiableEntity {
         }
         if (request.description() != null) {
             this.description = request.description();
+        }
+        if (request.imageUrl() != null) {
+            this.imageUrl = request.imageUrl();
         }
     }
 }

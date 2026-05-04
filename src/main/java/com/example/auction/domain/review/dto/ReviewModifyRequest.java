@@ -10,5 +10,9 @@ public record ReviewModifyRequest(
         Integer score,
 
         @Size(max = 500, message = "리뷰 내용은 500자 이하로 입력해주세요")
-        String description
+        String description,
+
+        // 이미지 URL 수정 — null이면 기존 값 유지, 새 URL이면 교체
+        @Size(max = 512, message = "이미지 URL은 512자 이하로 입력해주세요")
+        String imageUrl
 ) {}

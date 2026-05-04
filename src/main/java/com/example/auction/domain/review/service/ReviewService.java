@@ -57,7 +57,7 @@ public class ReviewService {
         User reviewee = userRepository.findByIdAndDeletedFalse(revieweeId).orElseThrow(
                 () -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
-        Review review = Review.of(request.auctionId(), userId, reviewee.getId(), request.score(), request.description());
+        Review review = Review.of(request.auctionId(), userId, reviewee.getId(), request.score(), request.description(), request.imageUrl());
         try {
             reviewRepository.save(review);
         } catch (DataIntegrityViolationException e) {
@@ -85,6 +85,7 @@ public class ReviewService {
                 review.getRevieweeId(),
                 review.getScore(),
                 review.getDescription(),
+                review.getImageUrl(),
                 review.getCreatedAt()
         );
     }
@@ -125,6 +126,7 @@ public class ReviewService {
                 review.getRevieweeId(),
                 review.getScore(),
                 review.getDescription(),
+                review.getImageUrl(),
                 review.getCreatedAt(),
                 review.getModifiedAt()
         );
@@ -166,6 +168,7 @@ public class ReviewService {
                 review.getId(),
                 review.getScore(),
                 review.getDescription(),
+                review.getImageUrl(),
                 review.getCreatedAt(),
                 review.getModifiedAt()
         );

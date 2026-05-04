@@ -6,6 +6,7 @@ public record ReviewModifyResponse(
         Long reviewId,
         int score,
         String description,
+        String imageUrl,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {}
