@@ -93,7 +93,7 @@ class ReviewAdminControllerTest {
                         requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
                         queryParameters(
                                 parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
-                                parameterWithName("size").description("페이지 크기 (0 ~ 100)").optional(),
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)").optional(),
                                 parameterWithName("auctionId").description("경매 식별자 필터").optional(),
                                 parameterWithName("reviewerId").description("작성자 식별자 필터").optional(),
                                 parameterWithName("revieweeId").description("대상자 식별자 필터").optional(),

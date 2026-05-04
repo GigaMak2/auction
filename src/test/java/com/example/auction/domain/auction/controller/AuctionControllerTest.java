@@ -247,7 +247,7 @@ class AuctionControllerTest {
 
         // when & then
         mockMvc.perform(post("/api/auctions")
-                        .header("Authorization", "Bearer accessTokekn")
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())

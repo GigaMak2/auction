@@ -96,7 +96,7 @@ class UserAdminControllerTest {
                         requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
                         queryParameters(
                                 parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
-                                parameterWithName("size").description("페이지 크기 (0 ~ 100)").optional(),
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)").optional(),
                                 parameterWithName("deleted").description("탈퇴 여부 필터 (true / false)").optional(),
                                 parameterWithName("role").description("권한 필터 (USER / ADMIN)").optional(),
                                 parameterWithName("email").description("이메일 검색").optional()

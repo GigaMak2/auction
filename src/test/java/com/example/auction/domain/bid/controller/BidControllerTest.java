@@ -212,7 +212,7 @@ class BidControllerTest {
                         pathParameters(parameterWithName("auctionId").description("경매 식별자")),
                         queryParameters(
                                 parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
-                                parameterWithName("size").description("페이지 크기 (0 ~ 100)").optional()
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)").optional()
                         )
 
                 ));

@@ -92,7 +92,7 @@ class BidUserControllerTest {
                         requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
                         queryParameters(
                                 parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
-                                parameterWithName("size").description("페이지 크기 (0 ~ 100)").optional()
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)").optional()
                         )
                 ));;
     }

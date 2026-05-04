@@ -127,6 +127,7 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$.message").value("리뷰 생성 요청 성공"))
                 .andExpect(jsonPath("$.data.auctionId").value(10L))
                 .andExpect(jsonPath("$.data.score").value(5))
+                .andExpect(jsonPath("$.data.imageUrl").value("https://cdn.example.com/image.jpg"))
                 .andDo(document("review/create-review",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -233,7 +234,7 @@ class ReviewControllerTest {
                         requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
                         queryParameters(
                                 parameterWithName("page").description("페이지 번호 (0 이상)"),
-                                parameterWithName("size").description("페이지 크기 (0 ~ 100)"),
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)"),
                                 parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)").optional(),
                                 parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)").optional()
                         )
@@ -318,7 +319,7 @@ class ReviewControllerTest {
                         requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
                         queryParameters(
                                 parameterWithName("page").description("페이지 번호 (0 이상)"),
-                                parameterWithName("size").description("페이지 크기 (0 ~ 100)"),
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)"),
                                 parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)").optional(),
                                 parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)").optional()
                         )
