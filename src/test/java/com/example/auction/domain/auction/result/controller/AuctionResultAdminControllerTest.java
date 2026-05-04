@@ -24,9 +24,13 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -73,7 +77,10 @@ class AuctionResultAdminControllerTest {
         given(auctionResultAdminService.getAuctionResultList(any())).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/admin/auction-results"))
+        mockMvc.perform(get("/api/admin/auction-results")
+                        .header("Authorization", "Bearer accessToken")
+                        .param("page", "0")
+                        .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("경매 결과 목록 조회 요청 성공"))
@@ -81,7 +88,12 @@ class AuctionResultAdminControllerTest {
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("auction-result-admin/get-auction-result-list",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
+                        queryParameters(
+                                parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
+                                parameterWithName("size").description("페이지 크기 (0 ~ 100)").optional()
+                        )
                 ));
     }
 
