@@ -1,9 +1,10 @@
-﻿package com.example.auction.domain.review.controller;
+package com.example.auction.domain.review.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.GlobalExceptionHandler;
 import com.example.auction.domain.review.dto.*;
+import com.example.auction.domain.review.service.ReviewImageService;
 import com.example.auction.domain.review.service.ReviewService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -367,7 +368,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 수정 실패 - 설명 500자 초과")
     void modifyReview_fail_descriptionTooLong() throws Exception {
         // given
-        ReviewModifyRequest request = new ReviewModifyRequest(null, "a".repeat(501), null, false);
+        ReviewModifyRequest request = new ReviewModifyRequest(null, "a".repeat(501), null);
 
         // when & then
         mockMvc.perform(patch("/api/reviews/{reviewId}", 1L)

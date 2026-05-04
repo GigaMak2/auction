@@ -1,4 +1,4 @@
-﻿package com.example.auction.domain.review;
+package com.example.auction.domain.review;
 
 import com.example.auction.domain.auction.result.entity.AuctionResult;
 import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
