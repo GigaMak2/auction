@@ -15,6 +15,7 @@ import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,8 +37,25 @@ public class ReviewService {
     private final AuctionResultRepository auctionResultRepository;
     private final ReviewEmbeddingService reviewEmbeddingService;
 
+    // CloudFront 도메인 — imageUrl이 우리 CDN에서 온 것인지 검증에 사용
+    @Value("${aws.cloudfront.domain:}")
+    private String cloudfrontDomain;
+
+    // cloudfrontDomain 미설정(dev) 시 검증 스킵, 설정된 경우 해당 도메인으로 시작하는지 확인
+    private void validateImageUrl(String imageUrl) {
+        if (imageUrl == null || cloudfrontDomain.isBlank()) return;
+        String domain = cloudfrontDomain.endsWith("/")
+                ? cloudfrontDomain.substring(0, cloudfrontDomain.length() - 1)
+                : cloudfrontDomain;
+        if (!imageUrl.startsWith(domain + "/")) {
+            throw new ServiceErrorException(ReviewErrorEnum.REVIEW_IMAGE_INVALID_URL);
+        }
+    }
+
     @Transactional
     public ReviewCreateResponse createReview(Long userId, ReviewCreateRequest request) {
+        validateImageUrl(request.imageUrl());
+
         if (reviewRepository.existsByAuctionIdAndReviewerId(request.auctionId(), userId)) {
             throw new ServiceErrorException(ReviewErrorEnum.ALREADY_REVIEWED);
         }
@@ -141,6 +159,7 @@ public class ReviewService {
             throw new ServiceErrorException(ReviewErrorEnum.REVIEW_FORBIDDEN);
         }
 
+        validateImageUrl(request.imageUrl());
         review.modify(request);
 
         if (request.score() != null) {

@@ -34,9 +34,9 @@ class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        reviewRepository.save(Review.of(10L, 1L, 2L, 5, "좋아요"));
-        reviewRepository.save(Review.of(11L, 1L, 3L, 4, "괜찮아요"));
-        reviewRepository.save(Review.of(12L, 3L, 2L, 3, "보통이에요"));
+        reviewRepository.save(Review.of(10L, 1L, 2L, 5, "좋아요", null));
+        reviewRepository.save(Review.of(11L, 1L, 3L, 4, "괜찮아요", null));
+        reviewRepository.save(Review.of(12L, 3L, 2L, 3, "보통이에요", null));
     }
 
     // ========================

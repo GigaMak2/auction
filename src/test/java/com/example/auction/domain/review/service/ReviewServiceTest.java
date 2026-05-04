@@ -1,4 +1,4 @@
-package com.example.auction.domain.review.service;
+﻿package com.example.auction.domain.review.service;
 
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
@@ -81,7 +81,7 @@ class ReviewServiceTest {
         Long auctionId = 10L;
         Long bidId = 10L;
 
-        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요", null);
 
         AuctionResult auctionResult = AuctionResult.of(BigDecimal.valueOf(1000), auctionId, buyerId, sellerId, bidId);
         ReflectionTestUtils.setField(auctionResult, "id", 1L);
@@ -111,7 +111,7 @@ class ReviewServiceTest {
         // given
         Long userId = 1L;
         Long auctionId = 10L;
-        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요", null);
 
         given(reviewRepository.existsByAuctionIdAndReviewerId(auctionId, userId)).willReturn(true);
 
@@ -127,7 +127,7 @@ class ReviewServiceTest {
         // given
         Long userId = 1L;
         Long auctionId = 10L;
-        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요", null);
 
         given(reviewRepository.existsByAuctionIdAndReviewerId(auctionId, userId)).willReturn(false);
         given(auctionResultRepository.findByAuctionId(auctionId)).willReturn(Optional.empty());
@@ -147,7 +147,7 @@ class ReviewServiceTest {
         Long sellerId = 2L;
         Long auctionId = 10L;
         Long bidId = 10L;
-        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요", null);
 
         AuctionResult auctionResult = AuctionResult.of(BigDecimal.valueOf(1000), auctionId, buyerId, sellerId, bidId);
 
@@ -168,7 +168,7 @@ class ReviewServiceTest {
         Long sellerId = 2L;
         Long auctionId = 10L;
         Long bidId = 10L;
-        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요", null);
 
         AuctionResult auctionResult = AuctionResult.of(BigDecimal.valueOf(1000), auctionId, buyerId, sellerId, bidId);
 
@@ -190,7 +190,7 @@ class ReviewServiceTest {
         Long sellerId = 2L;
         Long auctionId = 10L;
         Long bidId = 10L;
-        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요", null);
 
         AuctionResult auctionResult = AuctionResult.of(BigDecimal.valueOf(1000), auctionId, buyerId, sellerId, bidId);
 
@@ -221,17 +221,17 @@ class ReviewServiceTest {
         ReviewSearchCondition condition = new ReviewSearchCondition();
 
         List<ReviewListGetResponse> reviewList = List.of(
-                new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(3L, 12L, 4L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(4L, 13L, 5L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(5L, 14L, 6L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(6L, 15L, 7L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(7L, 16L, 8L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(8L, 17L, 9L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(9L, 18L, 10L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(10L, 19L, 11L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(11L, 20L, 12L, LocalDateTime.now(), LocalDateTime.now())
+                new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(3L, 12L, 4L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(4L, 13L, 5L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(5L, 14L, 6L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(6L, 15L, 7L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(7L, 16L, 8L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(8L, 17L, 9L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(9L, 18L, 10L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(10L, 19L, 11L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(11L, 20L, 12L, LocalDateTime.now(), LocalDateTime.now(), null)
         );
         Page<ReviewListGetResponse> page = new PageImpl<>(reviewList.subList(0, 10), PageRequest.of(0, 10), 11);
 
@@ -285,17 +285,17 @@ class ReviewServiceTest {
         ReviewSearchCondition condition = new ReviewSearchCondition();
 
         List<ReviewListGetResponse> reviewList = List.of(
-                new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(3L, 12L, 4L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(4L, 13L, 5L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(5L, 14L, 6L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(6L, 15L, 7L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(7L, 16L, 8L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(8L, 17L, 9L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(9L, 18L, 10L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(10L, 19L, 11L, LocalDateTime.now(), LocalDateTime.now()),
-                new ReviewListGetResponse(11L, 20L, 12L, LocalDateTime.now(), LocalDateTime.now())
+                new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(3L, 12L, 4L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(4L, 13L, 5L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(5L, 14L, 6L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(6L, 15L, 7L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(7L, 16L, 8L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(8L, 17L, 9L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(9L, 18L, 10L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(10L, 19L, 11L, LocalDateTime.now(), LocalDateTime.now(), null),
+                new ReviewListGetResponse(11L, 20L, 12L, LocalDateTime.now(), LocalDateTime.now(), null)
         );
         Page<ReviewListGetResponse> page = new PageImpl<>(reviewList.subList(0, 10), PageRequest.of(0, 10), 11);
 
@@ -347,7 +347,7 @@ class ReviewServiceTest {
         // given
         Long reviewId = 1L;
 
-        Review review = Review.of(10L, 1L, 2L, 5, "좋아요");
+        Review review = Review.of(10L, 1L, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
@@ -389,9 +389,9 @@ class ReviewServiceTest {
         // given
         Long userId = 1L;
         Long reviewId = 1L;
-        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요");
+        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요", null);
 
-        Review review = Review.of(10L, userId, 2L, 5, "좋아요");
+        Review review = Review.of(10L, userId, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         User reviewee = User.of("seller@test.com", "encodedPassword");
@@ -415,9 +415,9 @@ class ReviewServiceTest {
         // given
         Long userId = 1L;
         Long reviewId = 1L;
-        ReviewModifyRequest request = new ReviewModifyRequest(null, "친절해요");
+        ReviewModifyRequest request = new ReviewModifyRequest(null, "친절해요", null);
 
-        Review review = Review.of(10L, userId, 2L, 5, "좋아요");
+        Review review = Review.of(10L, userId, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
@@ -436,7 +436,7 @@ class ReviewServiceTest {
         // given
         Long userId = 1L;
         Long reviewId = 1L;
-        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요");
+        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요", null);
 
         given(reviewRepository.findById(reviewId)).willReturn(Optional.empty());
 
@@ -452,9 +452,9 @@ class ReviewServiceTest {
         // given
         Long userId = 99L;
         Long reviewId = 1L;
-        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요");
+        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요", null);
 
-        Review review = Review.of(10L, 1L, 2L, 5, "좋아요");
+        Review review = Review.of(10L, 1L, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
@@ -471,9 +471,9 @@ class ReviewServiceTest {
         // given
         Long userId = 1L;
         Long reviewId = 1L;
-        ReviewModifyRequest request = new ReviewModifyRequest(null, null);
+        ReviewModifyRequest request = new ReviewModifyRequest(null, null, null);
 
-        Review review = Review.of(10L, userId, 2L, 5, "좋아요");
+        Review review = Review.of(10L, userId, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
@@ -496,7 +496,7 @@ class ReviewServiceTest {
         Long userId = 1L;
         Long reviewId = 1L;
 
-        Review review = Review.of(10L, userId, 2L, 5, "좋아요");
+        Review review = Review.of(10L, userId, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         User reviewee = User.of("seller@test.com", "encodedPassword");
@@ -522,7 +522,7 @@ class ReviewServiceTest {
         Long userId = 1L;
         Long reviewId = 1L;
 
-        Review review = Review.of(10L, userId, 2L, 5, "좋아요");
+        Review review = Review.of(10L, userId, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         User reviewee = User.of("seller@test.com", "encodedPassword");
@@ -548,7 +548,7 @@ class ReviewServiceTest {
         Long userId = 1L;
         Long reviewId = 1L;
 
-        Review review = Review.of(10L, userId, 2L, 5, "좋아요");
+        Review review = Review.of(10L, userId, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         User reviewee = User.of("seller@test.com", "encodedPassword");
@@ -588,7 +588,7 @@ class ReviewServiceTest {
         Long userId = 99L;
         Long reviewId = 1L;
 
-        Review review = Review.of(10L, 1L, 2L, 5, "좋아요");
+        Review review = Review.of(10L, 1L, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
@@ -599,3 +599,4 @@ class ReviewServiceTest {
                 .hasMessage(ReviewErrorEnum.REVIEW_FORBIDDEN.getMessage());
     }
 }
+

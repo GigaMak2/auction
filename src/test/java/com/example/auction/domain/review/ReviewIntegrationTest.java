@@ -1,4 +1,4 @@
-package com.example.auction.domain.review;
+﻿package com.example.auction.domain.review;
 
 import com.example.auction.domain.auction.result.entity.AuctionResult;
 import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
@@ -97,7 +97,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
     @DisplayName("리뷰 생성 성공")
     void createReview_success() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요", null);
 
         // when & then
         mockMvc.perform(post("/api/reviews")
@@ -115,7 +115,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
     @DisplayName("리뷰 생성 실패 - 이미 작성한 리뷰")
     void createReview_fail_alreadyReviewed() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, 5, "좋아요", null);
         mockMvc.perform(post("/api/reviews")
                 .header("Authorization", "Bearer " + buyerToken)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -135,7 +135,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
     @DisplayName("리뷰 생성 실패 - 경매 결과 없음")
     void createReview_fail_auctionResultNotFound() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(999L, 5, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(999L, 5, "좋아요", null);
 
         // when & then
         mockMvc.perform(post("/api/reviews")
@@ -217,7 +217,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
     void modifyReview_success() throws Exception {
         // given
         Long reviewId = createReview(buyerToken, auctionId, 5, "좋아요");
-        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요");
+        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요", null);
 
         // when & then
         mockMvc.perform(patch("/api/reviews/" + reviewId)
@@ -235,7 +235,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
     void modifyReview_fail_forbidden() throws Exception {
         // given
         Long reviewId = createReview(buyerToken, auctionId, 5, "좋아요");
-        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요");
+        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요", null);
 
         // when & then
         mockMvc.perform(patch("/api/reviews/" + reviewId)
@@ -304,7 +304,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
     }
 
     private Long createReview(String token, Long auctionId, int score, String description) throws Exception {
-        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, score, description);
+        ReviewCreateRequest request = new ReviewCreateRequest(auctionId, score, description, null);
         String response = mockMvc.perform(post("/api/reviews")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -314,3 +314,5 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
         return objectMapper.readTree(response).path("data").path("reviewId").asLong();
     }
 }
+
+

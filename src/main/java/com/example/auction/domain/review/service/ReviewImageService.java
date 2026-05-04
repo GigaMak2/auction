@@ -55,7 +55,10 @@ public class ReviewImageService {
                         .build()
         ).url().toString();
 
-        // presignedUrl: 업로드용 임시 URL / imageUrl: DB 저장 및 조회용 CloudFront URL
-        return new ReviewImagePresignResponse(presignedUrl, cloudfrontDomain + "/" + key);
+        // trailing slash 제거 후 CloudFront URL 조합 — 이중 슬래시 방지
+        String domain = cloudfrontDomain.endsWith("/")
+                ? cloudfrontDomain.substring(0, cloudfrontDomain.length() - 1)
+                : cloudfrontDomain;
+        return new ReviewImagePresignResponse(presignedUrl, domain + "/" + key);
     }
 }
