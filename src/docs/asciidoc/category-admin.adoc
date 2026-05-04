@@ -3,6 +3,8 @@
 === 카테고리 생성
 ==== 요청 헤더
 include::{snippets}/category-admin/create-category/request-headers.adoc[]
+==== 요청 필드
+include::{snippets}/category-admin/create-category/request-fields.adoc[]
 ==== 요청
 include::{snippets}/category-admin/create-category/http-request.adoc[]
 ==== 응답
@@ -13,6 +15,8 @@ include::{snippets}/category-admin/create-category/http-response.adoc[]
 include::{snippets}/category-admin/rename-category/request-headers.adoc[]
 ==== Path Variable
 include::{snippets}/category-admin/rename-category/path-parameters.adoc[]
+==== 요청 필드
+include::{snippets}/category-admin/rename-category/request-fields.adoc[]
 ==== 요청
 include::{snippets}/category-admin/rename-category/http-request.adoc[]
 ==== 응답
@@ -23,6 +27,8 @@ include::{snippets}/category-admin/rename-category/http-response.adoc[]
 include::{snippets}/category-admin/move-category/request-headers.adoc[]
 ==== Path Variable
 include::{snippets}/category-admin/move-category/path-parameters.adoc[]
+==== 요청 필드
+include::{snippets}/category-admin/move-category/request-fields.adoc[]
 ==== 요청
 include::{snippets}/category-admin/move-category/http-request.adoc[]
 ==== 응답

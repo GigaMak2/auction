@@ -24,6 +24,8 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -72,7 +74,11 @@ public class CategoryAdminControllerTest {
                 .andDo(document("category-admin/create-category",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)"))
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
+                        requestFields(
+                                fieldWithPath("parentId").description("부모 카테고리 식별자 (1 이상)").optional(),
+                                fieldWithPath("name").description("카테고리 이름")
+                        )
                 ));
     }
 
@@ -134,7 +140,8 @@ public class CategoryAdminControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
-                        pathParameters(parameterWithName("categoryId").description("카테고리 식별자"))
+                        pathParameters(parameterWithName("categoryId").description("카테고리 식별자")),
+                        requestFields(fieldWithPath("name").description("변경할 카테고리 이름"))
                 ));
     }
 
@@ -181,7 +188,8 @@ public class CategoryAdminControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
-                        pathParameters(parameterWithName("categoryId").description("카테고리 식별자"))
+                        pathParameters(parameterWithName("categoryId").description("카테고리 식별자")),
+                        requestFields(fieldWithPath("parentId").description("이동할 부모 카테고리 식별자 (1 이상)"))
                 ));
     }
 
