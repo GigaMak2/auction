@@ -12,7 +12,8 @@ public enum ReviewErrorEnum implements ErrorEnumInterface {
     ALREADY_REVIEWED(HttpStatus.CONFLICT, "이미 해당 경매에 리뷰를 작성했습니다"),
     REVIEW_FORBIDDEN(HttpStatus.FORBIDDEN, "리뷰 작성자가 아닙니다"),
     REVIEW_MODIFY_NO_CONTENT(HttpStatus.BAD_REQUEST, "수정할 내용이 없습니다"),
-    REVIEW_NOT_ALLOWED(HttpStatus.FORBIDDEN, "경매 구매자 또는 판매자만 리뷰를 작성할 수 있습니다");
+    REVIEW_NOT_ALLOWED(HttpStatus.FORBIDDEN, "경매 구매자 또는 판매자만 리뷰를 작성할 수 있습니다"),
+    REVIEW_IMAGE_INVALID_TYPE(HttpStatus.BAD_REQUEST, "허용되지 않는 이미지 형식입니다 (jpeg, png, webp만 가능)");
 
     private final HttpStatus status;
     private final String message;
