@@ -5,6 +5,8 @@
 include::{snippets}/bid/place-bid/request-headers.adoc[]
 ==== Path Variable
 include::{snippets}/bid/place-bid/path-parameters.adoc[]
+==== 요청 필드
+include::{snippets}/bid/place-bid/request-fields.adoc[]
 ==== 요청
 include::{snippets}/bid/place-bid/http-request.adoc[]
 ==== 응답

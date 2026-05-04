@@ -36,6 +36,8 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -94,7 +96,11 @@ class BidControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
-                        pathParameters(parameterWithName("auctionId").description("경매 식별자"))
+                        pathParameters(parameterWithName("auctionId").description("경매 식별자")),
+                        requestFields(
+                                fieldWithPath("price").description("입찰 금액 (0 초과 정수)"),
+                                fieldWithPath("description").description("입찰 설명 (1024자 이하)").optional()
+                        )
                 ));
     }
 
