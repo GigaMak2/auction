@@ -4,13 +4,14 @@ import com.redis.testcontainers.RedisContainer;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 import org.testcontainers.utility.TestcontainersConfiguration;
 
 /**
- * pgvector와 Redis를 Testcontainers로 실행하는 통합 테스트 기반 클래스입니다.
+ * pgvector와 Redis, elasticsearch를 Testcontainers로 실행하는 통합 테스트 기반 클래스입니다.
  *
  * <p>컨테이너는 테스트 실행 시 한 번만 시작되며, 모든 하위 클래스가 공유합니다.
  *
@@ -38,6 +39,22 @@ public abstract class BaseIntegrationTest {
             DockerImageName.parse("redis:8.6.2")
     );
 
+    static ElasticsearchContainer elasticsearch = new ElasticsearchContainer(
+            DockerImageName.parse("elasticsearch:9.3.3")
+        )
+        .withPassword("1234")
+        .withEnv("discovery.type", "single-node")
+        .withEnv("xpack.security.enabled", "true")
+        .withEnv("xpack.security.http.ssl.enabled", "false")
+        .withEnv("xpack.security.transport.ssl.enabled", "false")
+        .withCommand("bash", "-c",
+"""
+if [ ! -d /usr/share/elasticsearch/plugins/analysis-nori ]; then
+  bin/elasticsearch-plugin install analysis-nori --batch;
+fi &&
+/usr/local/bin/docker-entrypoint.sh
+""");
+
     static  {
         // Testcontainers는 기본적으로 테스트가 끝난후 테스트에 쓰인 container를 없애버립니다.
         // 
@@ -53,9 +70,11 @@ public abstract class BaseIntegrationTest {
         if (reuseEnabled) {
             postgres.withReuse(true).start();
             redis.withReuse(true).start();
+            elasticsearch.withReuse(true).start();
         }else {
             postgres.start();
             redis.start();
+            elasticsearch.start();
         }
     }
 
@@ -67,5 +86,9 @@ public abstract class BaseIntegrationTest {
 
         registry.add("spring.data.redis.host", redis::getHost);
         registry.add("spring.data.redis.port", redis::getRedisPort);
+
+        registry.add("spring.elasticsearch.username", ()-> "elastic" );
+        registry.add("spring.elasticsearch.password", ()-> "1234" );
+        registry.add("spring.elasticsearch.uris", () -> "http://" + elasticsearch.getHttpHostAddress());
     }
 }

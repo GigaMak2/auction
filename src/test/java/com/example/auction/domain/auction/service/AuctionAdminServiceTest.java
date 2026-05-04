@@ -8,6 +8,8 @@ import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
+import com.example.auction.domain.auction.search.service.AuctionSearchService;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +41,9 @@ class AuctionAdminServiceTest {
     @Mock
     private AuctionRepository auctionRepository;
 
+    @Mock
+    private AuctionSearchService auctionSearchService;
+
 
     // ========================
     // 경매 목록 조회
@@ -58,7 +63,7 @@ class AuctionAdminServiceTest {
         );
         Page<AuctionAdminListResponse> page = new PageImpl<>(auctionList, PageRequest.of(0,20), 3);
 
-        given(auctionRepository.findAuctionWithConditions(any(Pageable.class), any(), any())).willReturn(page);
+        given(auctionSearchService.searchAuctionWithConditions(any(Pageable.class), any(), any())).willReturn(page);
 
         // when
         PageResponse<AuctionAdminListResponse> response = auctionAdminService.getAuctionList(condition);
@@ -79,7 +84,7 @@ class AuctionAdminServiceTest {
         AuctionAdminSearchCondition condition = new AuctionAdminSearchCondition();
         Page<AuctionAdminListResponse> page = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
 
-        given(auctionRepository.findAuctionWithConditions(any(Pageable.class), any(), any())).willReturn(page);
+        given(auctionSearchService.searchAuctionWithConditions(any(Pageable.class), any(), any())).willReturn(page);
 
         // when
         PageResponse<AuctionAdminListResponse> response = auctionAdminService.getAuctionList(condition);
