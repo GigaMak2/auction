@@ -6,6 +6,8 @@ import com.example.auction.common.exception.GlobalExceptionHandler;
 import com.example.auction.domain.bid.dto.request.BidRequest;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
+import com.example.auction.domain.bid.entity.Bid;
+import com.example.auction.domain.bid.enums.BidAuctionStatus;
 import com.example.auction.domain.bid.service.BidCommandFacade;
 import com.example.auction.domain.bid.service.BidQueryService;
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +32,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -82,7 +85,17 @@ class BidControllerTest {
     void placeBid_success() throws Exception {
         // given
         BidRequest request = new BidRequest(BigDecimal.valueOf(5000), "열심히 입찰합니다");
-        given(commandService.placeBidDis(any(), eq(1L), any())).willReturn(new BidResponse());
+
+        Bid bid = mock(Bid.class);
+        given(bid.getId()).willReturn(1L);
+        given(bid.getAuctionId()).willReturn(1L);
+        given(bid.getPrice()).willReturn(BigDecimal.valueOf(5000));
+        given(bid.getDescription()).willReturn("열심히 입찰합니다");
+        given(bid.getCreatedAt()).willReturn(LocalDateTime.now());
+        given(bid.getStatus()).willReturn(BidAuctionStatus.ACTIVE);
+        BidResponse response = BidResponse.of(bid);
+
+        given(commandService.placeBidDis(any(), eq(1L), any())).willReturn(response);
 
         // when & then
         mockMvc.perform(post("/api/auctions/{auctionId}/bids/v2", 1L)
@@ -241,7 +254,16 @@ class BidControllerTest {
     @DisplayName("입찰 결과 조회 성공")
     void getWinnerBid_success() throws Exception {
         // given
-        given(queryService.getWinnerBid(any(), eq(1L))).willReturn(new BidResponse());
+        Bid bid = mock(Bid.class);
+        given(bid.getId()).willReturn(1L);
+        given(bid.getAuctionId()).willReturn(1L);
+        given(bid.getPrice()).willReturn(BigDecimal.valueOf(5000));
+        given(bid.getDescription()).willReturn("열심히 입찰합니다");
+        given(bid.getCreatedAt()).willReturn(LocalDateTime.now());
+        given(bid.getStatus()).willReturn(BidAuctionStatus.ACTIVE);
+        BidResponse response = BidResponse.of(bid);
+
+        given(queryService.getWinnerBid(any(), eq(1L))).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/auctions/{auctionId}/bids/winner/v1", 1L)
@@ -265,7 +287,16 @@ class BidControllerTest {
     @DisplayName("현재 최저가 입찰 조회 성공")
     void getCurrentMinBid_success() throws Exception {
         // given
-        given(queryService.getCurrentMinBid(any(), eq(1L))).willReturn(new BidResponse());
+        Bid bid = mock(Bid.class);
+        given(bid.getId()).willReturn(1L);
+        given(bid.getAuctionId()).willReturn(1L);
+        given(bid.getPrice()).willReturn(BigDecimal.valueOf(5000));
+        given(bid.getDescription()).willReturn("열심히 입찰합니다");
+        given(bid.getCreatedAt()).willReturn(LocalDateTime.now());
+        given(bid.getStatus()).willReturn(BidAuctionStatus.ACTIVE);
+        BidResponse response = BidResponse.of(bid);
+
+        given(queryService.getCurrentMinBid(any(), eq(1L))).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/auctions/{auctionId}/bids/current/v1", 1L)
