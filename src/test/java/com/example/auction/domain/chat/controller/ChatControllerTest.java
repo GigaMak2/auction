@@ -34,9 +34,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -92,14 +97,16 @@ class ChatControllerTest {
         given(chatService.createRoom(1L)).willReturn(response);
 
         // when & then
-        mockMvc.perform(post("/api/chat/rooms"))
+        mockMvc.perform(post("/api/chat/rooms")
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("채팅방을 생성했습니다"))
                 .andExpect(jsonPath("$.data.id").value(10L))
                 .andDo(document("chat/create-room",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
                 ));
     }
 
@@ -119,7 +126,8 @@ class ChatControllerTest {
         given(chatService.getRooms(1L)).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/chat/rooms"))
+        mockMvc.perform(get("/api/chat/rooms")
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("채팅방 목록을 조회했습니다"))
@@ -128,7 +136,8 @@ class ChatControllerTest {
                 .andExpect(jsonPath("$.data[1].id").value(2L))
                 .andDo(document("chat/get-rooms",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
                 ));
     }
 
@@ -159,7 +168,8 @@ class ChatControllerTest {
         given(chatService.updateTitle(eq(10L), eq(1L), eq("새제목"))).willReturn(response);
 
         // when & then
-        mockMvc.perform(patch("/api/chat/rooms/10")
+        mockMvc.perform(patch("/api/chat/rooms/{roomId}", 10L)
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -169,7 +179,10 @@ class ChatControllerTest {
                 .andExpect(jsonPath("$.data.title").value("새제목"))
                 .andDo(document("chat/update-room",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        pathParameters(parameterWithName("roomId").description("채팅방 식별자")),
+                        requestFields(fieldWithPath("title").description("변경할 채팅방 제목 (10자 이하)"))
                 ));
     }
 
@@ -215,13 +228,16 @@ class ChatControllerTest {
         doNothing().when(chatService).deleteRoom(10L, 1L);
 
         // when & then
-        mockMvc.perform(delete("/api/chat/rooms/10"))
+        mockMvc.perform(delete("/api/chat/rooms/{roomId}", 10L)
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("채팅방을 삭제했습니다"))
                 .andDo(document("chat/delete-room",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        pathParameters(parameterWithName("roomId").description("채팅방 식별자"))
                 ));
 
         verify(chatService).deleteRoom(10L, 1L);
@@ -244,7 +260,8 @@ class ChatControllerTest {
         given(chatService.getMessages(eq(10L), eq(1L), eq(null), eq(20))).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/chat/rooms/10/messages"))
+        mockMvc.perform(get("/api/chat/rooms/{roomId}/messages", 10L)
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("메시지 목록을 조회했습니다"))
@@ -252,7 +269,13 @@ class ChatControllerTest {
                 .andExpect(jsonPath("$.data.nextCursor").value((Object) null))
                 .andDo(document("chat/get-messages",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        pathParameters(parameterWithName("roomId").description("채팅방 식별자")),
+                        queryParameters(
+                                parameterWithName("cursor").description("이전 페이지의 마지막 메시지 식별자").optional(),
+                                parameterWithName("size").description("조회 개수 (기본값 20)").optional()
+                        )
                 ));
     }
 
