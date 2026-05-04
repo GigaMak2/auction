@@ -29,11 +29,7 @@ public abstract class BaseIntegrationTest {
         )
         .withDatabaseName("auction_test")
         .withUsername("postgres")
-        .withPassword("1234")
-        .withCopyFileToContainer(
-                MountableFile.forHostPath("init.sql"),
-                "/docker-entrypoint-initdb.d/"
-        );
+        .withPassword("1234");
 
     static RedisContainer redis = new RedisContainer(
             DockerImageName.parse("redis:8.6.2")

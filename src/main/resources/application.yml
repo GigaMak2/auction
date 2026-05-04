@@ -12,6 +12,12 @@ spring:
   profiles:
     include: oauth
 
+  flyway:
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
   data:
     redis:
       #  redis에서 tls 연결을 사용할 경우 

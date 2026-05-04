@@ -78,6 +78,11 @@ dependencies {
     // Elasticsearch
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 
+    // Flyway
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+
     // testcontainers
     testImplementation platform('org.testcontainers:testcontainers-bom:2.0.5')
     testImplementation "org.testcontainers:testcontainers-postgresql"

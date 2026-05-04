@@ -17,13 +17,11 @@ spring:
 
   jpa:
     show-sql: true
-    hibernate:
-      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-    defer-datasource-initialization: true
+
 aws:
   eventbridge:
     lambda-arn: ${LAMBDA_ARN:}
