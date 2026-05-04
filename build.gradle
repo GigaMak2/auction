@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '4.0.5'
     id 'io.spring.dependency-management' version '1.1.7'
+    id "org.asciidoctor.jvm.convert" version "4.0.5"
 }
 
 group = 'com.example'
@@ -17,6 +18,14 @@ java {
 repositories {
     mavenCentral()
     maven { url 'https://repo.spring.io/milestone' }
+}
+
+asciidoctorj {
+    version = "3.0.0"
+}
+
+configurations {
+    asciidoctorExt
 }
 
 dependencyManagement {
@@ -87,6 +96,11 @@ dependencies {
     testImplementation "org.testcontainers:testcontainers-elasticsearch"
     testImplementation "com.redis:testcontainers-redis:2.2.4"
 
+    // REST Docs
+    asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor:4.0.0'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc:4.0.0'
+    testImplementation 'org.springframework.boot:spring-boot-restdocs'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
@@ -100,6 +114,25 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
+ext {
+    snippetsDir = file('build/generated-snippets')
+}
+
 tasks.named('test') {
+    outputs.dir snippetsDir
     useJUnitPlatform()
+}
+
+tasks.named("asciidoctor") {
+    inputs.dir snippetsDir
+    configurations 'asciidoctorExt'
+    dependsOn tasks.named('test')
+    baseDirFollowsSourceFile()
+}
+
+bootJar {
+    dependsOn asciidoctor
+    from ("${asciidoctor.outputDir}") {
+        into 'static/docs'
+    }
 }

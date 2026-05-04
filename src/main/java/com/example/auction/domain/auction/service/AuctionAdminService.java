@@ -29,7 +29,7 @@ public class AuctionAdminService {
     public PageResponse<AuctionAdminListResponse> getAuctionList(AuctionAdminSearchCondition condition) {
         Page<AuctionAdminListResponse> auctionList = auctionSearchService.searchAuctionWithConditions(
                 PageRequest.of(condition.getPage(), condition.getSize()),
-                condition.getAuctionStatus(),
+                condition.getStatus(),
                 condition.getKeyword()
         );
 

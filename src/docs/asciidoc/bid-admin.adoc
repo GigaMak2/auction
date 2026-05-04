@@ -1,0 +1,21 @@
+== 입찰 관리자 전용 API
+
+=== 입찰 목록 조회 (취소 포함)
+==== 요청 헤더
+include::{snippets}/bid-admin/get-bid-list/request-headers.adoc[]
+==== Query Parameter
+include::{snippets}/bid-admin/get-bid-list/query-parameters.adoc[]
+==== 요청
+include::{snippets}/bid-admin/get-bid-list/http-request.adoc[]
+==== 응답
+include::{snippets}/bid-admin/get-bid-list/http-response.adoc[]
+
+=== 입찰 강제 취소
+==== 요청 헤더
+include::{snippets}/bid-admin/force-cancel/request-headers.adoc[]
+==== Path Variable
+include::{snippets}/bid-admin/force-cancel/path-parameters.adoc[]
+==== 요청
+include::{snippets}/bid-admin/force-cancel/http-request.adoc[]
+==== 응답
+include::{snippets}/bid-admin/force-cancel/http-response.adoc[]
