@@ -11,6 +11,8 @@ include::{snippets}/user/my-page/http-response.adoc[]
 === 비밀번호 변경
 ==== 요청 헤더
 include::{snippets}/user/change-password/request-headers.adoc[]
+==== 요청 필드
+include::{snippets}/user/change-password/request-fields.adoc[]
 ==== 요청
 include::{snippets}/user/change-password/http-request.adoc[]
 ==== 응답

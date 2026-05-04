@@ -35,6 +35,8 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -116,7 +118,11 @@ class UserControllerTest {
                 .andDo(document("user/change-password",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        requestFields(
+                                fieldWithPath("oldPassword").description("기존 비밀번호"),
+                                fieldWithPath("newPassword").description("새 비밀번호 (8자 이상)")
+                        )
                 ));
     }
 
