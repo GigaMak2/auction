@@ -27,9 +27,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -78,7 +81,10 @@ class BidAdminControllerTest {
         given(bidAdminService.getBidList(any())).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/admin/bids"))
+        mockMvc.perform(get("/api/admin/bids")
+                        .header("Authorization", "Bearer accessToken")
+                        .param("page", "0")
+                        .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("입찰 목록 조회 요청 성공"))
@@ -86,7 +92,15 @@ class BidAdminControllerTest {
                 .andExpect(jsonPath("$.data.totalElements").value(3))
                 .andDo(document("bid-admin/get-bid-list",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
+                        queryParameters(
+                                parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)").optional(),
+                                parameterWithName("status").description("입찰 상태 필터 (ACTIVE / CLOSED / CANCELLED)").optional(),
+                                parameterWithName("auctionId").description("경매 식별자 필터").optional(),
+                                parameterWithName("userId").description("사용자 식별자 필터").optional()
+                        )
                 ));
     }
 
@@ -135,13 +149,16 @@ class BidAdminControllerTest {
         doNothing().when(bidAdminService).forceCancel(1L);
 
         // when & then
-        mockMvc.perform(delete("/api/admin/bids/1"))
+        mockMvc.perform(delete("/api/admin/bids/{bidId}", 1L)
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("입찰 강제 취소 요청 성공"))
                 .andDo(document("bid-admin/force-cancel",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
+                        pathParameters(parameterWithName("bidId").description("입찰 식별자"))
                 ));
 
         verify(bidAdminService).forceCancel(1L);

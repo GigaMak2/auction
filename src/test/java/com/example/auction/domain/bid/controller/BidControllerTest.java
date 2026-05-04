@@ -30,10 +30,13 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -80,7 +83,8 @@ class BidControllerTest {
         given(commandService.placeBidDis(any(), eq(1L), any())).willReturn(new BidResponse());
 
         // when & then
-        mockMvc.perform(post("/api/auctions/1/bids/v2")
+        mockMvc.perform(post("/api/auctions/{auctionId}/bids/v2", 1L)
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -88,7 +92,9 @@ class BidControllerTest {
                 .andExpect(jsonPath("$.message").value("입찰이 완료되었습니다"))
                 .andDo(document("bid/place-bid",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        pathParameters(parameterWithName("auctionId").description("경매 식별자"))
                 ));
     }
 
@@ -171,7 +177,10 @@ class BidControllerTest {
         given(queryService.getBids(any(), eq(1L), any())).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/auctions/1/bids/v1"))
+        mockMvc.perform(get("/api/auctions/{auctionId}/bids/v1", 1L)
+                        .header("Authorization", "Bearer accessToken")
+                        .param("page", "0")
+                        .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("입찰 내역 조회가 완료되었습니다"))
@@ -179,7 +188,14 @@ class BidControllerTest {
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("bid/get-bids",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        pathParameters(parameterWithName("auctionId").description("경매 식별자")),
+                        queryParameters(
+                                parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
+                                parameterWithName("size").description("페이지 크기 (0 ~ 100)").optional()
+                        )
+
                 ));
     }
 
@@ -222,13 +238,16 @@ class BidControllerTest {
         given(queryService.getWinnerBid(any(), eq(1L))).willReturn(new BidResponse());
 
         // when & then
-        mockMvc.perform(get("/api/auctions/1/bids/winner/v1"))
+        mockMvc.perform(get("/api/auctions/{auctionId}/bids/winner/v1", 1L)
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("입찰 결과 조회가 완료되었습니다"))
                 .andDo(document("bid/get-winner-bid",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        pathParameters(parameterWithName("auctionId").description("경매 식별자"))
                 ));
     }
 
@@ -243,13 +262,16 @@ class BidControllerTest {
         given(queryService.getCurrentMinBid(any(), eq(1L))).willReturn(new BidResponse());
 
         // when & then
-        mockMvc.perform(get("/api/auctions/1/bids/current/v1"))
+        mockMvc.perform(get("/api/auctions/{auctionId}/bids/current/v1", 1L)
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("현재 최저가 입찰 조회가 완료되었습니다"))
                 .andDo(document("bid/get-current-min-bid",
                         preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint())
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        pathParameters(parameterWithName("auctionId").description("경매 식별자"))
                 ));
     }
 }

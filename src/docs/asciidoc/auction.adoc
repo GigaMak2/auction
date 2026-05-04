@@ -10,7 +10,7 @@ include::{snippets}/auction/get-auction/http-response.adoc[]
 
 === 경매 전체 조회
 ==== Query Parameter
-include::{snippets}/auction/get-many-auction-public/query-parameters.adoc[]
+include::{snippets}/auction/get-many-auctions-public/query-parameters.adoc[]
 ==== 요청
 include::{snippets}/auction/get-many-auctions-public/http-request.adoc[]
 ==== 응답
