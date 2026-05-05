@@ -88,6 +88,7 @@ create table reviews (
     reviewee_id bigint not null,
     score integer not null,
     description varchar(500),
+    image_url varchar(512),
     created_at timestamp(6),
     modified_at timestamp(6),
 
