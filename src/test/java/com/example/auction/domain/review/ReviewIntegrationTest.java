@@ -1,12 +1,18 @@
 package com.example.auction.domain.review;
 
+import com.example.auction.domain.auction.entity.Auction;
+import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.auction.result.entity.AuctionResult;
 import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
 import com.example.auction.domain.auth.dto.AuthLoginRequest;
 import com.example.auction.domain.auth.dto.AuthSignupRequest;
+import com.example.auction.domain.bid.entity.Bid;
+import com.example.auction.domain.bid.enums.BidAuctionStatus;
+import com.example.auction.domain.bid.repository.BidRepository;
+import com.example.auction.domain.category.entity.Category;
+import com.example.auction.domain.category.repository.CategoryRepository;
 import com.example.auction.domain.review.dto.ReviewCreateRequest;
 import com.example.auction.domain.review.dto.ReviewModifyRequest;
-import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.domain.user.repository.UserRepository;
 import com.example.auction.testutils.BaseIntegrationTest;
 
@@ -25,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,6 +51,15 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private AuctionRepository auctionRepository;
+
+    @Autowired
+    private BidRepository bidRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -71,10 +87,32 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
         Long sellerId = userRepository.findByEmailAndDeletedFalse("seller@test.com").orElseThrow(
                 () -> new IllegalStateException("seller 유저 없음")).getId();
 
+        // 경매 생성
+        Long fakeCategoryId = categoryRepository.save(Category.root("FAKE")).getId();
+
+        Auction auction = auctionRepository.save(Auction.of(
+            buyerId,
+            null,
+            BigDecimal.valueOf(1000),
+            "auction",
+            LocalDateTime.now().plusDays(1),
+            LocalDateTime.now().plusDays(2),
+            fakeCategoryId
+        ));
+
+        // 입찰 생성
+        Bid bid = bidRepository.save(Bid.of(
+            null,
+            BigDecimal.valueOf(500),
+            auction.getId(),
+            sellerId,
+            BidAuctionStatus.CLOSED
+        ));
+
         // 경매 결과 저장
-        auctionId = 1L;
+        auctionId = auction.getId();
         auctionResultRepository.save(
-                AuctionResult.of(BigDecimal.valueOf(10000), auctionId, buyerId, sellerId, 1L)
+                AuctionResult.of(BigDecimal.valueOf(10000), auctionId, buyerId, sellerId, bid.getId())
         );
     }
 

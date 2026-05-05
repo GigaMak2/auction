@@ -4,10 +4,16 @@ import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
+import com.example.auction.domain.category.entity.Category;
+import com.example.auction.domain.category.repository.CategoryRepository;
 import com.example.auction.domain.category.service.CategoryService;
+import com.example.auction.domain.user.entity.User;
+import com.example.auction.domain.user.repository.UserRepository;
 import com.example.auction.testutils.BaseIntegrationTest;
 
+import org.flywaydb.core.Flyway;
 import org.jspecify.annotations.NonNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,7 +29,6 @@ import org.springframework.test.context.ActiveProfiles;
 import com.example.auction.common.config.QuerydslConfig;
 import com.example.auction.common.config.JpaConfig;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
@@ -41,24 +46,36 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class})
 class AuctionRepositoryTest extends BaseIntegrationTest {
 
-    // TODO: 현재 DB를 초기화 하지 않고 @Transactional에만 의존하고 있습니다.
-    //  나중에 DB를 초기화 하는 방법을 구현해야 합니다.
+    @Autowired
+    private AuctionRepository auctionRepository;
 
     @Autowired
-    AuctionRepository auctionRepository;
+    private UserRepository userRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
 
-    // 임시로 만든 가짜 유저 ID
-    //
-    // TODO: 나중에 저희가 FK체크를 DB 에서 구현하게 되면 이 테스트는 작동이 안될 것입니다.
-    //  따로 유저를 만들거나 하는 방안을 마련해야 할 거 같습니다.
-    public static final Long FAKE_USER_ID = 1L;
+    private Long FAKE_USER_ID = 1L;
+    private Long FAKE_CATEGORY_ID = 1L;
+
+    @Autowired
+    private Flyway flyway;
+
+    @BeforeEach
+    void setup() {
+        flyway.clean();
+        flyway.migrate();
+
+        User user = userRepository.save(User.of("test@test.com", "encoded-password"));
+        FAKE_USER_ID = user.getId();
+
+        FAKE_CATEGORY_ID = categoryRepository.save(Category.root("FAKE")).getId();
+    }
 
     /**
      * AuctionSearchCondition이 기본값일 때 모든 데이터를 가지고 오는지 확인합니다.
      */
     @Test
-    @Transactional
     void findSimple() {
         Auction auction = Auction.of(
             FAKE_USER_ID,
@@ -67,7 +84,7 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
             "test auction item name",
             LocalDateTime.now().plusDays(1),
             LocalDateTime.now().plusDays(2),
-            1L
+            FAKE_CATEGORY_ID
         );
 
         AuctionSearchCondition condition = new AuctionSearchCondition();
@@ -86,7 +103,6 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
      */
     @ParameterizedTest(name = "{0}")
     @MethodSource("getFindMinMaxPriceRangeSources")
-    @Transactional
     void findMinMaxPriceRange(String name, AuctionSearchCondition condition, int expectingAuction) {
         Function<BigDecimal, Auction> createAuction = (
             maxPrice
@@ -98,7 +114,7 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
                 "test auction item name",
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(2),
-                1L
+                FAKE_CATEGORY_ID
             );
             auctionRepository.save(auction);
 
@@ -144,7 +160,6 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
      */
     @ParameterizedTest(name = "{0}")
     @MethodSource("getFindByStatusSources")
-    @Transactional
     void findByStatus(String name, AuctionSearchCondition condition, AuctionStatus[] statuses) {
         Function<AuctionStatus, Auction> createAuction = (
                 status
@@ -156,7 +171,7 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
                     "test auction item name",
                     LocalDateTime.now().plusDays(1),
                     LocalDateTime.now().plusDays(2),
-                    1L
+                    FAKE_CATEGORY_ID
             );
 
             ReflectionTestUtils.setField(auction, "status", status);
@@ -205,13 +220,12 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
     // ========================
 
     @Test
-    @Transactional
     @DisplayName("관리자 경매 목록 조회 - 필터 없음 전체 조회")
     void findAuctionWithConditions_noFilter() {
         auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID));
         Auction active = Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(2000), "키보드",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L);
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID);
         ReflectionTestUtils.setField(active, "status", AuctionStatus.ACTIVE);
         auctionRepository.save(active);
 
@@ -223,13 +237,12 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
     }
 
     @Test
-    @Transactional
     @DisplayName("관리자 경매 목록 조회 - 상태 필터링")
     void findAuctionWithConditions_statusFilter() {
         auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID));
         Auction active = Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(2000), "키보드",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L);
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID);
         ReflectionTestUtils.setField(active, "status", AuctionStatus.ACTIVE);
         auctionRepository.save(active);
 
@@ -242,13 +255,12 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
     }
 
     @Test
-    @Transactional
     @DisplayName("관리자 경매 목록 조회 - 키워드 필터링")
     void findAuctionWithConditions_keywordFilter() {
         auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID));
         auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(2000), "키보드",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID));
 
         Page<AuctionAdminListResponse> result = auctionRepository.findAuctionWithConditions(
                 PageRequest.of(0, 10), null, "노트");
@@ -258,13 +270,12 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
     }
 
     @Test
-    @Transactional
     @DisplayName("관리자 경매 목록 조회 - 상태 + 키워드 동시 필터링")
     void findAuctionWithConditions_statusAndKeyword() {
         auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID));
         Auction active = Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(2000), "노트북 거치대",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L);
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID);
         ReflectionTestUtils.setField(active, "status", AuctionStatus.ACTIVE);
         auctionRepository.save(active);
 
@@ -277,11 +288,10 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
     }
 
     @Test
-    @Transactional
     @DisplayName("관리자 경매 목록 조회 - 조건에 맞는 결과 없음")
     void findAuctionWithConditions_noMatch() {
         auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), 1L));
+                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID));
 
         Page<AuctionAdminListResponse> result = auctionRepository.findAuctionWithConditions(
                 PageRequest.of(0, 10), AuctionStatus.ACTIVE, null);

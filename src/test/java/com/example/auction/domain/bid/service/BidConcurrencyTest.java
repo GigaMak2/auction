@@ -6,16 +6,17 @@ import com.example.auction.domain.bid.dto.request.BidRequest;
 import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.repository.BidRepository;
 import com.example.auction.common.config.security.CustomUserDetails;
+import com.example.auction.domain.category.entity.Category;
+import com.example.auction.domain.category.repository.CategoryRepository;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.repository.UserRepository;
 import com.example.auction.testutils.BaseIntegrationTest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -57,11 +58,19 @@ class BidConcurrencyTest extends BaseIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private Flyway flyway;
+
     private List<Long> userIds = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
-        userIds.clear();
+        flyway.clean();
+        flyway.migrate();
+
         for (long i = 1; i <= 50; i++) {
             User user = User.of("user" + i + "@test.com", "password");
             User saved = userRepository.save(user);
@@ -69,22 +78,15 @@ class BidConcurrencyTest extends BaseIntegrationTest {
         }
     }
 
-    @AfterEach
-    void tearDown() {
-        bidRepository.deleteAll();
-        auctionRepository.deleteAll();
-        userRepository.deleteAll();
-    }
-
-    private Auction createActiveAuction(Long userId) {
+    private Auction createActiveAuction(Long userId, Long categoryId) {
         Auction auction = Auction.of(
                 userId,
-                "동시성 테스트 경매",
+                "테스트 경매",
                 BigDecimal.valueOf(200_000),
-                "테스트 상품",
+                "테스트 경매",
                 LocalDateTime.now().minusHours(1),
                 LocalDateTime.now().plusHours(1),
-                1L
+                categoryId
         );
         auction.activate();
         return auctionRepository.save(auction);
@@ -93,9 +95,12 @@ class BidConcurrencyTest extends BaseIntegrationTest {
     @Test
     @DisplayName("v2(분산락) 50명 동시 입찰 시 정확히 1건만 저장")
     void concurrency_v2_withLock() throws InterruptedException {
+        User auctionOwner = userRepository.save(User.of("auction-owner@test.com", "password"));
+        Category category = categoryRepository.save(Category.root("FAKE"));
+
         // given
         int threadCount = 50;
-        Auction auction = createActiveAuction(99L);
+        Auction auction = createActiveAuction(auctionOwner.getId(), category.getId());
         Long auctionId = auction.getId();
         BigDecimal bidPrice = BigDecimal.valueOf(80_000);
 

@@ -9,10 +9,7 @@ import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.testutils.BaseIntegrationTest;
 import com.example.auction.domain.user.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -22,17 +19,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.flywaydb.core.Flyway;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Transactional
 public class CategoryIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
@@ -50,11 +47,17 @@ public class CategoryIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private Flyway flyway;
+
     private String adminToken;
     private String userToken;
 
     @BeforeEach
     void setUp() throws Exception {
+        flyway.clean();
+        flyway.migrate();
+
         User admin = User.of("admin@test.com", passwordEncoder.encode("password123"));
         ReflectionTestUtils.setField(admin, "role", UserRole.ADMIN);
         userRepository.save(admin);
