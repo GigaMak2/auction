@@ -146,7 +146,7 @@ class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
     @DisplayName("받은 리뷰 목록 조회 - 전체 조회")
     void findReceivedReviewsWithConditions_noFilter() {
         Page<ReviewListGetResponse> result = reviewRepository.findReceivedReviewsWithConditions(
-                2L, PageRequest.of(0, 10), null, null
+                user2Id, PageRequest.of(0, 10), null, null
         );
 
         assertThat(result.getTotalElements()).isEqualTo(2);
@@ -168,13 +168,13 @@ class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
     @DisplayName("받은 리뷰 목록 조회 - 날짜 범위 필터링")
     void findReceivedReviewsWithConditions_dateFilter() {
         Page<ReviewListGetResponse> inRange = reviewRepository.findReceivedReviewsWithConditions(
-                2L, PageRequest.of(0, 10),
+                user2Id, PageRequest.of(0, 10),
                 LocalDate.now().minusDays(1),
                 LocalDate.now().plusDays(1)
         );
 
         Page<ReviewListGetResponse> outOfRange = reviewRepository.findReceivedReviewsWithConditions(
-                2L, PageRequest.of(0, 10),
+                user2Id, PageRequest.of(0, 10),
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusDays(2)
         );
@@ -212,7 +212,7 @@ class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
     @DisplayName("관리자 리뷰 목록 조회 - reviewerId 필터링")
     void findReviewsWithConditions_reviewerIdFilter() {
         Page<ReviewAdminListResponse> result = reviewRepository.findReviewsWithConditions(
-                PageRequest.of(0, 10), null, 1L, null, null);
+                PageRequest.of(0, 10), null, user1Id, null, null);
 
         assertThat(result.getTotalElements()).isEqualTo(2);
         assertThat(result.getContent())
@@ -224,7 +224,7 @@ class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
     @DisplayName("관리자 리뷰 목록 조회 - revieweeId 필터링")
     void findReviewsWithConditions_revieweeIdFilter() {
         Page<ReviewAdminListResponse> result = reviewRepository.findReviewsWithConditions(
-                PageRequest.of(0, 10), null, null, 2L, null);
+                PageRequest.of(0, 10), null, null, user2Id, null);
 
         assertThat(result.getTotalElements()).isEqualTo(2);
         assertThat(result.getContent())
