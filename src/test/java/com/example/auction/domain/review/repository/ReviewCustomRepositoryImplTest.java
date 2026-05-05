@@ -217,7 +217,7 @@ class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
         assertThat(result.getTotalElements()).isEqualTo(2);
         assertThat(result.getContent())
                 .extracting(ReviewAdminListResponse::reviewerId)
-                .containsOnly(1L);
+                .containsOnly(user1Id);
     }
 
     @Test
@@ -229,7 +229,7 @@ class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
         assertThat(result.getTotalElements()).isEqualTo(2);
         assertThat(result.getContent())
                 .extracting(ReviewAdminListResponse::revieweeId)
-                .containsOnly(2L);
+                .containsOnly(user2Id);
     }
 
     @Test
