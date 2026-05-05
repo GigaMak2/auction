@@ -78,9 +78,9 @@ class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
 
         Auction user3Auction = createAuction(user3.getId(), category.getId());
 
-        reviewRepository.save(Review.of(user2Auction1.getId(), user1.getId(), user2.getId(), 5, "좋아요"));
-        reviewRepository.save(Review.of(user2Auction2.getId(), user1.getId(), user3.getId(), 4, "괜찮아요"));
-        reviewRepository.save(Review.of(user3Auction.getId(), user3.getId(), user2.getId(), 3, "보통이에요"));
+        reviewRepository.save(Review.of(user2Auction1.getId(), user1.getId(), user2.getId(), 5, "좋아요", null));
+        reviewRepository.save(Review.of(user2Auction2.getId(), user1.getId(), user3.getId(), 4, "괜찮아요", null));
+        reviewRepository.save(Review.of(user3Auction.getId(), user3.getId(), user2.getId(), 3, "보통이에요", null));
 
         user1Id = user1.getId();
         user2Id = user2.getId();

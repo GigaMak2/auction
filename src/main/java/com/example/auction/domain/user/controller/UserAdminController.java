@@ -25,7 +25,7 @@ public class UserAdminController {
             @Valid @ModelAttribute UserSearchCondition condition
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "유저 목록 조회 요청 성공", userAdminService.getUserList(condition)));
+                HttpStatus.OK.name(), "사용자 목록 조회 요청 성공", userAdminService.getUserList(condition)));
     }
 
     @GetMapping("/{userId}")
@@ -33,7 +33,7 @@ public class UserAdminController {
             @PathVariable Long userId
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "유저 상세 조회 요청 성공", userAdminService.getUserDetail(userId)));
+                HttpStatus.OK.name(), "사용자 상세 조회 요청 성공", userAdminService.getUserDetail(userId)));
     }
 
     @DeleteMapping("/{userId}")
@@ -41,6 +41,6 @@ public class UserAdminController {
             @PathVariable Long userId
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "유저 강제 탈퇴 요청 성공", userAdminService.forceWithdraw(userId)));
+                HttpStatus.OK.name(), "사용자 강제 탈퇴 요청 성공", userAdminService.forceWithdraw(userId)));
     }
 }

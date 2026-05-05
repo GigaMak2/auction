@@ -1,0 +1,45 @@
+== 입찰 API
+
+=== 입찰 생성
+==== 요청 헤더
+include::{snippets}/bid/place-bid/request-headers.adoc[]
+==== Path Variable
+include::{snippets}/bid/place-bid/path-parameters.adoc[]
+==== 요청 필드
+include::{snippets}/bid/place-bid/request-fields.adoc[]
+==== 요청
+include::{snippets}/bid/place-bid/http-request.adoc[]
+==== 응답
+include::{snippets}/bid/place-bid/http-response.adoc[]
+
+=== 입찰 목록 조회
+==== 요청 헤더
+include::{snippets}/bid/get-bids/request-headers.adoc[]
+==== Path Variable
+include::{snippets}/bid/get-bids/path-parameters.adoc[]
+==== Query Parameter
+include::{snippets}/bid/get-bids/query-parameters.adoc[]
+==== 요청
+include::{snippets}/bid/get-bids/http-request.adoc[]
+==== 응답
+include::{snippets}/bid/get-bids/http-response.adoc[]
+
+=== 입찰 결과 조회
+==== 요청 헤더
+include::{snippets}/bid/get-winner-bid/request-headers.adoc[]
+==== Path Variable
+include::{snippets}/bid/get-winner-bid/path-parameters.adoc[]
+==== 요청
+include::{snippets}/bid/get-winner-bid/http-request.adoc[]
+==== 응답
+include::{snippets}/bid/get-winner-bid/http-response.adoc[]
+
+=== 현재 최저가 입찰 조회
+==== 요청 헤더
+include::{snippets}/bid/get-current-min-bid/request-headers.adoc[]
+==== Path Variable
+include::{snippets}/bid/get-current-min-bid/path-parameters.adoc[]
+==== 요청
+include::{snippets}/bid/get-current-min-bid/http-request.adoc[]
+==== 응답
+include::{snippets}/bid/get-current-min-bid/http-response.adoc[]

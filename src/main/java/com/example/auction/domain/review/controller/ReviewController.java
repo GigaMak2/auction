@@ -4,6 +4,7 @@ import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.domain.review.dto.*;
+import com.example.auction.domain.review.service.ReviewImageService;
 import com.example.auction.domain.review.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,18 @@ import org.springframework.web.bind.annotation.*;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final ReviewImageService reviewImageService;
+
+    // S3 직접 업로드용 Presigned URL 발급 — 리뷰 작성 전 이미지 업로드 시 사용
+    @GetMapping("/image/presigned-url")
+    public ResponseEntity<BaseResponse<ReviewImagePresignResponse>> getPresignedUrl(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "image/jpeg") String contentType
+    ) {
+        return ResponseEntity.ok(BaseResponse.success(
+                HttpStatus.OK.name(), "이미지 업로드 URL 발급 성공",
+                reviewImageService.generatePresignedUrl(userDetails.getUserId(), contentType)));
+    }
 
     @PostMapping
     public ResponseEntity<BaseResponse<ReviewCreateResponse>> createReview(

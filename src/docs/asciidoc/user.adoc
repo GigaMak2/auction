@@ -1,0 +1,27 @@
+== 사용자 API
+
+=== 마이페이지 조회
+==== 요청 헤더
+include::{snippets}/user/my-page/request-headers.adoc[]
+==== 요청
+include::{snippets}/user/my-page/http-request.adoc[]
+==== 응답
+include::{snippets}/user/my-page/http-response.adoc[]
+
+=== 비밀번호 변경
+==== 요청 헤더
+include::{snippets}/user/change-password/request-headers.adoc[]
+==== 요청 필드
+include::{snippets}/user/change-password/request-fields.adoc[]
+==== 요청
+include::{snippets}/user/change-password/http-request.adoc[]
+==== 응답
+include::{snippets}/user/change-password/http-response.adoc[]
+
+=== 회원탈퇴
+==== 요청 헤더
+include::{snippets}/user/withdraw/request-headers.adoc[]
+==== 요청
+include::{snippets}/user/withdraw/http-request.adoc[]
+==== 응답
+include::{snippets}/user/withdraw/http-response.adoc[]

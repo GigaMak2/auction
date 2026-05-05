@@ -9,5 +9,6 @@ public record ReviewCreateResponse(
         Long revieweeId,
         int score,
         String description,
+        String imageUrl,
         LocalDateTime createdAt
 ) {}

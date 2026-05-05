@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -29,12 +30,20 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({UserController.class, GlobalExceptionHandler.class})
 @AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureRestDocs
 class UserControllerTest {
 
     @Autowired
@@ -72,11 +81,17 @@ class UserControllerTest {
         given(userService.myPage(1L)).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/api/users")
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.email").value("test@test.com"))
-                .andExpect(jsonPath("$.data.role").value("USER"));
+                .andExpect(jsonPath("$.data.role").value("USER"))
+                .andDo(document("user/my-page",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
+                ));
     }
 
 
@@ -94,11 +109,21 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(patch("/api/users/password")
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("비밀번호 변경 요청 성공"));
+                .andExpect(jsonPath("$.message").value("비밀번호 변경 요청 성공"))
+                .andDo(document("user/change-password",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        requestFields(
+                                fieldWithPath("oldPassword").description("기존 비밀번호"),
+                                fieldWithPath("newPassword").description("새 비밀번호 (8자 이상)")
+                        )
+                ));
     }
 
     @Test
@@ -148,12 +173,18 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(delete("/api/users")
+                        .header("Authorization", "Bearer accessToken")
                         .requestAttr("accessToken", "accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("탈퇴 요청 성공"))
                 .andExpect(jsonPath("$.data.email").value("test@test.com"))
-                .andExpect(jsonPath("$.data.role").value("USER"));
+                .andExpect(jsonPath("$.data.role").value("USER"))
+                .andDo(document("user/withdraw",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰"))
+                ));
 
         verify(userService).withdraw(eq(1L), eq("accessToken"));
     }

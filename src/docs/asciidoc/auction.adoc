@@ -1,0 +1,47 @@
+== 경매 API
+
+=== 경매 단건 조회
+==== Path Variable
+include::{snippets}/auction/get-auction/path-parameters.adoc[]
+==== 요청
+include::{snippets}/auction/get-auction/http-request.adoc[]
+==== 응답
+include::{snippets}/auction/get-auction/http-response.adoc[]
+
+=== 경매 전체 조회
+==== Query Parameter
+include::{snippets}/auction/get-many-auctions-public/query-parameters.adoc[]
+==== 요청
+include::{snippets}/auction/get-many-auctions-public/http-request.adoc[]
+==== 응답
+include::{snippets}/auction/get-many-auctions-public/http-response.adoc[]
+
+=== 내 경매 목록 조회
+==== 요청 헤더
+include::{snippets}/auction/get-many-auctions-me/request-headers.adoc[]
+==== Query Parameter
+include::{snippets}/auction/get-many-auctions-me/query-parameters.adoc[]
+==== 요청
+include::{snippets}/auction/get-many-auctions-me/http-request.adoc[]
+==== 응답
+include::{snippets}/auction/get-many-auctions-me/http-response.adoc[]
+
+=== 경매 생성
+==== 요청 헤더
+include::{snippets}/auction/create-auction/request-headers.adoc[]
+==== 요청 필드
+include::{snippets}/auction/create-auction/request-fields.adoc[]
+==== 요청
+include::{snippets}/auction/create-auction/http-request.adoc[]
+==== 응답
+include::{snippets}/auction/create-auction/http-response.adoc[]
+
+=== 경매 취소
+==== 요청 헤더
+include::{snippets}/auction/cancel-auction/request-headers.adoc[]
+==== Path Variable
+include::{snippets}/auction/cancel-auction/path-parameters.adoc[]
+==== 요청
+include::{snippets}/auction/cancel-auction/http-request.adoc[]
+==== 응답
+include::{snippets}/auction/cancel-auction/http-response.adoc[]
