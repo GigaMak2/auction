@@ -3,6 +3,10 @@ spring:
   jpa:
     show-sql: false
 
+  flyway:
+    cleanDisabled: false
+    locations: classpath:db/migration
+
 jwt:
   secret:
     key: TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEST
