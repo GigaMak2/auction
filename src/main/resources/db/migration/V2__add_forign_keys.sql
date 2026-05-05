@@ -1,4 +1,3 @@
-BEGIN;
 ---------------------------
 -- auction_results 
 ---------------------------
@@ -105,5 +104,3 @@ alter table user_social_accounts
     add constraint fk_user_social_accounts_user_id
     foreign key (user_id) 
     REFERENCES users (id);
-
-COMMIT;

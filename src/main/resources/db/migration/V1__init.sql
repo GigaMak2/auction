@@ -1,5 +1,3 @@
-BEGIN;
-
 CREATE EXTENSION IF NOT EXISTS vector;
 
 create table auction_results (
@@ -122,5 +120,3 @@ create table users (
 
     primary key (id)
 );
-
-COMMIT;
