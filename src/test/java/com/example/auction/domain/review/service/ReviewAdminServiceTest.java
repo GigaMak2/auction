@@ -122,7 +122,7 @@ class ReviewAdminServiceTest {
     void forceDelete_success() {
         // given
         Long reviewId = 1L;
-        Review review = Review.of(10L, 1L, 2L, 5, "좋아요");
+        Review review = Review.of(10L, 1L, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         User reviewee = User.of("seller@test.com", "encodedPassword");
@@ -146,7 +146,7 @@ class ReviewAdminServiceTest {
     void forceDelete_success_lastReview() {
         // given
         Long reviewId = 1L;
-        Review review = Review.of(10L, 1L, 2L, 5, "좋아요");
+        Review review = Review.of(10L, 1L, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         User reviewee = User.of("seller@test.com", "encodedPassword");
@@ -170,7 +170,7 @@ class ReviewAdminServiceTest {
     void forceDelete_success_revieweeDeleted() {
         // given
         Long reviewId = 1L;
-        Review review = Review.of(10L, 1L, 2L, 5, "좋아요");
+        Review review = Review.of(10L, 1L, 2L, 5, "좋아요", null);
         ReflectionTestUtils.setField(review, "id", reviewId);
 
         User reviewee = User.of("seller@test.com", "encodedPassword");

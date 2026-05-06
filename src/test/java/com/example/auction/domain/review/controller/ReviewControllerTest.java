@@ -4,12 +4,14 @@ import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.GlobalExceptionHandler;
 import com.example.auction.domain.review.dto.*;
+import com.example.auction.domain.review.service.ReviewImageService;
 import com.example.auction.domain.review.service.ReviewService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -27,12 +29,21 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({ReviewController.class, GlobalExceptionHandler.class})
 @AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureRestDocs
 class ReviewControllerTest {
 
     @Autowired
@@ -43,6 +54,9 @@ class ReviewControllerTest {
 
     @MockitoBean
     private ReviewService reviewService;
+
+    @MockitoBean
+    private ReviewImageService reviewImageService;
 
     @BeforeEach
     void setUpSecurityContext() {
@@ -56,6 +70,40 @@ class ReviewControllerTest {
         SecurityContextHolder.clearContext();
     }
 
+
+    // ========================
+    // 리뷰 이미지 Presigned URL 발급
+    // ========================
+
+    @Test
+    @DisplayName("Presigned URL 발급 성공")
+    void getPresignedUrl_success() throws Exception {
+        // given
+        ReviewImagePresignResponse response = new ReviewImagePresignResponse(
+                "https://s3.amazonaws.com/bucket/reviews/1/uuid.jpg?presigned=...",
+                "https://cdn.example.com/reviews/1/uuid.jpg"
+        );
+
+        given(reviewImageService.generatePresignedUrl(eq(1L), eq("image/jpeg"))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/reviews/image/presigned-url")
+                        .header("Authorization", "Bearer accessToken")
+                        .param("contentType", "image/jpeg"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("이미지 업로드 URL 발급 성공"))
+                .andExpect(jsonPath("$.data.presignedUrl").exists())
+                .andExpect(jsonPath("$.data.imageUrl").exists())
+                .andDo(document("review/get-presigned-url",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        queryParameters(parameterWithName("contentType").description("이미지 MIME 타입 (image/jpeg, image/png, image/webp)").optional())
+                ));
+    }
+
+
     // ========================
     // 리뷰 생성
     // ========================
@@ -64,27 +112,40 @@ class ReviewControllerTest {
     @DisplayName("리뷰 생성 성공")
     void createReview_success() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(10L, 5, "좋아요");
-        ReviewCreateResponse response = new ReviewCreateResponse(1L, 10L, 1L, 2L, 5, "좋아요", LocalDateTime.now());
+        ReviewCreateRequest request = new ReviewCreateRequest(10L, 5, "좋아요", "https://cdn.example.com/image.jpg");
+        ReviewCreateResponse response = new ReviewCreateResponse(1L, 10L, 1L, 2L, 5, "좋아요", "https://cdn.example.com/image.jpg", LocalDateTime.now());
 
         given(reviewService.createReview(eq(1L), any(ReviewCreateRequest.class))).willReturn(response);
 
         // when & then
         mockMvc.perform(post("/api/reviews")
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("리뷰 생성 요청 성공"))
                 .andExpect(jsonPath("$.data.auctionId").value(10L))
-                .andExpect(jsonPath("$.data.score").value(5));
+                .andExpect(jsonPath("$.data.score").value(5))
+                .andExpect(jsonPath("$.data.imageUrl").value("https://cdn.example.com/image.jpg"))
+                .andDo(document("review/create-review",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        requestFields(
+                                fieldWithPath("auctionId").description("경매 식별자"),
+                                fieldWithPath("score").description("별점 (1 ~ 5)"),
+                                fieldWithPath("description").description("리뷰 내용 (500자 이하)").optional(),
+                                fieldWithPath("imageUrl").description("리뷰 이미지 URL").optional()
+                        )
+                ));
     }
 
     @Test
     @DisplayName("리뷰 생성 실패 - auctionId null")
     void createReview_fail_auctionIdNull() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(null, 5, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(null, 5, "좋아요", null);
 
         // when & then
         mockMvc.perform(post("/api/reviews")
@@ -99,7 +160,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 생성 실패 - score 1 미만")
     void createReview_fail_scoreLessThan1() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(10L, 0, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(10L, 0, "좋아요", null);
 
         // when & then
         mockMvc.perform(post("/api/reviews")
@@ -114,7 +175,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 생성 실패 - score 5 초과")
     void createReview_fail_scoreGreaterThan5() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(10L, 6, "좋아요");
+        ReviewCreateRequest request = new ReviewCreateRequest(10L, 6, "좋아요", null);
 
         // when & then
         mockMvc.perform(post("/api/reviews")
@@ -126,10 +187,10 @@ class ReviewControllerTest {
     }
 
     @Test
-    @DisplayName("리뷰 작성 실패 - 설명 500자 초과")
+    @DisplayName("리뷰 생성 실패 - 설명 500자 초과")
     void createReview_fail_descriptionTooLong() throws Exception {
         // given
-        ReviewCreateRequest request = new ReviewCreateRequest(1L, 5, "a".repeat(501));
+        ReviewCreateRequest request = new ReviewCreateRequest(1L, 5, "a".repeat(501), null);
 
         // when & then
         mockMvc.perform(post("/api/reviews")
@@ -151,19 +212,33 @@ class ReviewControllerTest {
         // given
         PageResponse<ReviewListGetResponse> response = new PageResponse<>(
                 List.of(
-                        new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now()),
-                        new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now())
+                        new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now(), null),
+                        new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now(), null)
                 ), 0, 1, 2L, 10, true);
 
         given(reviewService.getWrittenReviewList(eq(1L), any(ReviewSearchCondition.class))).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/reviews/written"))
+        mockMvc.perform(get("/api/reviews/written")
+                        .header("Authorization", "Bearer accessToken")
+                        .param("page", "0")
+                        .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("작성한 리뷰 목록 조회 요청 성공"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
-                .andExpect(jsonPath("$.data.totalElements").value(2));
+                .andExpect(jsonPath("$.data.totalElements").value(2))
+                .andDo(document("review/get-written-review-list",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        queryParameters(
+                                parameterWithName("page").description("페이지 번호 (0 이상)"),
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)"),
+                                parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)").optional(),
+                                parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)").optional()
+                        )
+                ));
     }
 
     @Test
@@ -222,19 +297,33 @@ class ReviewControllerTest {
         // given
         PageResponse<ReviewListGetResponse> response = new PageResponse<>(
                 List.of(
-                        new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now()),
-                        new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now())
+                        new ReviewListGetResponse(1L, 10L, 2L, LocalDateTime.now(), LocalDateTime.now(), null),
+                        new ReviewListGetResponse(2L, 11L, 3L, LocalDateTime.now(), LocalDateTime.now(), null)
                 ), 0, 1, 2L, 10, true);
 
         given(reviewService.getReceivedReviewList(eq(1L), any(ReviewSearchCondition.class))).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/reviews/received"))
+        mockMvc.perform(get("/api/reviews/received")
+                        .header("Authorization", "Bearer accessToken")
+                        .param("page", "0")
+                        .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("받은 리뷰 목록 조회 요청 성공"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
-                .andExpect(jsonPath("$.data.totalElements").value(2));
+                .andExpect(jsonPath("$.data.totalElements").value(2))
+                .andDo(document("review/get-received-review-list",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        queryParameters(
+                                parameterWithName("page").description("페이지 번호 (0 이상)"),
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)"),
+                                parameterWithName("startDate").description("조회 시작일 (yyyy-MM-dd)").optional(),
+                                parameterWithName("endDate").description("조회 종료일 (yyyy-MM-dd)").optional()
+                        )
+                ));
     }
 
     @Test
@@ -292,17 +381,22 @@ class ReviewControllerTest {
     void getReview_success() throws Exception {
         // given
         ReviewGetResponse response = new ReviewGetResponse(
-                1L, 10L, 1L, 2L, 5, "좋아요", LocalDateTime.now(), LocalDateTime.now());
+                1L, 10L, 1L, 2L, 5, "좋아요", null, LocalDateTime.now(), LocalDateTime.now());
 
         given(reviewService.getReview(1L)).willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/reviews/1"))
+        mockMvc.perform(get("/api/reviews/{reviewId}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("리뷰 상세 조회 요청 성공"))
                 .andExpect(jsonPath("$.data.reviewId").value(1L))
-                .andExpect(jsonPath("$.data.score").value(5));
+                .andExpect(jsonPath("$.data.score").value(5))
+                .andDo(document("review/get-review",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(parameterWithName("reviewId").description("리뷰 식별자"))
+                ));
     }
 
 
@@ -314,27 +408,39 @@ class ReviewControllerTest {
     @DisplayName("리뷰 수정 성공")
     void modifyReview_success() throws Exception {
         // given
-        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요");
-        ReviewModifyResponse response = new ReviewModifyResponse(1L, 1, "별로에요", LocalDateTime.now(), LocalDateTime.now());
+        ReviewModifyRequest request = new ReviewModifyRequest(1, "별로에요", "https://cdn.example.com/image.jpg");
+        ReviewModifyResponse response = new ReviewModifyResponse(1L, 1, "별로에요", "https://cdn.example.com/image.jpg", LocalDateTime.now(), LocalDateTime.now());
 
         given(reviewService.modifyReview(eq(1L), eq(1L), any(ReviewModifyRequest.class))).willReturn(response);
 
         // when & then
-        mockMvc.perform(patch("/api/reviews/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(patch("/api/reviews/{reviewId}", 1L)
+                        .header("Authorization", "Bearer accessToken")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("리뷰 수정 요청 성공"))
                 .andExpect(jsonPath("$.data.reviewId").value(1L))
-                .andExpect(jsonPath("$.data.score").value(1));
+                .andExpect(jsonPath("$.data.score").value(1))
+                .andDo(document("review/modify-review",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        pathParameters(parameterWithName("reviewId").description("리뷰 식별자")),
+                        requestFields(
+                                fieldWithPath("score").description("별점 (1 ~ 5)").optional(),
+                                fieldWithPath("description").description("리뷰 내용 (500자 이하)").optional(),
+                                fieldWithPath("imageUrl").description("리뷰 이미지 URL").optional()
+                        )
+                ));
     }
 
     @Test
     @DisplayName("리뷰 수정 실패 - score 1 미만")
     void modifyReview_fail_scoreLessThan1() throws Exception {
         // given
-        ReviewModifyRequest request = new ReviewModifyRequest(0, "친절해요");
+        ReviewModifyRequest request = new ReviewModifyRequest(0, "친절해요", null);
 
         // when & then
         mockMvc.perform(patch("/api/reviews/1")
@@ -349,7 +455,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 수정 실패 - score 5 초과")
     void modifyReview_fail_scoreGreaterThan5() throws Exception {
         // given
-        ReviewModifyRequest request = new ReviewModifyRequest(6, "친절해요");
+        ReviewModifyRequest request = new ReviewModifyRequest(6, "친절해요", null);
 
         // when & then
         mockMvc.perform(patch("/api/reviews/1")
@@ -364,7 +470,7 @@ class ReviewControllerTest {
     @DisplayName("리뷰 수정 실패 - 설명 500자 초과")
     void modifyReview_fail_descriptionTooLong() throws Exception {
         // given
-        ReviewModifyRequest request = new ReviewModifyRequest(null, "a".repeat(501));
+        ReviewModifyRequest request = new ReviewModifyRequest(null, "a".repeat(501), null);
 
         // when & then
         mockMvc.perform(patch("/api/reviews/{reviewId}", 1L)
@@ -387,11 +493,19 @@ class ReviewControllerTest {
         doNothing().when(reviewService).deleteReview(1L, 1L);
 
         // when & then
-        mockMvc.perform(delete("/api/reviews/1"))
+        mockMvc.perform(delete("/api/reviews/{reviewId}", 1L)
+                        .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 삭제 요청 성공"));
+                .andExpect(jsonPath("$.message").value("리뷰 삭제 요청 성공"))
+                .andDo(document("review/delete-review",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰")),
+                        pathParameters(parameterWithName("reviewId").description("리뷰 식별자"))
+                ));
 
         verify(reviewService).deleteReview(1L, 1L);
     }
 }
+

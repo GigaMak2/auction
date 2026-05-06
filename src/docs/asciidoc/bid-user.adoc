@@ -1,0 +1,11 @@
+== 입찰 사용자 전용 API
+
+=== 내 입찰 조회
+==== 요청 헤더
+include::{snippets}/bid-user/get-my-bids/request-headers.adoc[]
+==== Query Parameter
+include::{snippets}/bid-user/get-my-bids/query-parameters.adoc[]
+==== 요청
+include::{snippets}/bid-user/get-my-bids/http-request.adoc[]
+==== 응답
+include::{snippets}/bid-user/get-my-bids/http-response.adoc[]

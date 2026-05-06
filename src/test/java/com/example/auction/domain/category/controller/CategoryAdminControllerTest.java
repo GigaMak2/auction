@@ -6,6 +6,7 @@ import com.example.auction.domain.category.service.CategoryAdminService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -18,6 +19,15 @@ import java.time.LocalDateTime;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -25,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest({CategoryAdminController.class, GlobalExceptionHandler.class})
 @AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureRestDocs
 public class CategoryAdminControllerTest {
 
     @Autowired
@@ -52,13 +63,23 @@ public class CategoryAdminControllerTest {
 
         // when & then
         mockMvc.perform(post("/api/admin/categories")
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("카테고리 생성 요청 성공"))
                 .andExpect(jsonPath("$.data.categoryId").value(1L))
-                .andExpect(jsonPath("$.data.name").value("전자기기"));
+                .andExpect(jsonPath("$.data.name").value("전자기기"))
+                .andDo(document("category-admin/create-category",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
+                        requestFields(
+                                fieldWithPath("parentId").description("부모 카테고리 식별자 (1 이상)").optional(),
+                                fieldWithPath("name").description("카테고리 이름")
+                        )
+                ));
     }
 
     @Test
@@ -106,14 +127,22 @@ public class CategoryAdminControllerTest {
         given(categoryAdminService.renameCategory(eq(1L), any(CategoryRenameRequest.class))).willReturn(response);
 
         // when & then
-        mockMvc.perform(patch("/api/admin/categories/1/name")
+        mockMvc.perform(patch("/api/admin/categories/{categoryId}/name", 1L)
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("카테고리 이름 수정 요청 성공"))
                 .andExpect(jsonPath("$.data.categoryId").value(1L))
-                .andExpect(jsonPath("$.data.name").value("가전제품"));
+                .andExpect(jsonPath("$.data.name").value("가전제품"))
+                .andDo(document("category-admin/rename-category",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
+                        pathParameters(parameterWithName("categoryId").description("카테고리 식별자")),
+                        requestFields(fieldWithPath("name").description("변경할 카테고리 이름"))
+                ));
     }
 
     @Test
@@ -146,14 +175,22 @@ public class CategoryAdminControllerTest {
         given(categoryAdminService.moveCategory(eq(1L), any(CategoryMoveRequest.class))).willReturn(response);
 
         // when & then
-        mockMvc.perform(patch("/api/admin/categories/1/parent")
+        mockMvc.perform(patch("/api/admin/categories/{categoryId}/parent", 1L)
+                        .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("카테고리 이동 요청 성공"))
                 .andExpect(jsonPath("$.data.categoryId").value(1L))
-                .andExpect(jsonPath("$.data.parentId").value(2L));
+                .andExpect(jsonPath("$.data.parentId").value(2L))
+                .andDo(document("category-admin/move-category",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer 액세스 토큰 (ADMIN)")),
+                        pathParameters(parameterWithName("categoryId").description("카테고리 식별자")),
+                        requestFields(fieldWithPath("parentId").description("이동할 부모 카테고리 식별자 (1 이상)"))
+                ));
     }
 
     @Test

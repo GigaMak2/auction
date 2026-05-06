@@ -7,5 +7,6 @@ public record ReviewListGetResponse(
         Long auctionId,
         Long counterpartId,
         LocalDateTime createdAt,
-        LocalDateTime modifiedAt
+        LocalDateTime modifiedAt,
+        String imageUrl
 ) {}

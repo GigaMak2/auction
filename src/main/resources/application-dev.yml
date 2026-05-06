@@ -29,6 +29,10 @@ aws:
     lambda-arn: ${LAMBDA_ARN:}
     role-arn: ${ROLE_ARN:}
     legacy-lambda-arn: ${LEGACY_LAMBDA_ARN:}
+  s3:
+    bucket: ${S3_BUCKET_NAME:}         # 이미지 업로드 대상 S3 버킷 이름
+  cloudfront:
+    domain: ${CLOUDFRONT_DOMAIN:}      # 이미지 조회용 CDN 도메인 (예: https://d1234abcdef.cloudfront.net)
 
 management:
   server:

@@ -1,0 +1,21 @@
+= Second-Hand Goods Reverse Auction
+:doctype: book
+:toc: left
+:toc-title: 목차
+
+include::auth.adoc[]
+include::user.adoc[]
+include::auction.adoc[]
+include::bid.adoc[]
+include::bid-user.adoc[]
+include::category.adoc[]
+include::review.adoc[]
+include::chat.adoc[]
+
+include::auth-admin.adoc[]
+include::user-admin.adoc[]
+include::auction-admin.adoc[]
+include::auction-result-admin.adoc[]
+include::bid-admin.adoc[]
+include::category-admin.adoc[]
+include::review-admin.adoc[]

@@ -8,6 +8,8 @@ import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
+import com.example.auction.domain.auction.search.service.AuctionSearchService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
@@ -21,12 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuctionAdminService {
 
     private final AuctionRepository auctionRepository;
+    private final AuctionSearchService auctionSearchService;
 
     @Transactional(readOnly = true)
     public PageResponse<AuctionAdminListResponse> getAuctionList(AuctionAdminSearchCondition condition) {
-        Page<AuctionAdminListResponse> auctionList = auctionRepository.findAuctionWithConditions(
+        Page<AuctionAdminListResponse> auctionList = auctionSearchService.searchAuctionWithConditions(
                 PageRequest.of(condition.getPage(), condition.getSize()),
-                condition.getAuctionStatus(),
+                condition.getStatus(),
                 condition.getKeyword()
         );
 

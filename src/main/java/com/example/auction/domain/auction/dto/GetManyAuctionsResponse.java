@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
+import com.example.auction.domain.auction.search.dto.AuctionSearchResult;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -49,6 +50,28 @@ public class GetManyAuctionsResponse {
             auction.getCategoryId(),
 
             auction.getCreatedAt()
+        );
+    }
+
+    public static GetManyAuctionsResponse from(AuctionSearchResult searchResult) {
+        return new GetManyAuctionsResponse(
+            searchResult.id(),
+
+            searchResult.userId(),
+
+            searchResult.maxPrice(),
+
+            searchResult.itemName(),
+
+            searchResult.status(),
+
+            searchResult.startedAt(),
+            searchResult.endedAt(),
+            searchResult.cancelledAt(),
+
+            searchResult.categoryId(),
+
+            searchResult.createdAt()
         );
     }
 }
