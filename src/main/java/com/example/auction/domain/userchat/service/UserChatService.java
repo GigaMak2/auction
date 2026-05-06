@@ -3,11 +3,18 @@ package com.example.auction.domain.userchat.service;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
+import com.example.auction.domain.userchat.dto.UserChatMessageListResponse;
+import com.example.auction.domain.userchat.dto.UserChatMessageResponse;
+import com.example.auction.domain.userchat.dto.UserChatRoomResponse;
 import com.example.auction.domain.userchat.entity.UserChatRoom;
+import com.example.auction.domain.userchat.exception.UserChatErrorEnum;
+import com.example.auction.domain.userchat.repository.UserChatMessageRepository;
 import com.example.auction.domain.userchat.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +22,7 @@ public class UserChatService {
 
     private final UserRepository userRepository;
     private final UserChatRoomRepository userChatRoomRepository;
+    private final UserChatMessageRepository userChatMessageRepository;
 
     @Transactional
     public void createRoom(Long buyerId, Long sellerId, Long auctionId) {
@@ -30,5 +38,31 @@ public class UserChatService {
 
         UserChatRoom userChatRoom = UserChatRoom.of(buyerId, sellerId, auctionId);
         userChatRoomRepository.save(userChatRoom);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserChatRoomResponse> getRooms(Long userId) {
+        return userChatRoomRepository.findAllByBuyerIdOrSellerIdOrderByCreatedAtDesc(userId, userId)
+                .stream()
+                .map(room -> UserChatRoomResponse.of(room, userId))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public UserChatMessageListResponse getMessages(Long roomId, Long userId, Long cursor, int size) {
+        validateParticipant(roomId, userId);
+        List<UserChatMessageResponse> messages = userChatMessageRepository.findByCursor(roomId, cursor, size)
+                .stream()
+                .map(UserChatMessageResponse::from)
+                .toList();
+        return UserChatMessageListResponse.of(messages, size);
+    }
+
+    private void validateParticipant(Long roomId, Long userId) {
+        UserChatRoom room = userChatRoomRepository.findById(roomId).orElseThrow(
+                () -> new ServiceErrorException(UserChatErrorEnum.USER_CHAT_ROOM_NOT_FOUND));
+        if (!room.getBuyerId().equals(userId) && !room.getSellerId().equals(userId)) {
+            throw new ServiceErrorException(UserChatErrorEnum.USER_CHAT_ROOM_FORBIDDEN);
+        }
     }
 }
