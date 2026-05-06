@@ -104,6 +104,8 @@ jobs:
 
       # JAR 빌드
       - name: Build JAR
+        env:
+          IN_CI: true
         run: |
           chmod +x gradlew
           ./gradlew bootJar
