@@ -1,6 +1,7 @@
 package com.example.auction.common.config;
 
 import com.example.auction.domain.ai.listener.AuctionEmbedListener;
+import com.example.auction.domain.userchat.listener.UserChatRoomCreationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -36,10 +37,12 @@ public class RedisConfig {
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(
             RedisConnectionFactory connectionFactory,
-            AuctionEmbedListener auctionEmbedListener) {
+            AuctionEmbedListener auctionEmbedListener,
+            UserChatRoomCreationListener userChatRoomCreationListener) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         container.addMessageListener(auctionEmbedListener, new ChannelTopic(AUCTION_EVENTS_CHANNEL));
+        container.addMessageListener(userChatRoomCreationListener, new ChannelTopic(AUCTION_EVENTS_CHANNEL));
         return container;
     }
 
