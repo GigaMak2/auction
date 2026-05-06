@@ -84,7 +84,7 @@ create table reviews (
     auction_id bigint not null,
     reviewer_id bigint not null,
     reviewee_id bigint not null,
-    score integer not null,
+    score integer not null check (score between 1 and 5),
     description varchar(500),
     image_url varchar(512),
     created_at timestamp(6),
