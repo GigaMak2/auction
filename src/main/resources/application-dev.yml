@@ -4,6 +4,10 @@ spring:
     username: ${POSTGRES_USERNAME}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
+  flyway:
+    locations: classpath:db/migration,classpath:db/seed
+
   cloud:
     aws:
       parameterstore:
@@ -11,19 +15,13 @@ spring:
       region:
         static: ap-northeast-2
 
-  sql:
-    init:
-      mode: always
-
   jpa:
     show-sql: true
-    hibernate:
-      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-    defer-datasource-initialization: true
+
 aws:
   eventbridge:
     lambda-arn: ${LAMBDA_ARN:}
