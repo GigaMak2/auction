@@ -3,11 +3,11 @@ package com.example.auction.domain.userchat.service;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
-import com.example.auction.domain.userchat.dto.UserChatMessageListResponse;
-import com.example.auction.domain.userchat.dto.UserChatMessageResponse;
-import com.example.auction.domain.userchat.dto.UserChatRoomResponse;
+import com.example.auction.domain.userchat.dto.*;
+import com.example.auction.domain.userchat.entity.UserChatMessage;
 import com.example.auction.domain.userchat.entity.UserChatRoom;
 import com.example.auction.domain.userchat.exception.UserChatErrorEnum;
+import com.example.auction.domain.userchat.publisher.UserChatMessagePublisher;
 import com.example.auction.domain.userchat.repository.UserChatMessageRepository;
 import com.example.auction.domain.userchat.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +23,7 @@ public class UserChatService {
     private final UserRepository userRepository;
     private final UserChatRoomRepository userChatRoomRepository;
     private final UserChatMessageRepository userChatMessageRepository;
+    private final UserChatMessagePublisher userChatMessagePublisher;
 
     @Transactional
     public void createRoom(Long buyerId, Long sellerId, Long auctionId) {
@@ -56,6 +57,22 @@ public class UserChatService {
                 .map(UserChatMessageResponse::from)
                 .toList();
         return UserChatMessageListResponse.of(messages, size);
+    }
+
+    @Transactional
+    public void sendMessage(Long roomId, Long userId, UserChatMessageRequest request) {
+        validateParticipant(roomId, userId);
+        UserChatMessage message = UserChatMessage.of(roomId, userId, request.content());
+        userChatMessageRepository.save(message);
+
+        UserChatRedisMessage redisMessage = new UserChatRedisMessage(
+                message.getId(),
+                roomId,
+                userId,
+                request.content(),
+                message.getCreatedAt()
+        );
+        userChatMessagePublisher.publish(roomId, redisMessage);
     }
 
     private void validateParticipant(Long roomId, Long userId) {
