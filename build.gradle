@@ -106,6 +106,9 @@ dependencies {
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc:4.0.0'
     testImplementation 'org.springframework.boot:spring-boot-restdocs'
 
+    // WebSocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
