@@ -26,8 +26,11 @@ public class UserChatWebSocketController {
             @Payload UserChatMessageRequest request,
             Principal principal
     ) {
-        CustomUserDetails userDetails = (CustomUserDetails)
-                ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
+        if (!(principal instanceof UsernamePasswordAuthenticationToken token)) {
+            log.warn("[UserChat] 인증되지 않은 메시지 전송 시도 roomId={}", roomId);
+            return;
+        }
+        CustomUserDetails userDetails = (CustomUserDetails) token.getPrincipal();
         Long userId = userDetails.getUserId();
         userChatService.sendMessage(roomId, userId, request);
     }
