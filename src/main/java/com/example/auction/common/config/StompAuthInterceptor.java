@@ -43,6 +43,8 @@ public class StompAuthInterceptor implements ChannelInterceptor {
             // 세션 attributes에 저장
             if (accessor.getSessionAttributes() != null) {
                 accessor.getSessionAttributes().put("auth", auth);
+            } else {
+                throw new IllegalStateException("WebSocket 세션 attributes를 사용할 수 없습니다");
             }
 
         } else if (StompCommand.SEND.equals(accessor.getCommand())
