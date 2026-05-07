@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ServiceErrorException.class)
     public ResponseEntity<BaseResponse<Void>> handleServiceErrorException(ServiceErrorException e) {
-        log.error(e.getMessage(), e);
+        log.warn(e.getMessage(), e);
         return ResponseEntity.status(e.getHttpStatus()).body(BaseResponse.fail(e.getHttpStatus().name(), e.getMessage()));
     }
 
