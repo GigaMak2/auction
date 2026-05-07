@@ -34,10 +34,10 @@ public class UserChatRoomCreationListener implements MessageListener {
 
         try {
             var tree = objectMapper.readTree(body);
-            if (!"AUCTION_ENDED".equals(tree.get("eventType").asString())) {
+            if (!"AUCTION_ENDED".equals(tree.path("eventType").asString())) {
                 return;
             }
-            auctionId = tree.get("auctionId").asLong();
+            auctionId = tree.path("auctionId").asLong();
         } catch (Exception e) {
             log.error("[UserChatRoom] 메시지 파싱 실패: body={}", body, e);
             return;
