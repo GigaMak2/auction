@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -84,7 +85,7 @@ class ChatMessageRepositoryImplTest extends BaseIntegrationTest {
     @DisplayName("findByCursor - cursor 있음: cursor id 이전 메시지 ASC 반환")
     void findByCursor_withCursor() {
         // given — 전체 메시지 id 목록 확인
-        List<ChatMessage> all = chatMessageRepository.findAll();
+        List<ChatMessage> all = chatMessageRepository.findAll(Sort.by("id").ascending());
         Long thirdId = all.get(2).getId(); // 3번째 메시지 id (cursor로 사용)
 
         // when — thirdId 이전 메시지 2개

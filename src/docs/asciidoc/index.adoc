@@ -11,6 +11,7 @@ include::bid-user.adoc[]
 include::category.adoc[]
 include::review.adoc[]
 include::chat.adoc[]
+include::user-chat.adoc[]
 
 include::auth-admin.adoc[]
 include::user-admin.adoc[]

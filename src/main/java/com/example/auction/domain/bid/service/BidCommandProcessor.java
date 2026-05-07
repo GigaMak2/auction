@@ -83,8 +83,7 @@ public class BidCommandProcessor {
 
         // currentMinPrice 가 null일경우 bidPrice 가격검증 스킵됨
         if (currentMinPrice != null && bidPrice.compareTo(currentMinPrice) >= 0) {
-            log.warn("[입찰 실패] auctionId={}, userId={}, bidPrice={}, currentMinPrice={}",
-                    auctionId, userId, bidPrice, currentMinPrice);
+            log.warn("[BidCommandProcessor] 입찰 가격 검증 실패 — auctionId={}, userId={}, price={}, currentMin={}", auctionId, userId, bidPrice, currentMinPrice); // 현재 최저가보다 높은 입찰 시도 감지용
             throw new ServiceErrorException(BidErrorEnum.BID_PRICE_NOT_LOWER);
         }
 
@@ -96,8 +95,6 @@ public class BidCommandProcessor {
                 userId,
                 BidAuctionStatus.ACTIVE);
         Bid savedBid = bidRepository.save(bid);
-
-        log.info("[입찰] auctionId={}, userId={}, bidPrice={}", auctionId, userId, bidPrice);
 
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override

@@ -18,7 +18,7 @@ public class NotificationMessagePublisher {
         try {
             redisTemplate.convertAndSend(CHANNEL, message);
         } catch (RuntimeException e) {
-            log.error("알림 메시지 발행 실패: channel={}, type={}, receiverId={}",
+            log.error("[NotificationMessagePublisher] 알림 메시지 발행 실패 — channel={}, type={}, receiverId={}",
                     CHANNEL, message.type(), message.receiverId(), e);
         }
     }

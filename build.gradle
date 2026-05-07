@@ -110,6 +110,9 @@ dependencies {
     // nori analyzer
     implementation "org.apache.lucene:lucene-analysis-nori:10.4.0"
 
+    // WebSocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'

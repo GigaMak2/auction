@@ -40,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 blacklisted = Boolean.TRUE.equals(redisTemplate.hasKey(BLACKLIST_PREFIX + token));
             } catch (Exception e) {
-                log.error("Redis blacklist 확인 실패: {}", e.getMessage());
+                log.error("[JwtAuthenticationFilter] Redis blacklist 확인 실패 — msg={}", e.getMessage());
             }
         }
 

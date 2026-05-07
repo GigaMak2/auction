@@ -41,20 +41,15 @@ public class BidCommandFacade {
 
         // 락 획득 실패할 경우 에러
         if (!isLocked) {
-            log.warn("[입찰 락 획득 실패] auctionId={}, userId={}, bidPrice={}",
-                    auctionId, userDetails.getUserId(), request.getPrice());
+            log.warn("[BidCommandFacade] 락 획득 실패 — auctionId={}, userId={}, price={}", auctionId, userDetails.getUserId(), request.getPrice()); // 동시 입찰 경합 또는 락 타임아웃 감지용
             throw new ServiceErrorException(BidErrorEnum.BID_LOCK_FAILED);
         }
 
-        log.info("[입찰 락 획득 성공] auctionId={}, userId={}, bidPrice={}",
-                auctionId, userDetails.getUserId(), request.getPrice());
         try {
             return processor.placeBid(userDetails, auctionId, request);
         } finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();
-                log.info("[입찰 락 해제] auctionId={}, userId={}, bidPrice={}",
-                        auctionId, userDetails.getUserId(), request.getPrice());
             }
         }
     }
