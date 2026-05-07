@@ -12,6 +12,8 @@ import com.example.auction.domain.userchat.exception.UserChatErrorEnum;
 import com.example.auction.domain.userchat.publisher.UserChatMessagePublisher;
 import com.example.auction.domain.userchat.repository.UserChatMessageRepository;
 import com.example.auction.domain.userchat.repository.UserChatRoomRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +56,16 @@ class UserChatServiceTest {
     private static final Long SELLER_ID = 2L;
     private static final Long AUCTION_ID = 10L;
     private static final Long ROOM_ID   = 100L;
+
+    @BeforeEach
+    void initTransactionSync() {
+        TransactionSynchronizationManager.initSynchronization();
+    }
+
+    @AfterEach
+    void clearTransactionSync() {
+        TransactionSynchronizationManager.clearSynchronization();
+    }
 
 
     // ========================
@@ -255,6 +269,8 @@ class UserChatServiceTest {
 
         // when
         userChatService.sendMessage(ROOM_ID, BUYER_ID, request);
+        TransactionSynchronizationManager.getSynchronizations()
+                .forEach(TransactionSynchronization::afterCommit);
 
         // then
         verify(userChatMessageRepository).save(any(UserChatMessage.class));
