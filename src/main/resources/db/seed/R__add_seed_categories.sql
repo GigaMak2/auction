@@ -28,6 +28,7 @@ INSERT INTO categories (name, parent_id, depth, created_at, modified_at)
 SELECT name, (SELECT id FROM categories WHERE name = '스마트폰'), 2, NOW(), NOW()
 FROM (VALUES ('아이폰'), ('갤럭시')) AS t(name);
 
+
 -- 테스트 유저 생성
 INSERT INTO users (email, password, role, deleted, created_at, modified_at)
 SELECT

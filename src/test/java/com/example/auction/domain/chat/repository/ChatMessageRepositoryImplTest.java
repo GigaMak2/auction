@@ -4,9 +4,13 @@ import com.example.auction.common.config.JpaConfig;
 import com.example.auction.common.config.QuerydslConfig;
 import com.example.auction.domain.category.service.CategoryService;
 import com.example.auction.domain.chat.entity.ChatMessage;
+import com.example.auction.domain.chat.entity.ChatRoom;
 import com.example.auction.domain.chat.entity.MessageRole;
+import com.example.auction.domain.user.entity.User;
+import com.example.auction.domain.user.repository.UserRepository;
 import com.example.auction.testutils.BaseIntegrationTest;
 
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,10 +33,25 @@ class ChatMessageRepositoryImplTest extends BaseIntegrationTest {
     @Autowired
     private ChatMessageRepository chatMessageRepository;
 
-    private static final Long ROOM_ID = 1L;
+    @Autowired
+    private ChatRoomRepository chatRoomRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private Flyway flyway;
+
+    private Long ROOM_ID = 1L;
 
     @BeforeEach
     void setUp() {
+        flyway.clean();
+        flyway.migrate();
+
+        User user = userRepository.save(User.of("test@test.com", "encoded-password"));
+        ROOM_ID = chatRoomRepository.save(ChatRoom.from(user.getId())).getId();
+
         // 순서대로 저장 — id는 자동 증가이므로 저장 순서가 곧 시간 순서
         chatMessageRepository.save(ChatMessage.of(ROOM_ID, "질문1", MessageRole.USER));
         chatMessageRepository.save(ChatMessage.of(ROOM_ID, "답변1", MessageRole.ASSISTANT));
