@@ -15,7 +15,6 @@ import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.exceptions.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 // 입찰 조회, 결과 조회, 내입찰조회
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional(readOnly = true)
 public class BidQueryService {
 
@@ -41,9 +39,6 @@ public class BidQueryService {
         // 내 입찰 목록 조회 (페이징)
         Page<BidListResponse> myBidPage = bidRepository.findAllByUserId(userId, pageable)
                 .map(BidListResponse::from);
-
-        log.info("[내 입찰 조회] userId={}, page={}, size={}",
-                userId, pageable.getPageNumber(), pageable.getPageSize());
 
         return PageResponse.create(myBidPage);
     }

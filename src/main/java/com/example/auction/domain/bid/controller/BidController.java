@@ -10,6 +10,7 @@ import com.example.auction.domain.bid.service.BidCommandFacade;
 import com.example.auction.domain.bid.service.BidQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auctions/{auction_id}/bids")
 @RequiredArgsConstructor
@@ -34,6 +36,7 @@ public class BidController {
             @PathVariable("auction_id") Long auctionId,
             @Valid @RequestBody BidRequest request
     ) {
+        log.info("[BidController] placeBid — auctionId={}, userId={}, price={}", auctionId, userDetails.getUserId(), request.getPrice()); // 입찰 요청 유입 추적 — 유저별 입찰 빈도 및 비정상 반복 시도 감지용
         BidResponse data = commandService.placeBidDis(userDetails, auctionId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success(String.valueOf(HttpStatus.CREATED.name()), "입찰이 완료되었습니다", data));
@@ -47,6 +50,7 @@ public class BidController {
             @PathVariable("auction_id") Long auctionId,
             @ModelAttribute @Valid BidPageRequest request
             ) {
+        log.info("[BidController] getBids — auctionId={}, userId={}", auctionId, userDetails.getUserId()); // 경매 입찰 목록 조회 요청 추적용
         Pageable pageable = PageRequest.of(
                 request.getPage(),
                 request.getSize(),
@@ -64,6 +68,7 @@ public class BidController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("auction_id") Long auctionId
     ) {
+        log.info("[BidController] getWinnerBid — auctionId={}, userId={}", auctionId, userDetails.getUserId()); // 낙찰 입찰 조회 요청 추적용
         BidResponse data = queryService.getWinnerBid(userDetails, auctionId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(String.valueOf(HttpStatus.OK.name()), "입찰 결과 조회가 완료되었습니다", data));
@@ -75,6 +80,7 @@ public class BidController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("auction_id") Long auctionId
     ) {
+        log.info("[BidController] getCurrentMinBid — auctionId={}, userId={}", auctionId, userDetails.getUserId()); // 현재 최저가 조회 요청 추적용
         BidResponse data = queryService.getCurrentMinBid(userDetails, auctionId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(String.valueOf(HttpStatus.OK.name()), "현재 최저가 입찰 조회가 완료되었습니다", data));
