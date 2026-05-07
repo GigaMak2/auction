@@ -4,6 +4,7 @@ import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
+import com.example.auction.domain.auction.search.util.KoreanAnalyzerUtil;
 import com.example.auction.domain.category.entity.Category;
 import com.example.auction.domain.category.repository.CategoryRepository;
 import com.example.auction.domain.category.service.CategoryService;
@@ -11,6 +12,7 @@ import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.repository.UserRepository;
 import com.example.auction.testutils.BaseIntegrationTest;
 
+import org.apache.lucene.analysis.ko.KoreanAnalyzer;
 import org.flywaydb.core.Flyway;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 // H2좀 그만 불러!!
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
-@Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class})
+@Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class, KoreanAnalyzerUtil.class, KoreanAnalyzer.class})
 class AuctionRepositoryTest extends BaseIntegrationTest {
 
     @Autowired

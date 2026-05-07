@@ -4,6 +4,7 @@ import com.example.auction.common.config.JpaConfig;
 import com.example.auction.common.config.QuerydslConfig;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.repository.AuctionRepository;
+import com.example.auction.domain.auction.search.util.KoreanAnalyzerUtil;
 import com.example.auction.domain.bid.dto.response.BidAdminListResponse;
 import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
@@ -13,6 +14,7 @@ import com.example.auction.domain.category.repository.CategoryRepository;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.repository.UserRepository;
 import com.example.auction.testutils.BaseIntegrationTest;
+import org.apache.lucene.analysis.ko.KoreanAnalyzer;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class})
+@Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class, KoreanAnalyzerUtil.class, KoreanAnalyzer.class})
 class BidCustomRepositoryImplTest extends BaseIntegrationTest {
 
     @Autowired
