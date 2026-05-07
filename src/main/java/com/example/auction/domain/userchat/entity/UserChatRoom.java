@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(
         name = "user_chat_rooms",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"buyerId", "sellerId", "auctionId"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"buyer_id", "seller_id", "auction_id"})
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserChatRoom extends CreatableEntity {
