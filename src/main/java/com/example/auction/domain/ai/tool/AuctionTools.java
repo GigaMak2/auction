@@ -13,14 +13,12 @@ import com.example.auction.domain.ai.tool.dto.MyBidInfo;
 import com.example.auction.domain.ai.tool.dto.SellerReviewSummary;
 import com.example.auction.domain.ai.tool.dto.SellerStatsInfo;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuctionTools {
@@ -35,7 +33,6 @@ public class AuctionTools {
         if (auctionId == null || auctionId <= 0) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
-        log.info("[Tool] getBidsByAuctionId called — auctionId={}", auctionId); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<AuctionBidInfo> results = aiToolRepository.findBidsByAuctionId(auctionId);
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("해당 경매(ID: " + auctionId + ")의 입찰 내역이 없습니다. 입찰가나 경쟁 현황을 추측하지 마세요.");
@@ -49,7 +46,6 @@ public class AuctionTools {
         if (itemName == null || itemName.isBlank()) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
-        log.info("[Tool] getRecentAuctionResults called — itemName={}", itemName); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<AuctionResultInfo> results = aiToolRepository.findRecentAuctionResultsByItemName(itemName.trim());
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("해당 상품의 낙찰 이력이 없습니다. 시세나 낙찰가를 추측하지 마세요.");
@@ -66,7 +62,6 @@ public class AuctionTools {
         if (query == null || query.isBlank()) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
-        log.info("[Tool] getSellerReviewInsights called — sellerId={}, queryLength={}", sellerId, query.length()); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<String> results = reviewEmbeddingService.search(sellerId, query);
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("판매자(ID: " + sellerId + ")의 관련 후기가 없습니다. 데이터를 추측하지 마세요.");
@@ -79,7 +74,6 @@ public class AuctionTools {
     public List<MyAuctionInfo> getMyAuctions(ToolContext toolContext) {
         Long userId = (Long) toolContext.getContext().get("userId");
         if (userId == null) throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
-        log.info("[Tool] getMyAuctions called — userId={}", userId); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<MyAuctionInfo> results = aiToolRepository.findMyAuctions(userId);
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("등록한 경매가 없습니다. 데이터를 추측하지 마세요.");
@@ -92,7 +86,6 @@ public class AuctionTools {
     public List<MyBidInfo> getMyBids(ToolContext toolContext) {
         Long userId = (Long) toolContext.getContext().get("userId");
         if (userId == null) throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
-        log.info("[Tool] getMyBids called — userId={}", userId); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<MyBidInfo> results = aiToolRepository.findMyBids(userId);
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("입찰한 경매가 없습니다. 데이터를 추측하지 마세요.");
@@ -106,7 +99,6 @@ public class AuctionTools {
         if (categoryName == null || categoryName.isBlank()) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
-        log.info("[Tool] getAuctionStatsByCategory called — categoryName={}", categoryName); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<CategoryAuctionStats> results = aiToolRepository.findAuctionStatsByCategory(categoryName.trim());
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("해당 카테고리의 낙찰 이력이 없습니다. 데이터를 추측하지 마세요.");
@@ -120,7 +112,6 @@ public class AuctionTools {
         if (query == null || query.isBlank()) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
-        log.info("[Tool] searchAuctionDescriptions called — queryLength={}", query.length()); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         List<String> results = auctionEmbeddingService.search(query);
         if (results.isEmpty()) {
             throw new ToolEmptyResultException("관련 상품 설명이 없습니다. 데이터를 추측하지 마세요.");
@@ -134,7 +125,6 @@ public class AuctionTools {
         if (sellerId == null || sellerId <= 0) {
             throw new ServiceErrorException(AiErrorEnum.INVALID_TOOL_PARAMETER);
         }
-        log.info("[Tool] getSellerStats called — sellerId={}", sellerId); // AI가 어떤 Tool을 호출했는지 추적 — 비정상적인 Tool 호출 패턴 감지용
         long totalSales = aiToolRepository.countSellerSales(sellerId);
         SellerReviewSummary summary = aiToolRepository.findSellerReviewSummary(sellerId);
 

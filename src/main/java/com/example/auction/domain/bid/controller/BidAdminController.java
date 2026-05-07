@@ -24,7 +24,6 @@ public class BidAdminController {
     public ResponseEntity<BaseResponse<PageResponse<BidAdminListResponse>>> getBidList(
             @Valid @ModelAttribute BidAdminSearchCondition condition
     ) {
-        log.info("[BidAdminController] getBidList — status={}, auctionId={}, userId={}", condition.getStatus(), condition.getAuctionId(), condition.getUserId()); // 어드민 입찰 목록 조회 요청 추적용
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "입찰 목록 조회 요청 성공", bidAdminService.getBidList(condition)));
     }
