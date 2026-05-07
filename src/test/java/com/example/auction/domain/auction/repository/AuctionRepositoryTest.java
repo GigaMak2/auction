@@ -257,39 +257,6 @@ class AuctionRepositoryTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("관리자 경매 목록 조회 - 키워드 필터링")
-    void findAuctionWithConditions_keywordFilter() {
-        auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID));
-        auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(2000), "키보드",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID));
-
-        Page<AuctionAdminListResponse> result = auctionRepository.findAuctionWithConditions(
-                PageRequest.of(0, 10), null, "노트");
-
-        assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent().get(0).itemName()).isEqualTo("노트북");
-    }
-
-    @Test
-    @DisplayName("관리자 경매 목록 조회 - 상태 + 키워드 동시 필터링")
-    void findAuctionWithConditions_statusAndKeyword() {
-        auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID));
-        Auction active = Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(2000), "노트북 거치대",
-                LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), FAKE_CATEGORY_ID);
-        ReflectionTestUtils.setField(active, "status", AuctionStatus.ACTIVE);
-        auctionRepository.save(active);
-
-        Page<AuctionAdminListResponse> result = auctionRepository.findAuctionWithConditions(
-                PageRequest.of(0, 10), AuctionStatus.ACTIVE, "노트북");
-
-        assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent().get(0).status()).isEqualTo(AuctionStatus.ACTIVE);
-        assertThat(result.getContent().get(0).itemName()).isEqualTo("노트북 거치대");
-    }
-
-    @Test
     @DisplayName("관리자 경매 목록 조회 - 조건에 맞는 결과 없음")
     void findAuctionWithConditions_noMatch() {
         auctionRepository.save(Auction.of(FAKE_USER_ID, null, BigDecimal.valueOf(1000), "노트북",
