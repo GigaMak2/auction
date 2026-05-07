@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check } from 'k6';
 
 const BASE_URL = 'http://host.docker.internal:8080';
-const USER_COUNT = 100;
+const USER_COUNT = 200;
 const SELLER_COUNT = Math.floor(USER_COUNT * 0.1);
 export const BUYER_COUNT = USER_COUNT - SELLER_COUNT;
 
