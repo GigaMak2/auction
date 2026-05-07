@@ -64,7 +64,13 @@ public class StompAuthInterceptor implements ChannelInterceptor {
 
             String destination = accessor.getDestination();
             if (destination != null && destination.startsWith("/sub/chat/")) {
-                Long roomId = Long.parseLong(destination.substring("/sub/chat/".length()));
+                String roomIdStr = destination.substring("/sub/chat/".length());
+                Long roomId;
+                try {
+                    roomId = Long.parseLong(roomIdStr);
+                } catch (NumberFormatException e) {
+                    throw new AccessDeniedException("유효하지 않은 채팅방 경로입니다: " + destination);
+                }
                 UsernamePasswordAuthenticationToken auth =
                         (UsernamePasswordAuthenticationToken) accessor.getUser();
                 if (auth == null) {
