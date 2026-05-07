@@ -3,6 +3,7 @@ package com.example.auction.domain.userchat.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.domain.userchat.dto.UserChatMessageRequest;
 import com.example.auction.domain.userchat.service.UserChatService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -23,7 +24,7 @@ public class UserChatWebSocketController {
     @MessageMapping("/chat/{roomId}")
     public void sendMessage(
             @DestinationVariable Long roomId,
-            @Payload UserChatMessageRequest request,
+            @Payload @Valid UserChatMessageRequest request,
             Principal principal
     ) {
         if (!(principal instanceof UsernamePasswordAuthenticationToken token)) {
