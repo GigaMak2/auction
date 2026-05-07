@@ -17,6 +17,10 @@ public class KoreanAnalyzerUtil {
     private final KoreanAnalyzer koreanAnalyzer;
 
     public String toTsVectorLiteral (String str) {
+        if (str == null) {
+            return "";
+        }
+
         List<String> tokens = getTokens(str);
 
         // 토큰들을 tsvector literal로 변경
@@ -36,6 +40,10 @@ public class KoreanAnalyzerUtil {
     }
 
     public String toTsQueryLiteral (String str) {
+        if (str == null) {
+            return "";
+        }
+
         List<String> tokens = getTokens(str);
 
         // convert tokens to tsvector literal

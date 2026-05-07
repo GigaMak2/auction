@@ -93,17 +93,12 @@ public class AuctionSearchService {
     public Page<AuctionAdminListResponse> searchAuctionWithConditions(
             Pageable pageable, AuctionStatus auctionStatus, String keyword
     ) {
-        if (keyword == null || keyword.isBlank()) {
-            try {
-                return auctionRepository.findAuctionWithConditions(pageable, auctionStatus, keyword);
-            } catch (Exception e) {
-                log.error("[AuctionSearch] DB 키워드 없는 검색 실패, elasticsearch로 fallback - pageable={}, auctionStatus={}, keyword={}",
-                        pageable, auctionStatus, keyword, e);
-
-                return auctionElasticsearchService.searchAuctionWithConditionsFromElasticsearch(pageable, auctionStatus, keyword);
-            }
+        try {
+            return auctionElasticsearchService.searchAuctionWithConditionsFromElasticsearch(pageable, auctionStatus, keyword);
+        } catch (Exception e) {
+            log.error("[AuctionSearch] elasticsearch 검색 실패, DB 검색으로 fallback - pageable={}, auctionStatus={}, keyword={}",
+                    pageable, auctionStatus, keyword, e);
+            return auctionRepository.findAuctionWithConditions(pageable, auctionStatus, keyword);
         }
-
-        return auctionElasticsearchService.searchAuctionWithConditionsFromElasticsearch(pageable, auctionStatus, keyword);
     }
 }

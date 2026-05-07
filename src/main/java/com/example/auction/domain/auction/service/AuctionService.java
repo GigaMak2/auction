@@ -148,8 +148,8 @@ public class AuctionService {
 
         // auction의 tsvector column들을 업데이트 합니다.
         // 주의: 반드시 saveAndFlush이후에 일어나야 합니다.
-        String itemNameVector = koreanAnalyzerUtil.toTsVectorLiteral(auction.getDescription());
-        String descriptionVector = koreanAnalyzerUtil.toTsVectorLiteral(auction.getItemName());
+        String itemNameVector = koreanAnalyzerUtil.toTsVectorLiteral(auction.getItemName());
+        String descriptionVector = koreanAnalyzerUtil.toTsVectorLiteral(auction.getDescription());
 
         auctionRepository.updateSearchVectors(
                 auction.getId(), itemNameVector, descriptionVector, 1

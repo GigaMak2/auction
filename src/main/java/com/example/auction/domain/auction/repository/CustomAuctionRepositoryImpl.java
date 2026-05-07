@@ -62,6 +62,8 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
 
     @Override
     public Page<AuctionAdminListResponse> findAuctionWithConditions(Pageable pageable, AuctionStatus auctionStatus, String keyword) {
+        String itemNameTsQueryLiteral = getTsQueryLiteral(keyword);
+
         List<AuctionAdminListResponse> list = queryFactory
                 .select(Projections.constructor(AuctionAdminListResponse.class,
                         auction.id,
@@ -76,7 +78,7 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
                 .from(auction)
                 .where(
                         statusEq(auctionStatus),
-                        keywordContains(keyword)
+                        itemNameHasKeyword(itemNameTsQueryLiteral)
                 )
                 .orderBy(auction.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -88,7 +90,7 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
                 .from(auction)
                 .where(
                         statusEq(auctionStatus),
-                        keywordContains(keyword)
+                        itemNameHasKeyword(itemNameTsQueryLiteral)
                 )
                 .fetchOne();
 
@@ -199,10 +201,6 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
 
     private BooleanExpression statusEq(AuctionStatus status) {
         return status != null ? auction.status.eq(status) : null;
-    }
-
-    private BooleanExpression keywordContains(String keyword) {
-        return StringUtils.hasText(keyword) ? auction.itemName.containsIgnoreCase(keyword) : null;
     }
 
     private String getTsQueryLiteral(String str) {
