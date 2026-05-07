@@ -7,16 +7,20 @@ import com.example.auction.domain.chat.dto.ChatRoomResponse;
 import com.example.auction.domain.chat.dto.ChatRoomUpdateRequest;
 import com.example.auction.domain.chat.service.ChatService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
@@ -90,7 +94,7 @@ public class ChatController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long roomId,
             @RequestParam(required = false) Long cursor,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
     ) {
         log.debug("[ChatController] getMessages — userId={}, roomId={}", userDetails.getUserId(), roomId); // 메시지 목록 조회 추적 — 유저별 대화 접근 빈도 모니터링용
         return ResponseEntity.status(HttpStatus.OK)
