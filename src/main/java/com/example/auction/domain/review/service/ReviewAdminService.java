@@ -59,7 +59,7 @@ public class ReviewAdminService {
                 try {
                     reviewEmbeddingService.delete(deletedReviewId);
                 } catch (Exception e) {
-                    log.warn("[ReviewService] 임베딩 삭제 실패 — 리뷰 삭제는 정상 처리됨. reviewId={}, error={}", deletedReviewId, e.getMessage());
+                    log.warn("[ReviewAdminService] 임베딩 삭제 실패 — 리뷰 삭제는 정상 처리됨. reviewId={}, error={}", deletedReviewId, e.getMessage());
                 }
             }
         });
