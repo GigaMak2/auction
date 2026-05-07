@@ -9,10 +9,12 @@ import com.example.auction.domain.user.dto.UserWithdrawResponse;
 import com.example.auction.domain.user.service.UserAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/users")
@@ -40,6 +42,7 @@ public class UserAdminController {
     public ResponseEntity<BaseResponse<UserWithdrawResponse>> forceWithdraw(
             @PathVariable Long userId
     ) {
+        log.info("[UserAdminController] forceWithdraw — userId={}", userId); // 어드민 유저 강제 탈퇴 추적용
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
                 HttpStatus.OK.name(), "사용자 강제 탈퇴 요청 성공", userAdminService.forceWithdraw(userId)));
     }
