@@ -13,6 +13,8 @@ import com.example.auction.domain.userchat.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -72,7 +74,13 @@ public class UserChatService {
                 request.content(),
                 message.getCreatedAt()
         );
-        userChatMessagePublisher.publish(roomId, redisMessage);
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                userChatMessagePublisher.publish(roomId, redisMessage);
+            }
+        });
     }
 
     private void validateParticipant(Long roomId, Long userId) {
