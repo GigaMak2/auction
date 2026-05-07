@@ -2,6 +2,7 @@ package com.example.auction.common.config;
 
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.config.security.JwtProvider;
+import com.example.auction.domain.userchat.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -9,6 +10,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 public class StompAuthInterceptor implements ChannelInterceptor {
 
     private final JwtProvider jwtProvider;
+    private final UserChatRoomRepository userChatRoomRepository;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -56,6 +59,21 @@ public class StompAuthInterceptor implements ChannelInterceptor {
                         (UsernamePasswordAuthenticationToken) accessor.getSessionAttributes().get("auth");
                 if (auth != null) {
                     accessor.setUser(auth);
+                }
+            }
+
+            String destination = accessor.getDestination();
+            if (destination != null && destination.startsWith("/sub/chat/")) {
+                Long roomId = Long.parseLong(destination.substring("/sub/chat/".length()));
+                UsernamePasswordAuthenticationToken auth =
+                        (UsernamePasswordAuthenticationToken) accessor.getUser();
+                if (auth == null) {
+                    throw new AccessDeniedException("인증 정보가 없습니다");
+                }
+                Long userId = ((CustomUserDetails) auth.getPrincipal()).getUserId();
+
+                if (!userChatRoomRepository.existsByIdAndMember(roomId, userId)) {
+                    throw new AccessDeniedException("채팅방 접근 권한이 없습니다");
                 }
             }
         }
