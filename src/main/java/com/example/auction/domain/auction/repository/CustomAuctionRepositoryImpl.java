@@ -5,13 +5,18 @@ import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
+import com.example.auction.domain.auction.search.util.KoreanAnalyzerUtil;
 import com.example.auction.domain.category.service.CategoryService;
-import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.jpa.sql.JPASQLQuery;
+import com.querydsl.sql.PostgreSQLTemplates;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
@@ -25,7 +30,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 @Repository
 @RequiredArgsConstructor
@@ -33,6 +40,10 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
 
     private final JPAQueryFactory queryFactory;
     private final CategoryService categoryService;
+    private final KoreanAnalyzerUtil koreanAnalyzerUtil;
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public Page<@NonNull Auction> findByCondition(
@@ -95,18 +106,29 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
             condition.getPageSize()
         );
 
+        String itemNameTsQueryLiteral = getTsQueryLiteral(condition.getKeyword());
+        String descTsQueryLiteral = getTsQueryLiteral(condition.getKeyword());
+
         BooleanExpression[] booleans = new BooleanExpression[] {
                 statusContains(condition),
                 inMaxPriceRange(condition),
                 hasCategory(condition),
                 isOwnedBy(userId),
-                hasKeyword(condition)
+                itemNameHasKeyword(itemNameTsQueryLiteral),
         };
+
+        List<OrderSpecifier<?>> orderList = Stream.of(
+                getItemNameOrder(itemNameTsQueryLiteral),
+                getDescriptionOrder(descTsQueryLiteral),
+                auction.createdAt.desc()
+        )
+        .filter(Objects::nonNull)
+        .toList();
 
         List<Auction> auctions = queryFactory
             .selectFrom(auction)
             .where(booleans)
-            .orderBy(new OrderSpecifier<>(Order.DESC, auction.createdAt))
+            .orderBy(orderList.toArray(new OrderSpecifier[0]))
             .offset(pageRequest.getOffset())
             .limit(condition.getPageSize())
             .fetch();
@@ -164,13 +186,15 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
         return null;
     }
 
-    private BooleanExpression hasKeyword(AuctionSearchCondition condition) {
-        // TODO: 일단 간단한 like 키워드로만 검색
-        if (condition.getKeyword() != null && !condition.getKeyword().isBlank()) {
-            return auction.itemName.containsIgnoreCase(condition.getKeyword().trim());
+    private BooleanExpression itemNameHasKeyword(@Nullable String itemNameTsQueryLiteral) {
+        if (itemNameTsQueryLiteral == null) {
+            return null;
         }
-
-        return null;
+        return Expressions.booleanTemplate(
+            "match_raw_ts_query({0}, {1})",
+            auction.itemNameSearchVector,
+            itemNameTsQueryLiteral
+        );
     }
 
     private BooleanExpression statusEq(AuctionStatus status) {
@@ -179,5 +203,37 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
 
     private BooleanExpression keywordContains(String keyword) {
         return StringUtils.hasText(keyword) ? auction.itemName.containsIgnoreCase(keyword) : null;
+    }
+
+    private String getTsQueryLiteral(String str) {
+        if (StringUtils.hasText(str)) {
+            return koreanAnalyzerUtil.toTsQueryLiteral(str);
+        }
+        return null;
+    }
+
+    private OrderSpecifier<?> getItemNameOrder(@Nullable String itemNameTsQueryLiteral) {
+        if (itemNameTsQueryLiteral != null) {
+            return Expressions.numberTemplate(
+                    Double.class,
+                    "rank_raw_ts_query({0}, {1})",
+                    auction.itemNameSearchVector,
+                    itemNameTsQueryLiteral
+            ).desc();
+        }
+
+        return null;
+    }
+
+    private OrderSpecifier<?> getDescriptionOrder(@Nullable String descTsQueryLiteral) {
+        if (descTsQueryLiteral != null) {
+            return Expressions.numberTemplate(
+                    Double.class,
+                    "rank_raw_ts_query({0}, {1})",
+                    auction.descriptionSearchVector,
+                    descTsQueryLiteral
+            ).desc();
+        }
+        return null;
     }
 }

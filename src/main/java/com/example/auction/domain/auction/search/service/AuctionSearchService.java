@@ -66,36 +66,28 @@ public class AuctionSearchService {
     public Page<AuctionSearchResult> searchAuction(
             AuctionSearchCondition condition
     ) {
-        if (condition.getKeyword() == null || condition.getKeyword().isBlank()) {
-            try {
-                return searchAuctionFromDb(condition);
-            } catch (Exception e) {
-                log.error("[AuctionSearch] DB 키워드 없는 검색 실패, elasticsearch로 fallback - {}",
-                        condition.toLogString(), e);
+        try {
+            return auctionElasticsearchService.searchAuctionFromElasticsearch(condition);
+        } catch (Exception e) {
+            log.error("[AuctionSearch] elasticsearch 검색 실패, DB 검색으로 fallback - {}",
+                    condition.toLogString(), e);
 
-                return auctionElasticsearchService.searchAuctionFromElasticsearch(condition);
-            }
+            return searchAuctionFromDb(condition);
         }
-
-        return auctionElasticsearchService.searchAuctionFromElasticsearch(condition);
     }
 
     public Page<AuctionSearchResult> searchAuction(
             Long userId,
             AuctionSearchCondition condition
     ) {
-        if (condition.getKeyword() == null || condition.getKeyword().isBlank()) {
-            try {
-                return searchAuctionFromDb(userId, condition);
-            } catch (Exception e) {
-                log.error("[AuctionSearch] DB 키워드 없는 검색 실패, elasticsearch로 fallback - userId={}, {}",
-                        userId, condition.toLogString(), e);
+        try {
+            return auctionElasticsearchService.searchAuctionFromElasticsearch(userId, condition);
+        } catch (Exception e) {
+            log.error("[AuctionSearch] elasticsearch 검색 실패, DB 검색으로 fallback - userId={}, {}",
+                    userId, condition.toLogString(), e);
 
-                return auctionElasticsearchService.searchAuctionFromElasticsearch(userId, condition);
-            }
+            return searchAuctionFromDb(userId, condition);
         }
-
-        return auctionElasticsearchService.searchAuctionFromElasticsearch(userId, condition);
     }
 
     public Page<AuctionAdminListResponse> searchAuctionWithConditions(
