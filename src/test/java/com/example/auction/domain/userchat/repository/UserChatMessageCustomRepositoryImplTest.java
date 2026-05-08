@@ -4,6 +4,7 @@ import com.example.auction.common.config.JpaConfig;
 import com.example.auction.common.config.QuerydslConfig;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.repository.AuctionRepository;
+import com.example.auction.domain.auction.search.util.KoreanAnalyzerUtil;
 import com.example.auction.domain.category.entity.Category;
 import com.example.auction.domain.category.repository.CategoryRepository;
 import com.example.auction.domain.category.service.CategoryService;
@@ -12,6 +13,7 @@ import com.example.auction.domain.user.repository.UserRepository;
 import com.example.auction.domain.userchat.entity.UserChatMessage;
 import com.example.auction.domain.userchat.entity.UserChatRoom;
 import com.example.auction.testutils.BaseIntegrationTest;
+import org.apache.lucene.analysis.ko.KoreanAnalyzer;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class})
+@Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class, KoreanAnalyzerUtil.class, KoreanAnalyzer.class})
 class UserChatMessageCustomRepositoryImplTest extends BaseIntegrationTest {
 
     @Autowired

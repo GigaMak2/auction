@@ -5,11 +5,12 @@ import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
 import com.example.auction.domain.auction.dto.AuctionSearchCondition;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
+import com.example.auction.domain.auction.search.util.KoreanAnalyzerUtil;
 import com.example.auction.domain.category.service.CategoryService;
-import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.jspecify.annotations.NonNull;
@@ -25,7 +26,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 @Repository
 @RequiredArgsConstructor
@@ -33,6 +36,7 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
 
     private final JPAQueryFactory queryFactory;
     private final CategoryService categoryService;
+    private final KoreanAnalyzerUtil koreanAnalyzerUtil;
 
     @Override
     public Page<@NonNull Auction> findByCondition(
@@ -51,6 +55,8 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
 
     @Override
     public Page<AuctionAdminListResponse> findAuctionWithConditions(Pageable pageable, AuctionStatus auctionStatus, String keyword) {
+        String itemNameTsQueryLiteral = getTsQueryLiteral(keyword);
+
         List<AuctionAdminListResponse> list = queryFactory
                 .select(Projections.constructor(AuctionAdminListResponse.class,
                         auction.id,
@@ -65,7 +71,7 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
                 .from(auction)
                 .where(
                         statusEq(auctionStatus),
-                        keywordContains(keyword)
+                        itemNameHasKeyword(itemNameTsQueryLiteral)
                 )
                 .orderBy(auction.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -77,7 +83,7 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
                 .from(auction)
                 .where(
                         statusEq(auctionStatus),
-                        keywordContains(keyword)
+                        itemNameHasKeyword(itemNameTsQueryLiteral)
                 )
                 .fetchOne();
 
@@ -95,18 +101,29 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
             condition.getPageSize()
         );
 
+        String itemNameTsQueryLiteral = getTsQueryLiteral(condition.getKeyword());
+        String descTsQueryLiteral = getTsQueryLiteral(condition.getKeyword());
+
         BooleanExpression[] booleans = new BooleanExpression[] {
                 statusContains(condition),
                 inMaxPriceRange(condition),
                 hasCategory(condition),
                 isOwnedBy(userId),
-                hasKeyword(condition)
+                itemNameHasKeyword(itemNameTsQueryLiteral),
         };
+
+        List<OrderSpecifier<?>> orderList = Stream.of(
+                getItemNameOrder(itemNameTsQueryLiteral),
+                getDescriptionOrder(descTsQueryLiteral),
+                auction.createdAt.desc()
+        )
+        .filter(Objects::nonNull)
+        .toList();
 
         List<Auction> auctions = queryFactory
             .selectFrom(auction)
             .where(booleans)
-            .orderBy(new OrderSpecifier<>(Order.DESC, auction.createdAt))
+            .orderBy(orderList.toArray(new OrderSpecifier[0]))
             .offset(pageRequest.getOffset())
             .limit(condition.getPageSize())
             .fetch();
@@ -164,20 +181,50 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
         return null;
     }
 
-    private BooleanExpression hasKeyword(AuctionSearchCondition condition) {
-        // TODO: 일단 간단한 like 키워드로만 검색
-        if (condition.getKeyword() != null && !condition.getKeyword().isBlank()) {
-            return auction.itemName.containsIgnoreCase(condition.getKeyword().trim());
+    private BooleanExpression itemNameHasKeyword(@Nullable String itemNameTsQueryLiteral) {
+        if (itemNameTsQueryLiteral == null) {
+            return null;
         }
-
-        return null;
+        return Expressions.booleanTemplate(
+            "match_raw_ts_query({0}, {1})",
+            auction.itemNameSearchVector,
+            itemNameTsQueryLiteral
+        );
     }
 
     private BooleanExpression statusEq(AuctionStatus status) {
         return status != null ? auction.status.eq(status) : null;
     }
 
-    private BooleanExpression keywordContains(String keyword) {
-        return StringUtils.hasText(keyword) ? auction.itemName.containsIgnoreCase(keyword) : null;
+    private String getTsQueryLiteral(String str) {
+        if (StringUtils.hasText(str)) {
+            return koreanAnalyzerUtil.toTsQueryLiteral(str);
+        }
+        return null;
+    }
+
+    private OrderSpecifier<?> getItemNameOrder(@Nullable String itemNameTsQueryLiteral) {
+        if (itemNameTsQueryLiteral != null) {
+            return Expressions.numberTemplate(
+                    Double.class,
+                    "rank_raw_ts_query({0}, {1})",
+                    auction.itemNameSearchVector,
+                    itemNameTsQueryLiteral
+            ).desc();
+        }
+
+        return null;
+    }
+
+    private OrderSpecifier<?> getDescriptionOrder(@Nullable String descTsQueryLiteral) {
+        if (descTsQueryLiteral != null) {
+            return Expressions.numberTemplate(
+                    Double.class,
+                    "rank_raw_ts_query({0}, {1})",
+                    auction.descriptionSearchVector,
+                    descTsQueryLiteral
+            ).desc();
+        }
+        return null;
     }
 }

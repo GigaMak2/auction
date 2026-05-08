@@ -42,6 +42,7 @@ dependencies {
     // QueryDSL
     implementation 'io.github.openfeign.querydsl:querydsl-core:7.1'
     implementation 'io.github.openfeign.querydsl:querydsl-jpa:7.1'
+    implementation 'io.github.openfeign.querydsl:querydsl-sql:7.1'
     annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:7.1:jpa'
 
     // Spring AI
@@ -105,6 +106,9 @@ dependencies {
     asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor:4.0.0'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc:4.0.0'
     testImplementation 'org.springframework.boot:spring-boot-restdocs'
+
+    // nori analyzer
+    implementation "org.apache.lucene:lucene-analysis-nori:10.4.0"
 
     // WebSocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
