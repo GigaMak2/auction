@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.auction.domain.auction.entity.Auction;
 
@@ -18,6 +19,7 @@ public interface AuctionRepository extends
 
     List<Auction> findByUserIdAndStatusIn(Long userId, List<AuctionStatus> statuses);
 
+    @Transactional
     @Modifying
     @Query(value = """
 UPDATE auctions SET

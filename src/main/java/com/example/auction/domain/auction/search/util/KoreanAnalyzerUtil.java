@@ -46,7 +46,7 @@ public class KoreanAnalyzerUtil {
 
         List<String> tokens = getTokens(str);
 
-        // convert tokens to tsvector literal
+        // convert tokens to tsquery literal
         
         StringBuilder sb = new StringBuilder();
 
