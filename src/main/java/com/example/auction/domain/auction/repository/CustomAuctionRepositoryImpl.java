@@ -13,10 +13,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.sql.JPASQLQuery;
-import com.querydsl.sql.PostgreSQLTemplates;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
@@ -41,9 +37,6 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
     private final JPAQueryFactory queryFactory;
     private final CategoryService categoryService;
     private final KoreanAnalyzerUtil koreanAnalyzerUtil;
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Override
     public Page<@NonNull Auction> findByCondition(
