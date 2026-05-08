@@ -16,6 +16,7 @@ import com.example.auction.domain.auction.util.AuctionUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.StringUtils;
 
 @Service
 @Slf4j
@@ -66,6 +67,10 @@ public class AuctionSearchService {
     public Page<AuctionSearchResult> searchAuction(
             AuctionSearchCondition condition
     ) {
+        if (!StringUtils.hasText(condition.getKeyword())) {
+            return searchAuctionFromDb(condition);
+        }
+
         try {
             return auctionElasticsearchService.searchAuctionFromElasticsearch(condition);
         } catch (Exception e) {
@@ -80,6 +85,10 @@ public class AuctionSearchService {
             Long userId,
             AuctionSearchCondition condition
     ) {
+        if (!StringUtils.hasText(condition.getKeyword())) {
+            return searchAuctionFromDb(userId, condition);
+        }
+
         try {
             return auctionElasticsearchService.searchAuctionFromElasticsearch(userId, condition);
         } catch (Exception e) {
@@ -93,6 +102,10 @@ public class AuctionSearchService {
     public Page<AuctionAdminListResponse> searchAuctionWithConditions(
             Pageable pageable, AuctionStatus auctionStatus, String keyword
     ) {
+        if (!StringUtils.hasText(keyword)) {
+            return auctionRepository.findAuctionWithConditions(pageable, auctionStatus, keyword);
+        }
+
         try {
             return auctionElasticsearchService.searchAuctionWithConditionsFromElasticsearch(pageable, auctionStatus, keyword);
         } catch (Exception e) {
