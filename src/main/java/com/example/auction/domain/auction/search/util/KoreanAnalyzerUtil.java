@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.ko.KoreanAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -39,12 +40,20 @@ public class KoreanAnalyzerUtil {
         return sb.toString();
     }
 
-    public String toTsQueryLiteral (String str) {
+    /**
+     * 토큰이 없으면 null을 반환합니다.
+     * 호출부에서 null 체크 후 검색 조건에서 제외해야 합니다.
+     */
+    public @Nullable String toTsQueryLiteral (String str) {
         if (str == null) {
-            return "";
+            return null;
         }
 
         List<String> tokens = getTokens(str);
+
+        if (tokens.isEmpty()) {
+            return null;
+        }
 
         // convert tokens to tsquery literal
         
