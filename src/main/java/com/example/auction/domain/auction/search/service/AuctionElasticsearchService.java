@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuctionElasticsearchService {
     private final ElasticsearchOperations elasticsearch;
 
-    @Async("executorWithVT")
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAuctionCreated(AuctionCreatedDocument event) {
         int maxAttempts = 3;
