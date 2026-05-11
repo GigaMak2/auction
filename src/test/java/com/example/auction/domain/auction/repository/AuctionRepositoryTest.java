@@ -1,7 +1,7 @@
 package com.example.auction.domain.auction.repository;
 
-import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
-import com.example.auction.domain.auction.dto.AuctionSearchCondition;
+import com.example.auction.domain.auction.dto.response.AuctionAdminListResponse;
+import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.search.util.KoreanAnalyzerUtil;

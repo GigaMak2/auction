@@ -1,9 +1,8 @@
 package com.example.auction.domain.chat.service;
 
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.chat.dto.ChatMessageListResponse;
-import com.example.auction.domain.chat.dto.ChatMessageResponse;
-import com.example.auction.domain.chat.dto.ChatRoomResponse;
+import com.example.auction.domain.chat.dto.response.ChatMessageListResponse;
+import com.example.auction.domain.chat.dto.response.ChatRoomResponse;
 import com.example.auction.domain.chat.entity.ChatMessage;
 import com.example.auction.domain.chat.entity.ChatRoom;
 import com.example.auction.domain.chat.entity.MessageRole;

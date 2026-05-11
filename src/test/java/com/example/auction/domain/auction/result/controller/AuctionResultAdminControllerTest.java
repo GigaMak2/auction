@@ -3,7 +3,7 @@ package com.example.auction.domain.auction.result.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.auction.result.dto.AuctionResultAdminListResponse;
+import com.example.auction.domain.auction.result.dto.response.AuctionResultAdminListResponse;
 import com.example.auction.domain.auction.result.service.AuctionResultAdminService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

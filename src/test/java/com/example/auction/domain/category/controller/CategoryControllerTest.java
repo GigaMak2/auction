@@ -1,7 +1,7 @@
 package com.example.auction.domain.category.controller;
 
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.category.dto.*;
+import com.example.auction.domain.category.dto.response.CategoryListGetResponse;
 import com.example.auction.domain.category.service.CategoryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
-import com.example.auction.domain.auction.dto.AuctionSearchCondition;
+import com.example.auction.domain.auction.dto.response.AuctionAdminListResponse;
+import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.search.document.AuctionDocument;
 import com.example.auction.domain.auction.search.dto.AuctionCreatedDocument;

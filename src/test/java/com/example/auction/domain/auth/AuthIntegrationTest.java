@@ -1,7 +1,7 @@
 package com.example.auction.domain.auth;
 
-import com.example.auction.domain.auth.dto.AuthLoginRequest;
-import com.example.auction.domain.auth.dto.AuthSignupRequest;
+import com.example.auction.domain.auth.dto.request.AuthLoginRequest;
+import com.example.auction.domain.auth.dto.request.AuthSignupRequest;
 import com.example.auction.testutils.BaseIntegrationTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

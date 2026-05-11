@@ -2,9 +2,9 @@ package com.example.auction.domain.user.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.domain.user.dto.UserChangePasswordRequest;
-import com.example.auction.domain.user.dto.UserGetResponse;
-import com.example.auction.domain.user.dto.UserWithdrawResponse;
+import com.example.auction.domain.user.dto.request.UserChangePasswordRequest;
+import com.example.auction.domain.user.dto.response.UserGetResponse;
+import com.example.auction.domain.user.dto.response.UserWithdrawResponse;
 import com.example.auction.domain.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

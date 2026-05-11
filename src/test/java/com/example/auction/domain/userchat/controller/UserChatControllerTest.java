@@ -5,9 +5,9 @@ import com.example.auction.common.config.security.CustomAuthenticationEntryPoint
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.config.security.JwtProvider;
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.userchat.dto.UserChatMessageListResponse;
-import com.example.auction.domain.userchat.dto.UserChatMessageResponse;
-import com.example.auction.domain.userchat.dto.UserChatRoomResponse;
+import com.example.auction.domain.userchat.dto.response.UserChatMessageListResponse;
+import com.example.auction.domain.userchat.dto.response.UserChatMessageResponse;
+import com.example.auction.domain.userchat.dto.response.UserChatRoomResponse;
 import com.example.auction.domain.userchat.service.UserChatService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

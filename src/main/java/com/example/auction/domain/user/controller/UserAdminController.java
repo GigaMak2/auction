@@ -2,10 +2,10 @@ package com.example.auction.domain.user.controller;
 
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
-import com.example.auction.domain.user.dto.UserDetailGetResponse;
-import com.example.auction.domain.user.dto.UserListGetResponse;
-import com.example.auction.domain.user.dto.UserSearchCondition;
-import com.example.auction.domain.user.dto.UserWithdrawResponse;
+import com.example.auction.domain.user.dto.response.UserDetailGetResponse;
+import com.example.auction.domain.user.dto.response.UserListGetResponse;
+import com.example.auction.domain.user.dto.request.UserSearchCondition;
+import com.example.auction.domain.user.dto.response.UserWithdrawResponse;
 import com.example.auction.domain.user.service.UserAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

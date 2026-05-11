@@ -2,8 +2,8 @@ package com.example.auction.domain.review.controller;
 
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
-import com.example.auction.domain.review.dto.ReviewAdminListResponse;
-import com.example.auction.domain.review.dto.ReviewAdminSearchCondition;
+import com.example.auction.domain.review.dto.response.ReviewAdminListResponse;
+import com.example.auction.domain.review.dto.request.ReviewAdminSearchCondition;
 import com.example.auction.domain.review.service.ReviewAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

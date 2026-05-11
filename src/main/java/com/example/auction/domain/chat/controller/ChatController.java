@@ -2,9 +2,9 @@ package com.example.auction.domain.chat.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.domain.chat.dto.ChatMessageListResponse;
-import com.example.auction.domain.chat.dto.ChatRoomResponse;
-import com.example.auction.domain.chat.dto.ChatRoomUpdateRequest;
+import com.example.auction.domain.chat.dto.response.ChatMessageListResponse;
+import com.example.auction.domain.chat.dto.response.ChatRoomResponse;
+import com.example.auction.domain.chat.dto.request.ChatRoomUpdateRequest;
 import com.example.auction.domain.chat.service.ChatService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

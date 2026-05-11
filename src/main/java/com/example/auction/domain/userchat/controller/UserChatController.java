@@ -2,8 +2,8 @@ package com.example.auction.domain.userchat.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.domain.userchat.dto.UserChatMessageListResponse;
-import com.example.auction.domain.userchat.dto.UserChatRoomResponse;
+import com.example.auction.domain.userchat.dto.response.UserChatMessageListResponse;
+import com.example.auction.domain.userchat.dto.response.UserChatRoomResponse;
 import com.example.auction.domain.userchat.service.UserChatService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

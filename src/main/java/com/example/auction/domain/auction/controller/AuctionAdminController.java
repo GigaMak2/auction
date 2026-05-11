@@ -2,8 +2,8 @@ package com.example.auction.domain.auction.controller;
 
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
-import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
-import com.example.auction.domain.auction.dto.AuctionAdminSearchCondition;
+import com.example.auction.domain.auction.dto.response.AuctionAdminListResponse;
+import com.example.auction.domain.auction.dto.request.AuctionAdminSearchCondition;
 import com.example.auction.domain.auction.service.AuctionAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

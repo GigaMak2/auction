@@ -1,10 +1,10 @@
 package com.example.auction.domain.category;
 
-import com.example.auction.domain.auth.dto.AuthLoginRequest;
-import com.example.auction.domain.auth.dto.AuthSignupRequest;
-import com.example.auction.domain.category.dto.CategoryCreateRequest;
-import com.example.auction.domain.category.dto.CategoryMoveRequest;
-import com.example.auction.domain.category.dto.CategoryRenameRequest;
+import com.example.auction.domain.auth.dto.request.AuthLoginRequest;
+import com.example.auction.domain.auth.dto.request.AuthSignupRequest;
+import com.example.auction.domain.category.dto.request.CategoryCreateRequest;
+import com.example.auction.domain.category.dto.request.CategoryMoveRequest;
+import com.example.auction.domain.category.dto.request.CategoryRenameRequest;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.testutils.BaseIntegrationTest;

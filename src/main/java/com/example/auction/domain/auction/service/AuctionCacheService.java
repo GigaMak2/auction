@@ -4,7 +4,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.example.auction.domain.auction.dto.AuctionSearchCondition;
+import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
 
 import lombok.RequiredArgsConstructor;
 

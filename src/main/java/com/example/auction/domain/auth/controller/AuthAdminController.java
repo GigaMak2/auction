@@ -1,8 +1,8 @@
 package com.example.auction.domain.auth.controller;
 
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.domain.auth.dto.AuthAdminSignupRequest;
-import com.example.auction.domain.auth.dto.AuthSignupResponse;
+import com.example.auction.domain.auth.dto.request.AuthAdminSignupRequest;
+import com.example.auction.domain.auth.dto.response.AuthSignupResponse;
 import com.example.auction.domain.auth.service.AuthAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

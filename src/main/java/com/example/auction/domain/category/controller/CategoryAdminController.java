@@ -1,7 +1,12 @@
 package com.example.auction.domain.category.controller;
 
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.domain.category.dto.*;
+import com.example.auction.domain.category.dto.request.CategoryCreateRequest;
+import com.example.auction.domain.category.dto.request.CategoryMoveRequest;
+import com.example.auction.domain.category.dto.request.CategoryRenameRequest;
+import com.example.auction.domain.category.dto.response.CategoryCreateResponse;
+import com.example.auction.domain.category.dto.response.CategoryMoveResponse;
+import com.example.auction.domain.category.dto.response.CategoryRenameResponse;
 import com.example.auction.domain.category.service.CategoryAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

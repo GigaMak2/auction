@@ -2,10 +2,10 @@ package com.example.auction.domain.auth.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.domain.auth.dto.AuthLoginRequest;
-import com.example.auction.domain.auth.dto.AuthLoginResponse;
-import com.example.auction.domain.auth.dto.AuthSignupRequest;
-import com.example.auction.domain.auth.dto.AuthSignupResponse;
+import com.example.auction.domain.auth.dto.request.AuthLoginRequest;
+import com.example.auction.domain.auth.dto.response.AuthLoginResponse;
+import com.example.auction.domain.auth.dto.request.AuthSignupRequest;
+import com.example.auction.domain.auth.dto.response.AuthSignupResponse;
 import com.example.auction.domain.auth.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

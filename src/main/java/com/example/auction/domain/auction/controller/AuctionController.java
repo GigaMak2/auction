@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
-import com.example.auction.domain.auction.dto.AuctionSearchCondition;
-import com.example.auction.domain.auction.dto.CreateAuctionRequest;
-import com.example.auction.domain.auction.dto.GetAuctionResponse;
-import com.example.auction.domain.auction.dto.GetManyAuctionsResponse;
+import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
+import com.example.auction.domain.auction.dto.request.CreateAuctionRequest;
+import com.example.auction.domain.auction.dto.response.GetAuctionResponse;
+import com.example.auction.domain.auction.dto.response.GetManyAuctionsResponse;
 import com.example.auction.domain.auction.service.AuctionService;
 
 import jakarta.validation.Valid;

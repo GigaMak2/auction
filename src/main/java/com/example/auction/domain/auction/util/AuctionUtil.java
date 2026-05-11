@@ -3,8 +3,8 @@ package com.example.auction.domain.auction.util;
 import java.time.LocalDateTime;
 
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.auction.dto.AuctionSearchCondition;
-import com.example.auction.domain.auction.dto.CreateAuctionRequest;
+import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
+import com.example.auction.domain.auction.dto.request.CreateAuctionRequest;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 
 public class AuctionUtil {
