@@ -97,7 +97,7 @@ class AuctionAdminControllerTest {
                         queryParameters(
                                 parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
                                 parameterWithName("size").description("페이지 크기 (1 ~ 100)").optional(),
-                                parameterWithName("status").description("경매 상태 필터 (READY / ACTIVE / CLOSED / CANCELLED)").optional(),
+                                parameterWithName("status").description("경매 상태 필터 (READY / ACTIVE / DONE / NO_BID / CANCELLED)").optional(),
                                 parameterWithName("keyword").description("검색 키워드").optional()
                         )
                 ));;
