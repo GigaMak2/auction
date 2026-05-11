@@ -18,7 +18,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequiredArgsConstructor()
+@RequiredArgsConstructor
 public class AuctionController {
 
     private final AuctionService auctionService;
