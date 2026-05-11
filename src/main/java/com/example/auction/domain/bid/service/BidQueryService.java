@@ -12,11 +12,9 @@ import com.example.auction.domain.auction.result.repository.AuctionResultReposit
 import com.example.auction.domain.bid.dto.response.BidCachedResponse;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
-import com.example.auction.domain.bid.entity.Bid;
-import com.example.auction.domain.bid.exceptions.BidErrorEnum;
+import com.example.auction.domain.bid.exception.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
