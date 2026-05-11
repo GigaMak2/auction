@@ -98,6 +98,9 @@ public class BidCommandProcessor {
                 auctionId,
                 userId,
                 BidAuctionStatus.ACTIVE);
+
+        Bid prevMinBid = bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId).orElse(null);
+
         Bid savedBid = bidRepository.save(bid);
 
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
@@ -109,9 +112,9 @@ public class BidCommandProcessor {
                 ));
 
                 // 최저가 갱신 알림
-                if (currentMinPrice != null) {
+                if (prevMinBid != null) {
                     notificationMessagePublisher.publish(new NotificationMessage(
-                            NotificationType.LOWEST_BID_UPDATED, currentCachedMin.getUserId(), auctionId, auction.getItemName()
+                            NotificationType.LOWEST_BID_UPDATED, prevMinBid.getUserId(), auctionId, auction.getItemName()
                     ));
                 }
             }

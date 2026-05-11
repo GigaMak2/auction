@@ -101,8 +101,6 @@ public class BidQueryService {
             throw new ServiceErrorException(BidErrorEnum.BID_NOT_FOUND);
         }
 
-        return bidRepository.findById(cached.getBidId())
-                .map(BidResponse::of)
-                .orElseThrow(() -> new ServiceErrorException(BidErrorEnum.BID_NOT_FOUND));
+        return BidResponse.fromCached(cached);
     }
 }
