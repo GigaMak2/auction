@@ -93,9 +93,9 @@ public class JwtProvider {
             Claims claims = getClaims(token);
             return tokenType.equals(claims.get("tokenType", String.class));
         } catch (ExpiredJwtException e) {
-            log.warn("만료된 JWT 토큰: {}", e.getMessage());
+            log.warn("[JwtProvider] 만료된 JWT 토큰 — msg={}", e.getMessage());
         } catch (JwtException | IllegalArgumentException e) {
-            log.warn("유효하지 않은 JWT 토큰: {}", e.getMessage());
+            log.warn("[JwtProvider] 유효하지 않은 JWT 토큰 — msg={}", e.getMessage());
         }
         return false;
     }

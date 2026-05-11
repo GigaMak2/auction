@@ -2,11 +2,13 @@ package com.example.auction.domain.user.repository;
 
 import com.example.auction.common.config.JpaConfig;
 import com.example.auction.common.config.QuerydslConfig;
+import com.example.auction.domain.auction.search.util.KoreanAnalyzerUtil;
 import com.example.auction.domain.category.service.CategoryService;
 import com.example.auction.domain.user.dto.UserListGetResponse;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.testutils.BaseIntegrationTest;
+import org.apache.lucene.analysis.ko.KoreanAnalyzer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class})
+@Import({QuerydslConfig.class, JpaConfig.class, CategoryService.class, KoreanAnalyzerUtil.class, KoreanAnalyzer.class})
 class UserCustomRepositoryImplTest extends BaseIntegrationTest {
 
     @Autowired

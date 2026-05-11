@@ -35,6 +35,7 @@ import com.example.auction.domain.auction.search.service.AuctionSearchService;
 import com.example.auction.domain.auction.util.AuctionUtil;
 import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
+import com.example.auction.domain.auction.search.util.KoreanAnalyzerUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,6 +48,7 @@ public class AuctionService {
     private final AuctionEventBridgeService auctionEventBridgeService;
     private final ApplicationEventPublisher eventPublisher;
     private final AuctionSearchService auctionSearchService;
+    private final KoreanAnalyzerUtil koreanAnalyzerUtil;
 
     @Transactional(readOnly = true)
     @Cacheable(
@@ -143,6 +145,15 @@ public class AuctionService {
         );
 
         auction = auctionRepository.saveAndFlush(auction);
+
+        // auction의 tsvector column들을 업데이트 합니다.
+        // 주의: 반드시 saveAndFlush이후에 일어나야 합니다.
+        String itemNameVector = koreanAnalyzerUtil.toTsVectorLiteral(auction.getItemName());
+        String descriptionVector = koreanAnalyzerUtil.toTsVectorLiteral(auction.getDescription());
+
+        auctionRepository.updateSearchVectors(
+                auction.getId(), itemNameVector, descriptionVector, 1
+        );
 
         // 이벤트퍼블리셔를 활용하여 트랜잭션 밖으로 빼냄
 

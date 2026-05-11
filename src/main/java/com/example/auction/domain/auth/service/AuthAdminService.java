@@ -7,6 +7,7 @@ import com.example.auction.domain.auth.exception.AuthErrorEnum;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthAdminService {
@@ -41,6 +43,7 @@ public class AuthAdminService {
 
         if (!request.adminSecretKey().equals(adminSecretKey)) {
             incrementFailCount(failKey);
+            log.warn("[AuthAdminService] 어드민 시크릿 키 검증 실패 — email={}", maskEmail(request.email()));
             throw new ServiceErrorException(AuthErrorEnum.INVALID_ADMIN_SECRET_KEY);
         }
 
@@ -55,7 +58,14 @@ public class AuthAdminService {
         User user = User.ofAdmin(request.email(), encodedPassword);
         userRepository.save(user);
 
+        log.info("[AuthAdminService] 어드민 계정 생성 완료 — userId={}", user.getId());
         return new AuthSignupResponse(user.getId(), user.getEmail(), user.getRole(), user.getCreatedAt());
+    }
+
+    private static String maskEmail(String email) {
+        int at = email.indexOf('@');
+        if (at <= 1) return "***@***";
+        return email.charAt(0) + "***" + email.substring(at);
     }
 
     private void incrementFailCount(String failKey) {

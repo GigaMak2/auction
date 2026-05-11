@@ -16,6 +16,7 @@ import com.example.auction.domain.auction.util.AuctionUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.StringUtils;
 
 @Service
 @Slf4j
@@ -66,52 +67,51 @@ public class AuctionSearchService {
     public Page<AuctionSearchResult> searchAuction(
             AuctionSearchCondition condition
     ) {
-        if (condition.getKeyword() == null || condition.getKeyword().isBlank()) {
-            try {
-                return searchAuctionFromDb(condition);
-            } catch (Exception e) {
-                log.error("[AuctionSearch] DB 키워드 없는 검색 실패, elasticsearch로 fallback - {}",
-                        condition.toLogString(), e);
-
-                return auctionElasticsearchService.searchAuctionFromElasticsearch(condition);
-            }
+        if (!StringUtils.hasText(condition.getKeyword())) {
+            return searchAuctionFromDb(condition);
         }
 
-        return auctionElasticsearchService.searchAuctionFromElasticsearch(condition);
+        try {
+            return auctionElasticsearchService.searchAuctionFromElasticsearch(condition);
+        } catch (Exception e) {
+            log.error("[AuctionSearch] elasticsearch 검색 실패, DB 검색으로 fallback - {}",
+                    condition.toLogString(), e);
+
+            return searchAuctionFromDb(condition);
+        }
     }
 
     public Page<AuctionSearchResult> searchAuction(
             Long userId,
             AuctionSearchCondition condition
     ) {
-        if (condition.getKeyword() == null || condition.getKeyword().isBlank()) {
-            try {
-                return searchAuctionFromDb(userId, condition);
-            } catch (Exception e) {
-                log.error("[AuctionSearch] DB 키워드 없는 검색 실패, elasticsearch로 fallback - userId={}, {}",
-                        userId, condition.toLogString(), e);
-
-                return auctionElasticsearchService.searchAuctionFromElasticsearch(userId, condition);
-            }
+        if (!StringUtils.hasText(condition.getKeyword())) {
+            return searchAuctionFromDb(userId, condition);
         }
 
-        return auctionElasticsearchService.searchAuctionFromElasticsearch(userId, condition);
+        try {
+            return auctionElasticsearchService.searchAuctionFromElasticsearch(userId, condition);
+        } catch (Exception e) {
+            log.error("[AuctionSearch] elasticsearch 검색 실패, DB 검색으로 fallback - userId={}, {}",
+                    userId, condition.toLogString(), e);
+
+            return searchAuctionFromDb(userId, condition);
+        }
     }
 
     public Page<AuctionAdminListResponse> searchAuctionWithConditions(
             Pageable pageable, AuctionStatus auctionStatus, String keyword
     ) {
-        if (keyword == null || keyword.isBlank()) {
-            try {
-                return auctionRepository.findAuctionWithConditions(pageable, auctionStatus, keyword);
-            } catch (Exception e) {
-                log.error("[AuctionSearch] DB 키워드 없는 검색 실패, elasticsearch로 fallback - pageable={}, auctionStatus={}, keyword={}",
-                        pageable, auctionStatus, keyword, e);
-
-                return auctionElasticsearchService.searchAuctionWithConditionsFromElasticsearch(pageable, auctionStatus, keyword);
-            }
+        if (!StringUtils.hasText(keyword)) {
+            return auctionRepository.findAuctionWithConditions(pageable, auctionStatus, keyword);
         }
 
-        return auctionElasticsearchService.searchAuctionWithConditionsFromElasticsearch(pageable, auctionStatus, keyword);
+        try {
+            return auctionElasticsearchService.searchAuctionWithConditionsFromElasticsearch(pageable, auctionStatus, keyword);
+        } catch (Exception e) {
+            log.error("[AuctionSearch] elasticsearch 검색 실패, DB 검색으로 fallback - pageable={}, auctionStatus={}, keyword={}",
+                    pageable, auctionStatus, keyword, e);
+            return auctionRepository.findAuctionWithConditions(pageable, auctionStatus, keyword);
+        }
     }
 }
