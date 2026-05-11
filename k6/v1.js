@@ -1,4 +1,4 @@
-// v1용
+// v1용 - 레거시 함수를 활용하였으므로 현재 동작 X
 import http from 'k6/http';
 import { Counter, Rate } from 'k6/metrics';
 import { check, sleep } from 'k6';
