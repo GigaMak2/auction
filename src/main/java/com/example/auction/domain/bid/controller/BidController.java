@@ -27,20 +27,6 @@ public class BidController {
     private final BidCommandFacade commandService;
     private final BidQueryService queryService;
 
-    // 특정 경매에 입찰 생성 - 기본 버전, before/after 비교용
-    @PostMapping("/v1")
-    public ResponseEntity<BaseResponse<BidResponse>> placeBid(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("auction_id") Long auctionId,
-            @Valid @RequestBody BidRequest request
-    ) {
-        BidResponse data = commandService.placeBid(userDetails, auctionId, request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.CREATED.value()), "입찰이 완료되었습니다", data));
-    }
-
-
-
     // 특정 경매에 입찰 생성 - 분산락
     @PostMapping("/v2")
     public ResponseEntity<BaseResponse<BidResponse>> placeBidDis(

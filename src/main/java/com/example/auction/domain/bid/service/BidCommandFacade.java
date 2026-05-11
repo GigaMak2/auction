@@ -25,11 +25,6 @@ public class BidCommandFacade {
     private static final String BID_LOCK_PREFIX = "bid:lock:";
     private static final long LOCK_WAIT_TIME = 20L;    // 락 획득 대기 시간 (초)
 
-    // 입찰 생성 - 락 없음
-    public BidResponse placeBid(CustomUserDetails userDetails, Long auctionId, BidRequest request) {
-        return processor.placeBid(userDetails, auctionId, request);
-    }
-
     // 입찰 생성 - 분산락
     public BidResponse placeBidDis(CustomUserDetails userDetails, Long auctionId, BidRequest request) {
 
