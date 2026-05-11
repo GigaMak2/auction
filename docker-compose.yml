@@ -204,7 +204,7 @@ services:
     container_name: auction-k6
     volumes:
       - ./k6:/scripts
-    command: run --out influxdb=http://auction-influxdb:8086/k6 /scripts/bid-test.js
+    command: run --out influxdb=http://auction-influxdb:8086/k6 /scripts/stress-test.js
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
