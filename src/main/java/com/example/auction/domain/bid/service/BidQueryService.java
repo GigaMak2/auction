@@ -9,6 +9,7 @@ import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.auction.result.entity.AuctionResult;
 import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
+import com.example.auction.domain.bid.dto.response.BidCachedResponse;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 import com.example.auction.domain.bid.entity.Bid;
@@ -16,6 +17,7 @@ import com.example.auction.domain.bid.exceptions.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BidQueryService {
 
+    private final BidCacheService bidCacheService;
     private final BidRepository bidRepository;
     private final AuctionRepository auctionRepository;
     private final AuctionResultRepository resultRepository;
@@ -99,9 +102,21 @@ public class BidQueryService {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND);
         }
 
-        Bid currentMin = bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)
+ /*       Bid currentMin = bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)
                 .orElseThrow(() -> new ServiceErrorException(BidErrorEnum.BID_NOT_FOUND));
 
-        return BidResponse.of(currentMin);
+
+          return BidResponse.of(currentMin);
+
+  */
+
+        BidCachedResponse cached = bidCacheService.getCurrentMinPrice(auctionId);
+        if (cached == null) {
+            throw new ServiceErrorException(BidErrorEnum.BID_NOT_FOUND);
+        }
+
+        return bidRepository.findById(cached.getBidId())
+                .map(BidResponse::of)
+                .orElseThrow(() -> new ServiceErrorException(BidErrorEnum.BID_NOT_FOUND));
     }
 }

@@ -48,6 +48,8 @@ public class RedisCacheConfig {
 
         cacheConfigs.put("getCategoryList", defaultConfig.entryTtl(Duration.ofHours(1)));
 
+        cacheConfigs.put("currentMinBid", defaultConfig.entryTtl(Duration.ofSeconds(30)));
+
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(cacheConfigs)
