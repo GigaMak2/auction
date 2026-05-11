@@ -14,7 +14,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "6.3.3"
+      "version": "13.0.0"
     },
     {
       "type": "panel",
@@ -30,8 +30,8 @@
     },
     {
       "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
+      "id": "stat",
+      "name": "Stat",
       "version": ""
     }
   ],
@@ -50,7 +50,7 @@
   },
   "description": "Dashboard for k6 load testing results visualization",
   "editable": true,
-  "gnetId": 2587,
+  "gnetId": 19665,
   "graphTooltip": 0,
   "id": null,
   "iteration": 1567706819839,
@@ -68,7 +68,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influxdb",
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
       "fill": 1,
       "gridPos": { "h": 9, "w": 6, "x": 0, "y": 1 },
       "id": 4,
@@ -88,6 +88,7 @@
       "targets": [
         {
           "alias": "Virtual Users",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [{ "params": ["$__interval"], "type": "time" }, { "params": ["null"], "type": "fill" }],
           "measurement": "vus",
           "orderByTime": "ASC",
@@ -117,7 +118,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influxdb",
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
       "fill": 1,
       "gridPos": { "h": 9, "w": 6, "x": 6, "y": 1 },
       "id": 8,
@@ -137,6 +138,7 @@
       "targets": [
         {
           "alias": "Requests/s",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [{ "params": ["$__interval"], "type": "time" }, { "params": ["null"], "type": "fill" }],
           "measurement": "http_reqs",
           "orderByTime": "ASC",
@@ -166,7 +168,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influxdb",
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
       "fill": 1,
       "gridPos": { "h": 9, "w": 6, "x": 12, "y": 1 },
       "id": 10,
@@ -186,6 +188,7 @@
       "targets": [
         {
           "alias": "Errors/s",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [{ "params": ["$__interval"], "type": "time" }, { "params": ["null"], "type": "fill" }],
           "measurement": "http_req_failed",
           "orderByTime": "ASC",
@@ -215,7 +218,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influxdb",
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
       "fill": 1,
       "gridPos": { "h": 9, "w": 6, "x": 18, "y": 1 },
       "id": 23,
@@ -235,6 +238,7 @@
       "targets": [
         {
           "alias": "Checks/s",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [{ "params": ["$__interval"], "type": "time" }, { "params": ["null"], "type": "fill" }],
           "measurement": "checks",
           "orderByTime": "ASC",
@@ -267,14 +271,25 @@
       "type": "row"
     },
     {
-      "datasource": "influxdb",
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
       "gridPos": { "h": 4, "w": 4, "x": 0, "y": 11 },
       "id": 14,
       "links": [],
-      "options": {},
+      "type": "stat",
+      "options": {
+        "reduceOptions": { "calcs": ["mean"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "ms" }
+      },
       "targets": [
         {
           "alias": "mean",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [],
           "measurement": "http_req_duration",
           "orderByTime": "ASC",
@@ -285,20 +300,28 @@
           "tags": []
         }
       ],
-      "title": "http_req_duration (mean)",
-      "type": "singlestat",
-      "valueName": "avg",
-      "format": "ms"
+      "title": "http_req_duration (mean)"
     },
     {
-      "datasource": "influxdb",
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
       "gridPos": { "h": 4, "w": 4, "x": 4, "y": 11 },
       "id": 15,
       "links": [],
-      "options": {},
+      "type": "stat",
+      "options": {
+        "reduceOptions": { "calcs": ["last"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "ms" }
+      },
       "targets": [
         {
           "alias": "max",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [],
           "measurement": "http_req_duration",
           "orderByTime": "ASC",
@@ -309,20 +332,28 @@
           "tags": []
         }
       ],
-      "title": "http_req_duration (max)",
-      "type": "singlestat",
-      "valueName": "current",
-      "format": "ms"
+      "title": "http_req_duration (max)"
     },
     {
-      "datasource": "influxdb",
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 11 },
       "id": 16,
       "links": [],
-      "options": {},
+      "type": "stat",
+      "options": {
+        "reduceOptions": { "calcs": ["last"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "ms" }
+      },
       "targets": [
         {
           "alias": "med",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [],
           "measurement": "http_req_duration",
           "orderByTime": "ASC",
@@ -333,20 +364,28 @@
           "tags": []
         }
       ],
-      "title": "http_req_duration (med)",
-      "type": "singlestat",
-      "valueName": "current",
-      "format": "ms"
+      "title": "http_req_duration (med)"
     },
     {
-      "datasource": "influxdb",
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
       "gridPos": { "h": 4, "w": 4, "x": 12, "y": 11 },
       "id": 17,
       "links": [],
-      "options": {},
+      "type": "stat",
+      "options": {
+        "reduceOptions": { "calcs": ["last"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "ms" }
+      },
       "targets": [
         {
           "alias": "min",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [],
           "measurement": "http_req_duration",
           "orderByTime": "ASC",
@@ -357,20 +396,28 @@
           "tags": []
         }
       ],
-      "title": "http_req_duration (min)",
-      "type": "singlestat",
-      "valueName": "current",
-      "format": "ms"
+      "title": "http_req_duration (min)"
     },
     {
-      "datasource": "influxdb",
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
       "gridPos": { "h": 4, "w": 4, "x": 16, "y": 11 },
       "id": 18,
       "links": [],
-      "options": {},
+      "type": "stat",
+      "options": {
+        "reduceOptions": { "calcs": ["last"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "ms" }
+      },
       "targets": [
         {
           "alias": "p90",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [],
           "measurement": "http_req_duration",
           "orderByTime": "ASC",
@@ -381,20 +428,28 @@
           "tags": []
         }
       ],
-      "title": "http_req_duration (p90)",
-      "type": "singlestat",
-      "valueName": "current",
-      "format": "ms"
+      "title": "http_req_duration (p90)"
     },
     {
-      "datasource": "influxdb",
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
       "gridPos": { "h": 4, "w": 4, "x": 20, "y": 11 },
       "id": 19,
       "links": [],
-      "options": {},
+      "type": "stat",
+      "options": {
+        "reduceOptions": { "calcs": ["last"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "ms" }
+      },
       "targets": [
         {
           "alias": "p95",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [],
           "measurement": "http_req_duration",
           "orderByTime": "ASC",
@@ -405,17 +460,14 @@
           "tags": []
         }
       ],
-      "title": "http_req_duration (p95)",
-      "type": "singlestat",
-      "valueName": "current",
-      "format": "ms"
+      "title": "http_req_duration (p95)"
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "influxdb",
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
       "fill": 1,
       "gridPos": { "h": 9, "w": 12, "x": 0, "y": 15 },
       "id": 2,
@@ -435,6 +487,7 @@
       "targets": [
         {
           "alias": "mean",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [{ "params": ["$__interval"], "type": "time" }, { "params": ["null"], "type": "fill" }],
           "measurement": "http_req_duration",
           "orderByTime": "ASC",
@@ -446,6 +499,7 @@
         },
         {
           "alias": "p90",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [{ "params": ["$__interval"], "type": "time" }, { "params": ["null"], "type": "fill" }],
           "measurement": "http_req_duration",
           "orderByTime": "ASC",
@@ -457,6 +511,7 @@
         },
         {
           "alias": "p95",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
           "groupBy": [{ "params": ["$__interval"], "type": "time" }, { "params": ["null"], "type": "fill" }],
           "measurement": "http_req_duration",
           "orderByTime": "ASC",
@@ -483,7 +538,7 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 18,
+  "schemaVersion": 36,
   "style": "dark",
   "tags": ["k6"],
   "time": { "from": "now-1h", "to": "now" },

@@ -45,8 +45,6 @@ export default function (data) {
         price = 99999999;
     }
 
-    // sleep 없음! 최대한 동시에 몰리게
-
     const params = {
         ...authHeaders(token),
         responseCallback: http.expectedStatuses(201, 400, 409),

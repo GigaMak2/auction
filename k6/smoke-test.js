@@ -37,7 +37,8 @@ export default function (data) {
     let price = minPrice - Math.floor(Math.random() * 100) - 1;
     if (price <= 0) {
         price = Math.floor(Math.random() * 100) + 1;
-        sleep(1); }
+        sleep(1);
+    }
 
     const params = {
         ...authHeaders(token),
