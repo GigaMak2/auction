@@ -1,6 +1,5 @@
 package com.example.auction.domain.auction.controller;
 
-import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,7 +24,7 @@ public class AuctionController {
     private final AuctionService auctionService;
 
     @GetMapping("/api/auctions/{auctionId}")
-    public ResponseEntity<@NonNull BaseResponse<GetAuctionResponse>> getAuction(@PathVariable Long auctionId) {
+    public ResponseEntity<BaseResponse<GetAuctionResponse>> getAuction(@PathVariable Long auctionId) {
         GetAuctionResponse res = auctionService.getAuction(auctionId);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -37,7 +36,7 @@ public class AuctionController {
     }
 
     @GetMapping("/api/auctions")
-    public ResponseEntity<@NonNull BaseResponse<PageResponse<GetManyAuctionsResponse>>> getManyAuctionsPublic(
+    public ResponseEntity<BaseResponse<PageResponse<GetManyAuctionsResponse>>> getManyAuctionsPublic(
             @ModelAttribute @Valid AuctionSearchCondition conditionDto
     ) {
         PageResponse<GetManyAuctionsResponse> res = auctionService.getManyAuctionsPublic(conditionDto);
@@ -51,7 +50,7 @@ public class AuctionController {
     }
 
     @GetMapping("/api/me/auctions")
-    public ResponseEntity<@NonNull BaseResponse<PageResponse<GetManyAuctionsResponse>>> getManyAuctionsMe(
+    public ResponseEntity<BaseResponse<PageResponse<GetManyAuctionsResponse>>> getManyAuctionsMe(
             @ModelAttribute @Valid AuctionSearchCondition conditionDto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
@@ -66,7 +65,7 @@ public class AuctionController {
     }
 
     @PostMapping("/api/auctions")
-    public ResponseEntity<@NonNull BaseResponse<GetAuctionResponse>> createAuction(
+    public ResponseEntity<BaseResponse<GetAuctionResponse>> createAuction(
             @RequestBody @Valid CreateAuctionRequest req,
             @AuthenticationPrincipal CustomUserDetails details
     ) {

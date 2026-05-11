@@ -111,7 +111,7 @@ public class AuctionService {
         return PageResponse.create(auctionsDto);
     }
 
-    @Transactional()
+    @Transactional
     @CachePut(
         cacheNames = {"getAuction"},
         key = "#result.getId()"
@@ -167,7 +167,7 @@ public class AuctionService {
         return GetAuctionResponse.from(auction);
     }
 
-    @Transactional()
+    @Transactional
     @Caching(
         evict = {
             @CacheEvict(
