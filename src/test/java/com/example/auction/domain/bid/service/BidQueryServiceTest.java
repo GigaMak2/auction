@@ -13,7 +13,7 @@ import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
-import com.example.auction.domain.bid.exceptions.BidErrorEnum;
+import com.example.auction.domain.bid.exception.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -113,7 +113,7 @@ class BidQueryServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when
-        PageResponse<BidListResponse> response = queryService.getBids(userDetails, auctionId, pageable);
+        PageResponse<BidListResponse> response = queryService.getBids(auctionId, pageable);
 
         // then
         assertThat(response.content()).hasSize(2);
@@ -130,7 +130,7 @@ class BidQueryServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when
-        PageResponse<BidListResponse> response = queryService.getBids(userDetails, auctionId, pageable);
+        PageResponse<BidListResponse> response = queryService.getBids(auctionId, pageable);
 
         // then
         assertThat(response.content()).isEmpty();
@@ -145,7 +145,7 @@ class BidQueryServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> queryService.getBids(userDetails, auctionId, pageable))
+        assertThatThrownBy(() -> queryService.getBids(auctionId, pageable))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
     }
@@ -157,7 +157,7 @@ class BidQueryServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(cancelledAuction));
 
         // when & then
-        assertThatThrownBy(() -> queryService.getBids(userDetails, auctionId, pageable))
+        assertThatThrownBy(() -> queryService.getBids(auctionId, pageable))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
     }
@@ -219,7 +219,7 @@ class BidQueryServiceTest {
         given(bidRepository.findById(100L)).willReturn(Optional.of(winnerBid));
 
         // when
-        BidResponse response = queryService.getWinnerBid(userDetails, auctionId);
+        BidResponse response = queryService.getWinnerBid(auctionId);
 
         // then
         assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(80_000));
@@ -232,7 +232,7 @@ class BidQueryServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> queryService.getWinnerBid(userDetails, auctionId))
+        assertThatThrownBy(() -> queryService.getWinnerBid(auctionId))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
     }
@@ -244,7 +244,7 @@ class BidQueryServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when & then
-        assertThatThrownBy(() -> queryService.getWinnerBid(userDetails, auctionId))
+        assertThatThrownBy(() -> queryService.getWinnerBid(auctionId))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.AUCTION_RESULT_NOT_FOUND.getMessage());
     }
@@ -265,7 +265,7 @@ class BidQueryServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(noBidAuction));
 
         // when & then
-        assertThatThrownBy(() -> queryService.getWinnerBid(userDetails, auctionId))
+        assertThatThrownBy(() -> queryService.getWinnerBid(auctionId))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.AUCTION_RESULT_NOT_FOUND.getMessage());
     }
@@ -278,7 +278,7 @@ class BidQueryServiceTest {
         given(resultRepository.findByAuctionId(auctionId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> queryService.getWinnerBid(userDetails, auctionId))
+        assertThatThrownBy(() -> queryService.getWinnerBid(auctionId))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.AUCTION_RESULT_NOT_FOUND.getMessage());
     }
@@ -299,7 +299,7 @@ class BidQueryServiceTest {
         given(bidCacheService.getCurrentMinPrice(auctionId)).willReturn(cached);
 
         // when
-        BidResponse response = queryService.getCurrentMinBid(userDetails, auctionId);
+        BidResponse response = queryService.getCurrentMinBid(auctionId);
 
         // then
         assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(80_000));
@@ -313,7 +313,7 @@ class BidQueryServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> queryService.getCurrentMinBid(userDetails, auctionId))
+        assertThatThrownBy(() -> queryService.getCurrentMinBid(auctionId))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
     }
@@ -325,7 +325,7 @@ class BidQueryServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(doneAuction));
 
         // when & then
-        assertThatThrownBy(() -> queryService.getCurrentMinBid(userDetails, auctionId))
+        assertThatThrownBy(() -> queryService.getCurrentMinBid(auctionId))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
     }
@@ -337,7 +337,7 @@ class BidQueryServiceTest {
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(cancelledAuction));
 
         // when & then
-        assertThatThrownBy(() -> queryService.getCurrentMinBid(userDetails, auctionId))
+        assertThatThrownBy(() -> queryService.getCurrentMinBid(auctionId))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(AuctionErrorEnum.AUCTION_NOT_FOUND.getMessage());
     }
@@ -350,7 +350,7 @@ class BidQueryServiceTest {
         given(bidCacheService.getCurrentMinPrice(auctionId)).willReturn(null);
 
         // when & then
-        assertThatThrownBy(() -> queryService.getCurrentMinBid(userDetails, auctionId))
+        assertThatThrownBy(() -> queryService.getCurrentMinBid(auctionId))
                 .isInstanceOf(ServiceErrorException.class)
                 .hasMessage(BidErrorEnum.BID_NOT_FOUND.getMessage());
     }

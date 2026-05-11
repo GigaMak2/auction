@@ -3,7 +3,7 @@ package com.example.auction.domain.review.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.review.dto.ReviewAdminListResponse;
+import com.example.auction.domain.review.dto.response.ReviewAdminListResponse;
 import com.example.auction.domain.review.service.ReviewAdminService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,7 +84,7 @@ class ReviewAdminControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("리뷰 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("review-admin/get-review-list",
@@ -151,7 +151,7 @@ class ReviewAdminControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 강제 삭제 요청 성공"))
+                .andExpect(jsonPath("$.message").value("리뷰를 강제 삭제했습니다"))
                 .andDo(document("review-admin/force-delete",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

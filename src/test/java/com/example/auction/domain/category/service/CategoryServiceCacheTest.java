@@ -1,8 +1,8 @@
 package com.example.auction.domain.category.service;
 
-import com.example.auction.domain.category.dto.CategoryCreateRequest;
-import com.example.auction.domain.category.dto.CategoryMoveRequest;
-import com.example.auction.domain.category.dto.CategoryRenameRequest;
+import com.example.auction.domain.category.dto.request.CategoryCreateRequest;
+import com.example.auction.domain.category.dto.request.CategoryMoveRequest;
+import com.example.auction.domain.category.dto.request.CategoryRenameRequest;
 import com.example.auction.domain.category.entity.Category;
 import com.example.auction.domain.category.repository.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;

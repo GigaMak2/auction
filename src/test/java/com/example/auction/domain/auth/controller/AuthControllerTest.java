@@ -3,10 +3,10 @@ package com.example.auction.domain.auth.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.exception.GlobalExceptionHandler;
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.auth.dto.AuthLoginRequest;
-import com.example.auction.domain.auth.dto.AuthLoginResponse;
-import com.example.auction.domain.auth.dto.AuthSignupRequest;
-import com.example.auction.domain.auth.dto.AuthSignupResponse;
+import com.example.auction.domain.auth.dto.request.AuthLoginRequest;
+import com.example.auction.domain.auth.dto.response.AuthLoginResponse;
+import com.example.auction.domain.auth.dto.request.AuthSignupRequest;
+import com.example.auction.domain.auth.dto.response.AuthSignupResponse;
 import com.example.auction.domain.auth.exception.AuthErrorEnum;
 import com.example.auction.domain.auth.service.AuthService;
 import com.example.auction.domain.user.enums.UserRole;
@@ -247,7 +247,7 @@ class AuthControllerTest {
                         .requestAttr("accessToken", "accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("로그아웃 요청 성공"))
+                .andExpect(jsonPath("$.message").value("로그아웃했습니다"))
                 .andDo(document("auth/logout",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

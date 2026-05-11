@@ -12,11 +12,9 @@ import com.example.auction.domain.auction.result.repository.AuctionResultReposit
 import com.example.auction.domain.bid.dto.response.BidCachedResponse;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
-import com.example.auction.domain.bid.entity.Bid;
-import com.example.auction.domain.bid.exceptions.BidErrorEnum;
+import com.example.auction.domain.bid.exception.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -47,7 +45,7 @@ public class BidQueryService {
     }
 
     // 특정 경매의 입찰조회(삭제된 유저의 입찰 조회 가능)
-    public PageResponse<BidListResponse> getBids(CustomUserDetails userDetails, Long auctionId, Pageable pageable) {
+    public PageResponse<BidListResponse> getBids(Long auctionId, Pageable pageable) {
         // 경매 존재 여부 및 상태 확인
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));
@@ -64,7 +62,7 @@ public class BidQueryService {
     }
 
     // 입찰 결과 조회(1건, 삭제된 유저의 입찰 조회 가능)
-    public BidResponse getWinnerBid(CustomUserDetails userDetails, Long auctionId) {
+    public BidResponse getWinnerBid(Long auctionId) {
 
         // 경매 존재 여부 및 상태 확인
         Auction auction = auctionRepository.findById(auctionId)
@@ -86,7 +84,7 @@ public class BidQueryService {
     }
 
     // 현재 최저가 입찰 조회(삭제된 유저의 입찰 제외)
-    public BidResponse getCurrentMinBid(CustomUserDetails userDetails, Long auctionId) {
+    public BidResponse getCurrentMinBid(Long auctionId) {
         // 경매 존재 여부 및 상태 확인
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));

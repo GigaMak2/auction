@@ -1,11 +1,11 @@
 package com.example.auction.domain.auction.util;
 
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.auction.dto.CreateAuctionRequest;
+import com.example.auction.domain.auction.dto.request.CreateAuctionRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.example.auction.domain.auction.dto.AuctionSearchCondition;
+import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

@@ -1,3 +1,4 @@
+
 package com.example.auction.domain.auction.eventBridge.service;
 
 import com.example.auction.domain.auction.eventBridge.entity.AuctionCancelledEventBridge;

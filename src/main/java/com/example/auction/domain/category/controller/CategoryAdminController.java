@@ -1,7 +1,12 @@
 package com.example.auction.domain.category.controller;
 
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.domain.category.dto.*;
+import com.example.auction.domain.category.dto.request.CategoryCreateRequest;
+import com.example.auction.domain.category.dto.request.CategoryMoveRequest;
+import com.example.auction.domain.category.dto.request.CategoryRenameRequest;
+import com.example.auction.domain.category.dto.response.CategoryCreateResponse;
+import com.example.auction.domain.category.dto.response.CategoryMoveResponse;
+import com.example.auction.domain.category.dto.response.CategoryRenameResponse;
 import com.example.auction.domain.category.service.CategoryAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +26,7 @@ public class CategoryAdminController {
             @Valid @RequestBody CategoryCreateRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(BaseResponse.success(
-                HttpStatus.CREATED.name(), "카테고리 생성 요청 성공", categoryAdminService.createCategory(request)));
+                HttpStatus.CREATED.name(), "카테고리를 생성했습니다", categoryAdminService.createCategory(request)));
     }
 
     @PatchMapping("/{categoryId}/name")
@@ -30,7 +35,7 @@ public class CategoryAdminController {
             @Valid @RequestBody CategoryRenameRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "카테고리 이름 수정 요청 성공", categoryAdminService.renameCategory(categoryId, request)));
+                HttpStatus.OK.name(), "카테고리 이름을 수정했습니다", categoryAdminService.renameCategory(categoryId, request)));
     }
 
     @PatchMapping("/{categoryId}/parent")
@@ -39,6 +44,6 @@ public class CategoryAdminController {
             @Valid @RequestBody CategoryMoveRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "카테고리 이동 요청 성공", categoryAdminService.moveCategory(categoryId, request)));
+                HttpStatus.OK.name(), "카테고리를 이동했습니다", categoryAdminService.moveCategory(categoryId, request)));
     }
 }

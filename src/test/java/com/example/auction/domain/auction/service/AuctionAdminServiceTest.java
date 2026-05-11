@@ -2,8 +2,8 @@ package com.example.auction.domain.auction.service;
 
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
-import com.example.auction.domain.auction.dto.AuctionAdminSearchCondition;
+import com.example.auction.domain.auction.dto.response.AuctionAdminListResponse;
+import com.example.auction.domain.auction.dto.request.AuctionAdminSearchCondition;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;

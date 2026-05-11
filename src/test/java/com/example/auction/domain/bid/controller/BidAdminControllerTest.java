@@ -87,7 +87,7 @@ class BidAdminControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("입찰 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("입찰 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(3))
                 .andExpect(jsonPath("$.data.totalElements").value(3))
                 .andDo(document("bid-admin/get-bid-list",
@@ -153,7 +153,7 @@ class BidAdminControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("입찰 강제 취소 요청 성공"))
+                .andExpect(jsonPath("$.message").value("입찰을 강제 취소했습니다"))
                 .andDo(document("bid-admin/force-cancel",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

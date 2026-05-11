@@ -1,7 +1,7 @@
 package com.example.auction.domain.review.service;
 
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.review.dto.ReviewImagePresignResponse;
+import com.example.auction.domain.review.dto.response.ReviewImagePresignResponse;
 import com.example.auction.domain.review.exception.ReviewErrorEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

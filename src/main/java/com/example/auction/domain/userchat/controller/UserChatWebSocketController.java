@@ -1,7 +1,7 @@
 package com.example.auction.domain.userchat.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
-import com.example.auction.domain.userchat.dto.UserChatMessageRequest;
+import com.example.auction.domain.userchat.dto.request.UserChatMessageRequest;
 import com.example.auction.domain.userchat.service.UserChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

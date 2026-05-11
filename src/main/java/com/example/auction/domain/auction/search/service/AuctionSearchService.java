@@ -8,8 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
-import com.example.auction.domain.auction.dto.AuctionSearchCondition;
+import com.example.auction.domain.auction.dto.response.AuctionAdminListResponse;
+import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.search.dto.AuctionSearchResult;
 import com.example.auction.domain.auction.util.AuctionUtil;

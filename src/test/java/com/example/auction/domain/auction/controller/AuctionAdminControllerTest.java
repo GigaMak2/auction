@@ -3,7 +3,7 @@ package com.example.auction.domain.auction.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
+import com.example.auction.domain.auction.dto.response.AuctionAdminListResponse;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.service.AuctionAdminService;
 import org.junit.jupiter.api.AfterEach;
@@ -87,7 +87,7 @@ class AuctionAdminControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("경매 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("경매 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(3))
                 .andExpect(jsonPath("$.data.totalElements").value(3))
                 .andDo(document("auction-admin/get-auction-list",
@@ -97,7 +97,7 @@ class AuctionAdminControllerTest {
                         queryParameters(
                                 parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
                                 parameterWithName("size").description("페이지 크기 (1 ~ 100)").optional(),
-                                parameterWithName("status").description("경매 상태 필터 (READY / ACTIVE / CLOSED / CANCELLED)").optional(),
+                                parameterWithName("status").description("경매 상태 필터 (READY / ACTIVE / DONE / NO_BID / CANCELLED)").optional(),
                                 parameterWithName("keyword").description("검색 키워드").optional()
                         )
                 ));;
@@ -152,7 +152,7 @@ class AuctionAdminControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("경매 강제 취소 요청 성공"))
+                .andExpect(jsonPath("$.message").value("경매를 강제 취소했습니다"))
                 .andDo(document("auction-admin/force-cancel",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

@@ -27,7 +27,7 @@ public class Auction extends CreatableEntity {
     private Long userId;
 
     @Size(max=1024)
-    @Column(name="description", nullable = true)
+    @Column(name="description")
     private String description;
 
     @Column(name="max_price", nullable = false)
@@ -47,7 +47,7 @@ public class Auction extends CreatableEntity {
     @Column(name="ended_at", nullable = false)
     private LocalDateTime endedAt;
 
-    @Column(name="cancelled_at", nullable = true)
+    @Column(name="cancelled_at")
     private LocalDateTime cancelledAt;
 
     @Column(name="category_id", nullable = false)

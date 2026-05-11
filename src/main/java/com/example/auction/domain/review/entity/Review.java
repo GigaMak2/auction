@@ -2,7 +2,7 @@ package com.example.auction.domain.review.entity;
 
 import com.example.auction.common.entity.ModifiableEntity;
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.review.dto.ReviewModifyRequest;
+import com.example.auction.domain.review.dto.request.ReviewModifyRequest;
 import com.example.auction.domain.review.exception.ReviewErrorEnum;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

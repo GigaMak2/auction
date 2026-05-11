@@ -83,7 +83,7 @@ class BidUserControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("내 입찰 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.message").value("내 입찰 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("bid-user/get-my-bids",

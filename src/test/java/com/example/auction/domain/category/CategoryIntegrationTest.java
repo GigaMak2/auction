@@ -1,10 +1,10 @@
 package com.example.auction.domain.category;
 
-import com.example.auction.domain.auth.dto.AuthLoginRequest;
-import com.example.auction.domain.auth.dto.AuthSignupRequest;
-import com.example.auction.domain.category.dto.CategoryCreateRequest;
-import com.example.auction.domain.category.dto.CategoryMoveRequest;
-import com.example.auction.domain.category.dto.CategoryRenameRequest;
+import com.example.auction.domain.auth.dto.request.AuthLoginRequest;
+import com.example.auction.domain.auth.dto.request.AuthSignupRequest;
+import com.example.auction.domain.category.dto.request.CategoryCreateRequest;
+import com.example.auction.domain.category.dto.request.CategoryMoveRequest;
+import com.example.auction.domain.category.dto.request.CategoryRenameRequest;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.testutils.BaseIntegrationTest;
@@ -96,7 +96,7 @@ public class CategoryIntegrationTest extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("카테고리 생성 요청 성공"))
+                .andExpect(jsonPath("$.message").value("카테고리를 생성했습니다"))
                 .andExpect(jsonPath("$.data.name").value("전자기기"))
                 .andExpect(jsonPath("$.data.parentId").doesNotExist());
     }
@@ -182,7 +182,7 @@ public class CategoryIntegrationTest extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(new CategoryRenameRequest("가전제품"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("카테고리 이름 수정 요청 성공"))
+                .andExpect(jsonPath("$.message").value("카테고리 이름을 수정했습니다"))
                 .andExpect(jsonPath("$.data.name").value("가전제품"));
     }
 
@@ -222,7 +222,7 @@ public class CategoryIntegrationTest extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(new CategoryMoveRequest(parentId))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("카테고리 이동 요청 성공"))
+                .andExpect(jsonPath("$.message").value("카테고리를 이동했습니다"))
                 .andExpect(jsonPath("$.data.parentId").value(parentId));
     }
 
@@ -260,7 +260,7 @@ public class CategoryIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/categories"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("카테고리 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("카테고리 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].name").value("전자기기"))
                 .andExpect(jsonPath("$.data[0].children[0].name").value("스마트폰"));

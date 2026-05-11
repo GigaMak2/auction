@@ -23,10 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.auction.dto.AuctionSearchCondition;
-import com.example.auction.domain.auction.dto.CreateAuctionRequest;
-import com.example.auction.domain.auction.dto.GetAuctionResponse;
-import com.example.auction.domain.auction.dto.GetManyAuctionsResponse;
+import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
+import com.example.auction.domain.auction.dto.request.CreateAuctionRequest;
+import com.example.auction.domain.auction.dto.response.GetAuctionResponse;
+import com.example.auction.domain.auction.dto.response.GetManyAuctionsResponse;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
@@ -51,7 +51,6 @@ public class AuctionService {
     private final ApplicationEventPublisher eventPublisher;
     private final AuctionSearchService auctionSearchService;
     private final KoreanAnalyzerUtil koreanAnalyzerUtil;
-
 
     @Transactional(readOnly = true)
     @Cacheable(
@@ -114,7 +113,7 @@ public class AuctionService {
         return PageResponse.create(auctionsDto);
     }
 
-    @Transactional()
+    @Transactional
     @CachePut(
         cacheNames = {"getAuction"},
         key = "#result.getId()"
@@ -173,7 +172,7 @@ public class AuctionService {
         return GetAuctionResponse.from(auction);
     }
 
-    @Transactional()
+    @Transactional
     @Caching(
         evict = {
             @CacheEvict(

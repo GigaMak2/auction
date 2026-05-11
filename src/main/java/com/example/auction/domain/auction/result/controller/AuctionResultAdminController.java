@@ -2,8 +2,8 @@ package com.example.auction.domain.auction.result.controller;
 
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
-import com.example.auction.domain.auction.result.dto.AuctionResultAdminListResponse;
-import com.example.auction.domain.auction.result.dto.AuctionResultAdminPageCondition;
+import com.example.auction.domain.auction.result.dto.response.AuctionResultAdminListResponse;
+import com.example.auction.domain.auction.result.dto.request.AuctionResultAdminPageCondition;
 import com.example.auction.domain.auction.result.service.AuctionResultAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +23,6 @@ public class AuctionResultAdminController {
             @Valid @ModelAttribute AuctionResultAdminPageCondition condition
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "경매 결과 목록 조회 요청 성공", auctionResultAdminService.getAuctionResultList(condition)));
+                HttpStatus.OK.name(), "경매 결과 목록을 조회했습니다", auctionResultAdminService.getAuctionResultList(condition)));
     }
 }

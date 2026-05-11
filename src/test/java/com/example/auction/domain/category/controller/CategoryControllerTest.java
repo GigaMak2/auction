@@ -1,7 +1,7 @@
 package com.example.auction.domain.category.controller;
 
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.category.dto.*;
+import com.example.auction.domain.category.dto.response.CategoryListGetResponse;
 import com.example.auction.domain.category.service.CategoryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ class CategoryControllerTest {
         mockMvc.perform(get("/api/categories"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("카테고리 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("카테고리 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].name").value("전자기기"))
                 .andExpect(jsonPath("$.data[0].children[0].name").value("스마트폰"))

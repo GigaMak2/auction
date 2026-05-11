@@ -1,8 +1,8 @@
 package com.example.auction.domain.auction.result.service;
 
 import com.example.auction.common.dto.PageResponse;
-import com.example.auction.domain.auction.result.dto.AuctionResultAdminListResponse;
-import com.example.auction.domain.auction.result.dto.AuctionResultAdminPageCondition;
+import com.example.auction.domain.auction.result.dto.response.AuctionResultAdminListResponse;
+import com.example.auction.domain.auction.result.dto.request.AuctionResultAdminPageCondition;
 import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

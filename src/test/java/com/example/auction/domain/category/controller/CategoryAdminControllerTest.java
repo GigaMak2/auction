@@ -1,7 +1,12 @@
 package com.example.auction.domain.category.controller;
 
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.category.dto.*;
+import com.example.auction.domain.category.dto.request.CategoryCreateRequest;
+import com.example.auction.domain.category.dto.request.CategoryMoveRequest;
+import com.example.auction.domain.category.dto.request.CategoryRenameRequest;
+import com.example.auction.domain.category.dto.response.CategoryCreateResponse;
+import com.example.auction.domain.category.dto.response.CategoryMoveResponse;
+import com.example.auction.domain.category.dto.response.CategoryRenameResponse;
 import com.example.auction.domain.category.service.CategoryAdminService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,7 +73,7 @@ public class CategoryAdminControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("카테고리 생성 요청 성공"))
+                .andExpect(jsonPath("$.message").value("카테고리를 생성했습니다"))
                 .andExpect(jsonPath("$.data.categoryId").value(1L))
                 .andExpect(jsonPath("$.data.name").value("전자기기"))
                 .andDo(document("category-admin/create-category",
@@ -133,7 +138,7 @@ public class CategoryAdminControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("카테고리 이름 수정 요청 성공"))
+                .andExpect(jsonPath("$.message").value("카테고리 이름을 수정했습니다"))
                 .andExpect(jsonPath("$.data.categoryId").value(1L))
                 .andExpect(jsonPath("$.data.name").value("가전제품"))
                 .andDo(document("category-admin/rename-category",
@@ -181,7 +186,7 @@ public class CategoryAdminControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("카테고리 이동 요청 성공"))
+                .andExpect(jsonPath("$.message").value("카테고리를 이동했습니다"))
                 .andExpect(jsonPath("$.data.categoryId").value(1L))
                 .andExpect(jsonPath("$.data.parentId").value(2L))
                 .andDo(document("category-admin/move-category",
