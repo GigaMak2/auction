@@ -336,7 +336,9 @@ class AuctionControllerTest {
 
         mockMvc.perform(delete("/api/auctions/{auctionId}", 1L)
                         .header("Authorization", "Bearer accessToken"))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("경매를 취소했습니다"))
                 .andDo(document("auction/cancel-auction",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

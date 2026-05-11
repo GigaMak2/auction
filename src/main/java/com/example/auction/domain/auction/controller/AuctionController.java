@@ -81,11 +81,11 @@ public class AuctionController {
     }
 
     @DeleteMapping("/api/auctions/{auctionId}")
-    public ResponseEntity<Void> cancelAuction(
+    public ResponseEntity<BaseResponse<Void>> cancelAuction(
             @PathVariable Long auctionId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         auctionService.cancelAuction(auctionId, details);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "경매를 취소했습니다", null));
     }
 }
