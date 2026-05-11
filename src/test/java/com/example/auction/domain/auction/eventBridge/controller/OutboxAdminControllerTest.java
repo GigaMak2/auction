@@ -1,8 +1,7 @@
-package com.example.auction.domain.auction.controller;
+package com.example.auction.domain.auction.eventBridge.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.auction.eventBridge.controller.OutboxAdminController;
 import com.example.auction.domain.auction.eventBridge.dto.OutboxAdminResponse;
 import com.example.auction.domain.auction.eventBridge.service.OutboxAdminService;
 import org.junit.jupiter.api.AfterEach;
@@ -80,7 +79,7 @@ class OutboxAdminControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("FAILED outbox 조회 성공"))
+                .andExpect(jsonPath("$.message").value("FAILED outbox 조회에 성공했습니다"))
                 .andExpect(jsonPath("$.data.length()").value(2))
                 .andDo(document("outbox-admin/get-failed-outbox",
                         preprocessRequest(prettyPrint()),
@@ -131,7 +130,7 @@ class OutboxAdminControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("재시도 요청 성공"))
+                .andExpect(jsonPath("$.message").value("재시도 요청을 성공했습니다"))
                 .andDo(document("outbox-admin/retry-outbox",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
