@@ -1,4 +1,4 @@
-// v1용 - sleep 없애고 같은 가격으로 몰리게
+// v1용
 import http from 'k6/http';
 import { Counter, Rate } from 'k6/metrics';
 import { check, sleep } from 'k6';
