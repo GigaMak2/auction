@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<BaseResponse<Void>> handleIllegalArgumentException(IllegalArgumentException e) {
         log.error("요청 값 유효성 에러 발생 : ", e);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(BaseResponse.fail(String.valueOf(HttpStatus.BAD_REQUEST.name()), "요청 값이 유효하지 않습니다"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(BaseResponse.fail(HttpStatus.BAD_REQUEST.name(), "요청 값이 유효하지 않습니다"));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
