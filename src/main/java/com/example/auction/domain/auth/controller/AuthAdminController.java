@@ -20,6 +20,6 @@ public class AuthAdminController {
     @PostMapping("/signup")
     public ResponseEntity<BaseResponse<AuthSignupResponse>> signup(@Valid @RequestBody AuthAdminSignupRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(BaseResponse.success(
-                HttpStatus.CREATED.name(), "관리자 회원가입 요청 성공", authAdminService.signup(request)));
+                HttpStatus.CREATED.name(), "관리자 회원가입했습니다", authAdminService.signup(request)));
     }
 }

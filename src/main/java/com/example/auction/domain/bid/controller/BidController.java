@@ -36,7 +36,7 @@ public class BidController {
     ) {
         BidResponse data = commandService.placeBidDis(userDetails, auctionId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.CREATED.name()), "입찰이 완료되었습니다", data));
+                .body(BaseResponse.success(String.valueOf(HttpStatus.CREATED.name()), "입찰을 생성했습니다", data));
     }
 
 
@@ -55,7 +55,7 @@ public class BidController {
         );
         PageResponse<BidListResponse> data = queryService.getBids(userDetails, auctionId, pageable);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.name()), "입찰 내역 조회가 완료되었습니다", data));
+                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.name()), "입찰 목록을 조회했습니다", data));
     }
 
     // 입찰 결과 조회(1건)
@@ -66,7 +66,7 @@ public class BidController {
     ) {
         BidResponse data = queryService.getWinnerBid(userDetails, auctionId);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.name()), "입찰 결과 조회가 완료되었습니다", data));
+                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.name()), "입찰 결과를 조회했습니다", data));
     }
 
     // (경매 진행중) 현재 최저가입찰 조회
@@ -77,6 +77,6 @@ public class BidController {
     ) {
         BidResponse data = queryService.getCurrentMinBid(userDetails, auctionId);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.name()), "현재 최저가 입찰 조회가 완료되었습니다", data));
+                .body(BaseResponse.success(String.valueOf(HttpStatus.OK.name()), "현재 최저가 입찰을 조회했습니다", data));
     }
 }

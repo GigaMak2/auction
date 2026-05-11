@@ -31,7 +31,7 @@ public class AuctionController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(
                         HttpStatus.OK.name(),
-                        "경매 단건조회를 하였습니다",
+                        "경매를 조회했습니다",
                         res
                 ));
     }
@@ -45,7 +45,7 @@ public class AuctionController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(
                         HttpStatus.OK.name(),
-                        "경매 전체 조회를 하였습니다",
+                        "경매 목록을 조회했습니다",
                         res
                 ));
     }
@@ -60,7 +60,7 @@ public class AuctionController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(
                         HttpStatus.OK.name(),
-                        "경매 전체 조회를 하였습니다",
+                        "내 경매 목록을 조회했습니다",
                         res
                 ));
     }
@@ -75,7 +75,7 @@ public class AuctionController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success(
                         HttpStatus.CREATED.name(),
-                        "경매를 생성 하였습니다",
+                        "경매를 생성했습니다",
                         res
                 ));
     }

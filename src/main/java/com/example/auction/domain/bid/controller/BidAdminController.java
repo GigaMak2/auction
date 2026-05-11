@@ -25,7 +25,7 @@ public class BidAdminController {
             @Valid @ModelAttribute BidAdminSearchCondition condition
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "입찰 목록 조회 요청 성공", bidAdminService.getBidList(condition)));
+                HttpStatus.OK.name(), "입찰 목록을 조회했습니다", bidAdminService.getBidList(condition)));
     }
 
     @DeleteMapping("/{bidId}")
@@ -34,6 +34,6 @@ public class BidAdminController {
     ) {
         log.info("[BidAdminController] forceCancel — bidId={}", bidId); // 어드민 입찰 강제 취소 요청 추적용
         bidAdminService.forceCancel(bidId);
-        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "입찰 강제 취소 요청 성공", null));
+        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "입찰을 강제 취소했습니다", null));
     }
 }

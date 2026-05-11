@@ -23,6 +23,6 @@ public class AuctionResultAdminController {
             @Valid @ModelAttribute AuctionResultAdminPageCondition condition
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "경매 결과 목록 조회 요청 성공", auctionResultAdminService.getAuctionResultList(condition)));
+                HttpStatus.OK.name(), "경매 결과 목록을 조회했습니다", auctionResultAdminService.getAuctionResultList(condition)));
     }
 }

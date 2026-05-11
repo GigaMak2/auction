@@ -19,6 +19,6 @@ public class CategoryController {
     @GetMapping("/api/categories")
     public ResponseEntity<BaseResponse<List<CategoryListGetResponse>>> getCategoryList() {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "카테고리 목록 조회 요청 성공", categoryService.getCategoryList()));
+                HttpStatus.OK.name(), "카테고리 목록을 조회했습니다", categoryService.getCategoryList()));
     }
 }
