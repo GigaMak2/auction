@@ -1,5 +1,9 @@
-package com.example.auction.domain.auction.eventbridge;
 
+package com.example.auction.domain.auction.eventBridge.service;
+
+import com.example.auction.domain.auction.eventBridge.entity.AuctionCancelledEventBridge;
+import com.example.auction.domain.auction.eventBridge.entity.AuctionCreatedEventBridge;
+import com.example.auction.domain.auction.eventBridge.repository.AuctionScheduleOutboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 public class AuctionEventBridgeService {
 
     private final SchedulerClient schedulerClient;
+    private final AuctionScheduleOutboxRepository outboxRepository;
 
     // 이벤트브릿지가 어떤 람다 함수를 실행할지 찾을 때 쓰는 경로. 계정번호와 실제 람다함수이름이 필요함
     @Value("${aws.eventbridge.lambda-arn}")
@@ -46,18 +51,29 @@ public class AuctionEventBridgeService {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAuctionCreated(AuctionCreatedEventBridge event) {
         int maxAttempts = 3;
+        // start/end 따로 시도
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
-                // 경매 시작/종료 5분전으로 세팅
                 registerStartSchedule(event.auctionId(), event.startedAt());
-                registerEndSchedule(event.auctionId(), event.endedAt());
-                return; // 성공하면 종료
+                outboxRepository.markPublished(event.auctionId(), "START");
+                break;
             } catch (Exception e) {
-                log.warn("[EventBridge] 스케줄 등록 실패 {}/{}회 - auctionId={}",
-                        attempt, maxAttempts, event.auctionId(), e);
+                log.warn("[EventBridge] START 스케줄 등록 실패 {}/{}회 - auctionId={}", attempt, maxAttempts, event.auctionId(), e);
                 if (attempt == maxAttempts) {
-                    log.error("[EventBridge] 스케줄 등록 최종 실패 - auctionId={}, 일부 성공 여부 확인 필요",
-                            event.auctionId(), e);
+                    log.error("[EventBridge] START 스케줄 등록 최종 실패 - auctionId={}", event.auctionId(), e);
+                }
+            }
+        }
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                registerEndSchedule(event.auctionId(), event.endedAt());
+                outboxRepository.markPublished(event.auctionId(), "END");
+                break;
+            } catch (Exception e) {
+                log.warn("[EventBridge] END 스케줄 등록 실패 {}/{}회 - auctionId={}", attempt, maxAttempts, event.auctionId(), e);
+                if (attempt == maxAttempts) {
+                    log.error("[EventBridge] END 스케줄 등록 최종 실패 - auctionId={}", event.auctionId(), e);
                 }
             }
         }
@@ -76,7 +92,7 @@ public class AuctionEventBridgeService {
         }
         // 신규와 레거시 둘다 등록
         registerSchedule(auctionId, startedAt.minusMinutes(5), startedAt, "START", lambdaArn, newArnSuffix);
-        registerSchedule(auctionId, startedAt, startedAt,"START", legacyLambdaArn, legacyArnSuffix);
+        //registerSchedule(auctionId, startedAt, startedAt,"START", legacyLambdaArn, legacyArnSuffix);
     }
 
     // 경매 종료 스케줄 등록(5분 전)
@@ -86,7 +102,7 @@ public class AuctionEventBridgeService {
             return;
         }
         registerSchedule(auctionId, endedAt.minusMinutes(5), endedAt, "END", lambdaArn, newArnSuffix);
-        registerSchedule(auctionId, endedAt, endedAt, "END", legacyLambdaArn, legacyArnSuffix);
+        //registerSchedule(auctionId, endedAt, endedAt, "END", legacyLambdaArn, legacyArnSuffix);
 
     }
 
