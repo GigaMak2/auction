@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 
 @RestController
-@RequestMapping("/api/auctions/{auction_id}/bids")
+@RequestMapping("/api/auctions/{auctionId}/bids")
 @RequiredArgsConstructor
 public class BidController {
 
@@ -31,7 +31,7 @@ public class BidController {
     @PostMapping("/v2")
     public ResponseEntity<BaseResponse<BidResponse>> placeBidDis(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("auction_id") Long auctionId,
+            @PathVariable("auctionId") Long auctionId,
             @Valid @RequestBody BidRequest request
     ) {
         BidResponse data = commandService.placeBidDis(userDetails, auctionId, request);
@@ -44,7 +44,7 @@ public class BidController {
     @GetMapping("/v1")
     public ResponseEntity<BaseResponse<PageResponse<BidListResponse>>> getBids(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("auction_id") Long auctionId,
+            @PathVariable("auctionId") Long auctionId,
             @ModelAttribute @Valid BidPageRequest request
             ) {
         Pageable pageable = PageRequest.of(
@@ -62,7 +62,7 @@ public class BidController {
     @GetMapping("/winner/v1")
     public ResponseEntity<BaseResponse<BidResponse>> getWinnerBid(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("auction_id") Long auctionId
+            @PathVariable("auctionId") Long auctionId
     ) {
         BidResponse data = queryService.getWinnerBid(userDetails, auctionId);
         return ResponseEntity.status(HttpStatus.OK)
@@ -73,7 +73,7 @@ public class BidController {
     @GetMapping("/current/v1")
     public ResponseEntity<BaseResponse<BidResponse>> getCurrentMinBid(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("auction_id") Long auctionId
+            @PathVariable("auctionId") Long auctionId
     ) {
         BidResponse data = queryService.getCurrentMinBid(userDetails, auctionId);
         return ResponseEntity.status(HttpStatus.OK)
