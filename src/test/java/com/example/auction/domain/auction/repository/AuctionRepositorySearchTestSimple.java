@@ -1,10 +1,10 @@
 package com.example.auction.domain.auction.repository;
 
 import com.example.auction.common.config.security.CustomUserDetails;
-import com.example.auction.domain.auction.dto.AuctionAdminListResponse;
-import com.example.auction.domain.auction.dto.AuctionSearchCondition;
-import com.example.auction.domain.auction.dto.CreateAuctionRequest;
-import com.example.auction.domain.auction.dto.GetAuctionResponse;
+import com.example.auction.domain.auction.dto.response.AuctionAdminListResponse;
+import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
+import com.example.auction.domain.auction.dto.request.CreateAuctionRequest;
+import com.example.auction.domain.auction.dto.response.GetAuctionResponse;
 import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.service.AuctionService;

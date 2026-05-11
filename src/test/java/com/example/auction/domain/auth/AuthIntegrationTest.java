@@ -1,7 +1,7 @@
 package com.example.auction.domain.auth;
 
-import com.example.auction.domain.auth.dto.AuthLoginRequest;
-import com.example.auction.domain.auth.dto.AuthSignupRequest;
+import com.example.auction.domain.auth.dto.request.AuthLoginRequest;
+import com.example.auction.domain.auth.dto.request.AuthSignupRequest;
 import com.example.auction.testutils.BaseIntegrationTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -178,7 +178,7 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
                         .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("로그아웃 요청 성공"));
+                .andExpect(jsonPath("$.message").value("로그아웃했습니다"));
     }
 
 

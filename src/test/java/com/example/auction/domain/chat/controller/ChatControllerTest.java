@@ -5,10 +5,10 @@ import com.example.auction.common.config.security.CustomAuthenticationEntryPoint
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.config.security.JwtProvider;
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.chat.dto.ChatMessageListResponse;
-import com.example.auction.domain.chat.dto.ChatMessageResponse;
-import com.example.auction.domain.chat.dto.ChatRoomResponse;
-import com.example.auction.domain.chat.dto.ChatRoomUpdateRequest;
+import com.example.auction.domain.chat.dto.response.ChatMessageListResponse;
+import com.example.auction.domain.chat.dto.response.ChatMessageResponse;
+import com.example.auction.domain.chat.dto.response.ChatRoomResponse;
+import com.example.auction.domain.chat.dto.request.ChatRoomUpdateRequest;
 import com.example.auction.domain.chat.entity.MessageRole;
 import com.example.auction.domain.chat.service.ChatService;
 import org.junit.jupiter.api.AfterEach;

@@ -2,10 +2,10 @@ package com.example.auction.domain.auth.service;
 
 import com.example.auction.common.config.security.JwtProvider;
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.auth.dto.AuthLoginRequest;
-import com.example.auction.domain.auth.dto.AuthLoginResponse;
-import com.example.auction.domain.auth.dto.AuthSignupRequest;
-import com.example.auction.domain.auth.dto.AuthSignupResponse;
+import com.example.auction.domain.auth.dto.request.AuthLoginRequest;
+import com.example.auction.domain.auth.dto.response.AuthLoginResponse;
+import com.example.auction.domain.auth.dto.request.AuthSignupRequest;
+import com.example.auction.domain.auth.dto.response.AuthSignupResponse;
 import com.example.auction.domain.auth.exception.AuthErrorEnum;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.exception.UserErrorEnum;

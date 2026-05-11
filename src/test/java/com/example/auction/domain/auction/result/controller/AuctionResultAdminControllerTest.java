@@ -3,7 +3,7 @@ package com.example.auction.domain.auction.result.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.auction.result.dto.AuctionResultAdminListResponse;
+import com.example.auction.domain.auction.result.dto.response.AuctionResultAdminListResponse;
 import com.example.auction.domain.auction.result.service.AuctionResultAdminService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,7 +83,7 @@ class AuctionResultAdminControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("경매 결과 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("경매 결과 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("auction-result-admin/get-auction-result-list",

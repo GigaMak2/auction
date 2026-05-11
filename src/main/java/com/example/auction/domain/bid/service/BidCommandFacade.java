@@ -4,7 +4,7 @@ import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.bid.dto.request.BidRequest;
 import com.example.auction.domain.bid.dto.response.BidResponse;
-import com.example.auction.domain.bid.exceptions.BidErrorEnum;
+import com.example.auction.domain.bid.exception.BidErrorEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;

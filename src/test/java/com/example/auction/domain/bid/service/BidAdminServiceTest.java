@@ -6,7 +6,7 @@ import com.example.auction.domain.bid.dto.request.BidAdminSearchCondition;
 import com.example.auction.domain.bid.dto.response.BidAdminListResponse;
 import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
-import com.example.auction.domain.bid.exceptions.BidErrorEnum;
+import com.example.auction.domain.bid.exception.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

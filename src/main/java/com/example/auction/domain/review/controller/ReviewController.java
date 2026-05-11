@@ -3,7 +3,10 @@ package com.example.auction.domain.review.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
-import com.example.auction.domain.review.dto.*;
+import com.example.auction.domain.review.dto.request.ReviewCreateRequest;
+import com.example.auction.domain.review.dto.request.ReviewModifyRequest;
+import com.example.auction.domain.review.dto.request.ReviewSearchCondition;
+import com.example.auction.domain.review.dto.response.*;
 import com.example.auction.domain.review.service.ReviewImageService;
 import com.example.auction.domain.review.service.ReviewService;
 import jakarta.validation.Valid;
@@ -28,7 +31,7 @@ public class ReviewController {
             @RequestParam(defaultValue = "image/jpeg") String contentType
     ) {
         return ResponseEntity.ok(BaseResponse.success(
-                HttpStatus.OK.name(), "이미지 업로드 URL 발급 성공",
+                HttpStatus.OK.name(), "이미지 업로드 URL을 발급했습니다",
                 reviewImageService.generatePresignedUrl(userDetails.getUserId(), contentType)));
     }
 
@@ -39,7 +42,7 @@ public class ReviewController {
     ) {
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.CREATED).body(BaseResponse.success(
-                HttpStatus.CREATED.name(), "리뷰 생성 요청 성공", reviewService.createReview(userId, request)));
+                HttpStatus.CREATED.name(), "리뷰를 생성했습니다", reviewService.createReview(userId, request)));
     }
 
     @GetMapping("/written")
@@ -49,7 +52,7 @@ public class ReviewController {
     ) {
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "작성한 리뷰 목록 조회 요청 성공", reviewService.getWrittenReviewList(userId, condition)));
+                HttpStatus.OK.name(), "작성한 리뷰 목록을 조회했습니다", reviewService.getWrittenReviewList(userId, condition)));
     }
 
     @GetMapping("/received")
@@ -59,7 +62,7 @@ public class ReviewController {
     ) {
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "받은 리뷰 목록 조회 요청 성공", reviewService.getReceivedReviewList(userId, condition)));
+                HttpStatus.OK.name(), "받은 리뷰 목록을 조회했습니다", reviewService.getReceivedReviewList(userId, condition)));
     }
 
     @GetMapping("/{reviewId}")
@@ -67,7 +70,7 @@ public class ReviewController {
             @PathVariable Long reviewId
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "리뷰 상세 조회 요청 성공", reviewService.getReview(reviewId)));
+                HttpStatus.OK.name(), "리뷰를 조회했습니다", reviewService.getReview(reviewId)));
     }
 
     @PatchMapping("/{reviewId}")
@@ -78,7 +81,7 @@ public class ReviewController {
     ) {
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "리뷰 수정 요청 성공", reviewService.modifyReview(userId, reviewId, request)));
+                HttpStatus.OK.name(), "리뷰를 수정했습니다", reviewService.modifyReview(userId, reviewId, request)));
     }
 
     @DeleteMapping("/{reviewId}")
@@ -88,6 +91,6 @@ public class ReviewController {
     ) {
         Long userId = userDetails.getUserId();
         reviewService.deleteReview(userId, reviewId);
-        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "리뷰 삭제 요청 성공", null));
+        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "리뷰를 삭제했습니다", null));
     }
 }

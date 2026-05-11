@@ -1,6 +1,6 @@
 package com.example.auction.domain.user.repository;
 
-import com.example.auction.domain.user.dto.UserListGetResponse;
+import com.example.auction.domain.user.dto.response.UserListGetResponse;
 import com.example.auction.domain.user.enums.UserRole;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;

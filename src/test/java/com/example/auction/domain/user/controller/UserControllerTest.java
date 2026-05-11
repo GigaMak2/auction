@@ -2,9 +2,9 @@ package com.example.auction.domain.user.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.user.dto.UserChangePasswordRequest;
-import com.example.auction.domain.user.dto.UserGetResponse;
-import com.example.auction.domain.user.dto.UserWithdrawResponse;
+import com.example.auction.domain.user.dto.request.UserChangePasswordRequest;
+import com.example.auction.domain.user.dto.response.UserGetResponse;
+import com.example.auction.domain.user.dto.response.UserWithdrawResponse;
 import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.domain.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
@@ -114,7 +114,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("비밀번호 변경 요청 성공"))
+                .andExpect(jsonPath("$.message").value("비밀번호를 변경했습니다"))
                 .andDo(document("user/change-password",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -177,7 +177,7 @@ class UserControllerTest {
                         .requestAttr("accessToken", "accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("탈퇴 요청 성공"))
+                .andExpect(jsonPath("$.message").value("회원탈퇴했습니다"))
                 .andExpect(jsonPath("$.data.email").value("test@test.com"))
                 .andExpect(jsonPath("$.data.role").value("USER"))
                 .andDo(document("user/withdraw",

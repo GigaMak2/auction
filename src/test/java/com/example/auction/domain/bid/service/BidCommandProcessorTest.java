@@ -10,7 +10,7 @@ import com.example.auction.domain.bid.dto.response.BidCachedResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
-import com.example.auction.domain.bid.exceptions.BidErrorEnum;
+import com.example.auction.domain.bid.exception.BidErrorEnum;
 import com.example.auction.domain.bid.repository.BidRepository;
 import com.example.auction.domain.notification.publisher.NotificationMessagePublisher;
 import com.example.auction.domain.user.entity.User;

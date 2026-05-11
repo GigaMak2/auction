@@ -2,10 +2,10 @@ package com.example.auction.domain.user.controller;
 
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
-import com.example.auction.domain.user.dto.UserDetailGetResponse;
-import com.example.auction.domain.user.dto.UserListGetResponse;
-import com.example.auction.domain.user.dto.UserSearchCondition;
-import com.example.auction.domain.user.dto.UserWithdrawResponse;
+import com.example.auction.domain.user.dto.response.UserDetailGetResponse;
+import com.example.auction.domain.user.dto.response.UserListGetResponse;
+import com.example.auction.domain.user.dto.request.UserSearchCondition;
+import com.example.auction.domain.user.dto.response.UserWithdrawResponse;
 import com.example.auction.domain.user.service.UserAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class UserAdminController {
             @Valid @ModelAttribute UserSearchCondition condition
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "사용자 목록 조회 요청 성공", userAdminService.getUserList(condition)));
+                HttpStatus.OK.name(), "사용자 목록을 조회했습니다", userAdminService.getUserList(condition)));
     }
 
     @GetMapping("/{userId}")
@@ -35,7 +35,7 @@ public class UserAdminController {
             @PathVariable Long userId
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "사용자 상세 조회 요청 성공", userAdminService.getUserDetail(userId)));
+                HttpStatus.OK.name(), "사용자를 조회했습니다", userAdminService.getUserDetail(userId)));
     }
 
     @DeleteMapping("/{userId}")
@@ -44,6 +44,6 @@ public class UserAdminController {
     ) {
         log.info("[UserAdminController] forceWithdraw — userId={}", userId); // 어드민 유저 강제 탈퇴 추적용
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "사용자 강제 탈퇴 요청 성공", userAdminService.forceWithdraw(userId)));
+                HttpStatus.OK.name(), "사용자를 강제 탈퇴했습니다", userAdminService.forceWithdraw(userId)));
     }
 }

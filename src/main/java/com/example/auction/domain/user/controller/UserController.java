@@ -2,9 +2,9 @@ package com.example.auction.domain.user.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.domain.user.dto.UserChangePasswordRequest;
-import com.example.auction.domain.user.dto.UserGetResponse;
-import com.example.auction.domain.user.dto.UserWithdrawResponse;
+import com.example.auction.domain.user.dto.request.UserChangePasswordRequest;
+import com.example.auction.domain.user.dto.response.UserGetResponse;
+import com.example.auction.domain.user.dto.response.UserWithdrawResponse;
 import com.example.auction.domain.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -27,7 +27,7 @@ public class UserController {
     ) {
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "마이페이지 조회 요청 성공", userService.myPage(userId)));
+                HttpStatus.OK.name(), "마이페이지를 조회했습니다", userService.myPage(userId)));
     }
 
     @PatchMapping("/password")
@@ -38,7 +38,7 @@ public class UserController {
         Long userId = userDetails.getUserId();
         userService.changePassword(userId, request);
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "비밀번호 변경 요청 성공", null));
+                HttpStatus.OK.name(), "비밀번호를 변경했습니다", null));
     }
 
     @DeleteMapping
@@ -49,6 +49,6 @@ public class UserController {
         String accessToken = (String) request.getAttribute("accessToken");
         Long userId = userDetails.getUserId();
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "탈퇴 요청 성공", userService.withdraw(userId, accessToken)));
+                HttpStatus.OK.name(), "회원탈퇴했습니다", userService.withdraw(userId, accessToken)));
     }
 }

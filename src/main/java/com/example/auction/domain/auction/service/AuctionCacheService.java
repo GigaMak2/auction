@@ -1,11 +1,10 @@
 package com.example.auction.domain.auction.service;
 
-import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.example.auction.domain.auction.dto.AuctionSearchCondition;
+import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
 
 import lombok.RequiredArgsConstructor;
 
@@ -57,8 +56,8 @@ public class AuctionCacheService {
         builder.append(condition.getPage());
         builder.append("]");
 
-        builder.append("pageSize=[");
-        builder.append(condition.getPageSize());
+        builder.append("size=[");
+        builder.append(condition.getSize());
         builder.append("]");
 
         return builder.toString();

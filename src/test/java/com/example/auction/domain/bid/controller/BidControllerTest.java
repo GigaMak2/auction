@@ -104,7 +104,7 @@ class BidControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("입찰이 완료되었습니다"))
+                .andExpect(jsonPath("$.message").value("입찰을 생성했습니다"))
                 .andDo(document("bid/place-bid",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -193,7 +193,7 @@ class BidControllerTest {
                         new BidListResponse(2L, 1L, BigDecimal.valueOf(4000), now)
                 ), 0, 1, 2L, 20, true);
 
-        given(queryService.getBids(any(), eq(1L), any())).willReturn(response);
+        given(queryService.getBids(eq(1L), any())).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/auctions/{auctionId}/bids/v1", 1L)
@@ -202,7 +202,7 @@ class BidControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("입찰 내역 조회가 완료되었습니다"))
+                .andExpect(jsonPath("$.message").value("입찰 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("bid/get-bids",
@@ -263,14 +263,14 @@ class BidControllerTest {
         given(bid.getStatus()).willReturn(BidAuctionStatus.ACTIVE);
         BidResponse response = BidResponse.of(bid);
 
-        given(queryService.getWinnerBid(any(), eq(1L))).willReturn(response);
+        given(queryService.getWinnerBid(eq(1L))).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/auctions/{auctionId}/bids/winner/v1", 1L)
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("입찰 결과 조회가 완료되었습니다"))
+                .andExpect(jsonPath("$.message").value("입찰 결과를 조회했습니다"))
                 .andDo(document("bid/get-winner-bid",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -296,14 +296,14 @@ class BidControllerTest {
         given(bid.getStatus()).willReturn(BidAuctionStatus.ACTIVE);
         BidResponse response = BidResponse.of(bid);
 
-        given(queryService.getCurrentMinBid(any(), eq(1L))).willReturn(response);
+        given(queryService.getCurrentMinBid(eq(1L))).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/auctions/{auctionId}/bids/current/v1", 1L)
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("현재 최저가 입찰 조회가 완료되었습니다"))
+                .andExpect(jsonPath("$.message").value("현재 최저가 입찰을 조회했습니다"))
                 .andDo(document("bid/get-current-min-bid",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

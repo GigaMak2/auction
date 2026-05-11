@@ -3,7 +3,10 @@ package com.example.auction.domain.review.controller;
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.dto.PageResponse;
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.review.dto.*;
+import com.example.auction.domain.review.dto.request.ReviewCreateRequest;
+import com.example.auction.domain.review.dto.request.ReviewModifyRequest;
+import com.example.auction.domain.review.dto.request.ReviewSearchCondition;
+import com.example.auction.domain.review.dto.response.*;
 import com.example.auction.domain.review.service.ReviewImageService;
 import com.example.auction.domain.review.service.ReviewService;
 import org.junit.jupiter.api.AfterEach;
@@ -92,7 +95,7 @@ class ReviewControllerTest {
                         .param("contentType", "image/jpeg"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("이미지 업로드 URL 발급 성공"))
+                .andExpect(jsonPath("$.message").value("이미지 업로드 URL을 발급했습니다"))
                 .andExpect(jsonPath("$.data.presignedUrl").exists())
                 .andExpect(jsonPath("$.data.imageUrl").exists())
                 .andDo(document("review/get-presigned-url",
@@ -124,7 +127,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 생성 요청 성공"))
+                .andExpect(jsonPath("$.message").value("리뷰를 생성했습니다"))
                 .andExpect(jsonPath("$.data.auctionId").value(10L))
                 .andExpect(jsonPath("$.data.score").value(5))
                 .andExpect(jsonPath("$.data.imageUrl").value("https://cdn.example.com/image.jpg"))
@@ -225,7 +228,7 @@ class ReviewControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("작성한 리뷰 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("작성한 리뷰 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("review/get-written-review-list",
@@ -310,7 +313,7 @@ class ReviewControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("받은 리뷰 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("받은 리뷰 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("review/get-received-review-list",
@@ -389,7 +392,7 @@ class ReviewControllerTest {
         mockMvc.perform(get("/api/reviews/{reviewId}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 상세 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("리뷰를 조회했습니다"))
                 .andExpect(jsonPath("$.data.reviewId").value(1L))
                 .andExpect(jsonPath("$.data.score").value(5))
                 .andDo(document("review/get-review",
@@ -420,7 +423,7 @@ class ReviewControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 수정 요청 성공"))
+                .andExpect(jsonPath("$.message").value("리뷰를 수정했습니다"))
                 .andExpect(jsonPath("$.data.reviewId").value(1L))
                 .andExpect(jsonPath("$.data.score").value(1))
                 .andDo(document("review/modify-review",
@@ -497,7 +500,7 @@ class ReviewControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 삭제 요청 성공"))
+                .andExpect(jsonPath("$.message").value("리뷰를 삭제했습니다"))
                 .andDo(document("review/delete-review",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

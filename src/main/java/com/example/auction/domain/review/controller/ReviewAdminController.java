@@ -2,8 +2,8 @@ package com.example.auction.domain.review.controller;
 
 import com.example.auction.common.dto.BaseResponse;
 import com.example.auction.common.dto.PageResponse;
-import com.example.auction.domain.review.dto.ReviewAdminListResponse;
-import com.example.auction.domain.review.dto.ReviewAdminSearchCondition;
+import com.example.auction.domain.review.dto.response.ReviewAdminListResponse;
+import com.example.auction.domain.review.dto.request.ReviewAdminSearchCondition;
 import com.example.auction.domain.review.service.ReviewAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class ReviewAdminController {
             @Valid @ModelAttribute ReviewAdminSearchCondition condition
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponse.success(
-                HttpStatus.OK.name(), "리뷰 목록 조회 요청 성공", reviewAdminService.getReviewList(condition)));
+                HttpStatus.OK.name(), "리뷰 목록을 조회했습니다", reviewAdminService.getReviewList(condition)));
     }
 
     @DeleteMapping("/{reviewId}")
@@ -34,6 +34,6 @@ public class ReviewAdminController {
     ) {
         log.info("[ReviewAdminController] forceDelete — reviewId={}", reviewId); // 어드민 리뷰 강제 삭제 추적용
         reviewAdminService.forceDelete(reviewId);
-        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "리뷰 강제 삭제 요청 성공", null));
+        return ResponseEntity.ok(BaseResponse.success(HttpStatus.OK.name(), "리뷰를 강제 삭제했습니다", null));
     }
 }

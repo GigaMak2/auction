@@ -1,6 +1,6 @@
 package com.example.auction.domain.category.service;
 
-import com.example.auction.domain.category.dto.*;
+import com.example.auction.domain.category.dto.response.CategoryListGetResponse;
 import com.example.auction.domain.category.entity.Category;
 import com.example.auction.domain.category.repository.CategoryRepository;
 import org.junit.jupiter.api.DisplayName;

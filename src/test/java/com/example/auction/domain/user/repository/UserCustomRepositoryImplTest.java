@@ -4,7 +4,7 @@ import com.example.auction.common.config.JpaConfig;
 import com.example.auction.common.config.QuerydslConfig;
 import com.example.auction.domain.auction.search.util.KoreanAnalyzerUtil;
 import com.example.auction.domain.category.service.CategoryService;
-import com.example.auction.domain.user.dto.UserListGetResponse;
+import com.example.auction.domain.user.dto.response.UserListGetResponse;
 import com.example.auction.domain.user.entity.User;
 import com.example.auction.domain.user.enums.UserRole;
 import com.example.auction.testutils.BaseIntegrationTest;

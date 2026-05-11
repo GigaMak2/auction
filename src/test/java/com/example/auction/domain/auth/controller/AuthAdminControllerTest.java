@@ -1,8 +1,8 @@
 package com.example.auction.domain.auth.controller;
 
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.auth.dto.AuthAdminSignupRequest;
-import com.example.auction.domain.auth.dto.AuthSignupResponse;
+import com.example.auction.domain.auth.dto.request.AuthAdminSignupRequest;
+import com.example.auction.domain.auth.dto.response.AuthSignupResponse;
 import com.example.auction.domain.auth.service.AuthAdminService;
 import com.example.auction.domain.user.enums.UserRole;
 import org.junit.jupiter.api.DisplayName;
@@ -63,7 +63,7 @@ class AuthAdminControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("관리자 회원가입 요청 성공"))
+                .andExpect(jsonPath("$.message").value("관리자 회원가입했습니다"))
                 .andExpect(jsonPath("$.data.email").value("admin@test.com"))
                 .andExpect(jsonPath("$.data.role").value("ADMIN"))
                 .andDo(document("auth-admin/signup",
