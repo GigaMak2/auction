@@ -8,6 +8,7 @@ import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.auction.result.entity.AuctionResult;
 import com.example.auction.domain.auction.result.repository.AuctionResultRepository;
+import com.example.auction.domain.bid.dto.response.BidCachedResponse;
 import com.example.auction.domain.bid.dto.response.BidListResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 import com.example.auction.domain.bid.entity.Bid;
@@ -49,6 +50,9 @@ class BidQueryServiceTest {
 
     @Mock
     private AuctionResultRepository resultRepository;
+
+    @Mock
+    private BidCacheService bidCacheService;
 
     private CustomUserDetails userDetails;
     private Long auctionId;
@@ -289,9 +293,11 @@ class BidQueryServiceTest {
     void getCurrentMinBid_success() {
         // given
         Bid minBid = Bid.of(null, BigDecimal.valueOf(80_000), auctionId, 2L, BidAuctionStatus.ACTIVE);
+        BidCachedResponse cached = BidCachedResponse.of(minBid);
 
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
-        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.of(minBid));
+        given(bidCacheService.getCurrentMinPrice(auctionId)).willReturn(cached);
+        given(bidRepository.findById(cached.getBidId())).willReturn(Optional.of(minBid));
 
         // when
         BidResponse response = queryService.getCurrentMinBid(userDetails, auctionId);
@@ -342,7 +348,7 @@ class BidQueryServiceTest {
     void getCurrentMinBid_noBid_fail() {
         // given
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
-        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.empty());
+        given(bidCacheService.getCurrentMinPrice(auctionId)).willReturn(null);
 
         // when & then
         assertThatThrownBy(() -> queryService.getCurrentMinBid(userDetails, auctionId))
