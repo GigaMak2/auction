@@ -1,4 +1,4 @@
-package com.example.auction.domain.auction.eventBridge;
+package com.example.auction.domain.auction.eventbridge;
 
 import java.time.LocalDateTime;
 

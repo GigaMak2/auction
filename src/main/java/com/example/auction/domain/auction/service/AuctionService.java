@@ -3,9 +3,9 @@ package com.example.auction.domain.auction.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import com.example.auction.domain.auction.eventBridge.AuctionCancelledEventBridge;
-import com.example.auction.domain.auction.eventBridge.AuctionCreatedEventBridge;
-import com.example.auction.domain.auction.eventBridge.AuctionEventBridgeService;
+import com.example.auction.domain.auction.eventbridge.AuctionCancelledEventBridge;
+import com.example.auction.domain.auction.eventbridge.AuctionCreatedEventBridge;
+import com.example.auction.domain.auction.eventbridge.AuctionEventBridgeService;
 import com.example.auction.domain.category.exception.CategoryErrorEnum;
 import com.example.auction.domain.category.repository.CategoryRepository;
 
