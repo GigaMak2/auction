@@ -162,7 +162,7 @@ public class AuctionElasticsearchService {
 
         PageRequest pageRequest = PageRequest.of(
                 condition.getPage(),
-                condition.getPageSize()
+                condition.getSize()
                 );
 
         SearchHits<AuctionDocument> results = elasticsearch.search(

@@ -98,7 +98,7 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
     ) {
         PageRequest pageRequest = PageRequest.of(
             condition.getPage(),
-            condition.getPageSize()
+            condition.getSize()
         );
 
         String itemNameTsQueryLiteral = getTsQueryLiteral(condition.getKeyword());
@@ -125,7 +125,7 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
             .where(booleans)
             .orderBy(orderList.toArray(new OrderSpecifier[0]))
             .offset(pageRequest.getOffset())
-            .limit(condition.getPageSize())
+            .limit(condition.getSize())
             .fetch();
 
         JPAQuery<Long> totalCount = queryFactory

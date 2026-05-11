@@ -37,7 +37,7 @@ public class AuctionSearchCondition {
 
     @Positive(message = "페이지 크기는 1 이상이어야 합니다")
     @Max(value = 100, message = "페이지 크기는 100 이하여야 합니다")
-    private Integer pageSize = 10;
+    private Integer size = 20;
 
     public void setDefaultStatusesIfEmpty(AuctionStatus... statuses) {
         if (this.status == null) {
@@ -50,7 +50,7 @@ public class AuctionSearchCondition {
     }
 
     public String toLogString() {
-        return "keyword=\"%s\", maxPriceMin=%s, maxPriceMax=%s, status=%s, categoryId=%s, page=%s, pageSize=%s"
-            .formatted(this.keyword, this.maxPriceMin, this.maxPriceMax, this.status, this.categoryId, this.page, this.pageSize);
+        return "keyword=\"%s\", maxPriceMin=%s, maxPriceMax=%s, status=%s, categoryId=%s, page=%s, size=%s"
+            .formatted(this.keyword, this.maxPriceMin, this.maxPriceMax, this.status, this.categoryId, this.page, this.size);
     }
 }

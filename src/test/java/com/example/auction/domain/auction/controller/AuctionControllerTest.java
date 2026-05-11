@@ -121,7 +121,7 @@ class AuctionControllerTest {
         // when & then
         mockMvc.perform(get("/api/auctions")
                         .param("page", "0")
-                        .param("pageSize", "10"))
+                        .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("경매 목록을 조회했습니다"))
@@ -137,7 +137,7 @@ class AuctionControllerTest {
                                 parameterWithName("status").description("경매 상태 필터 (READY / ACTIVE / CLOSED / CANCELLED)").optional(),
                                 parameterWithName("categoryId").description("카테고리 식별자 (1 이상)").optional(),
                                 parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
-                                parameterWithName("pageSize").description("페이지 크기 (1 ~ 100)").optional()
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)").optional()
                         )
                 ));
     }
@@ -152,18 +152,18 @@ class AuctionControllerTest {
     }
 
     @Test
-    @DisplayName("경매 전체 조회 실패 - pageSize 0")
-    void getManyAuctionsPublic_fail_pageSizeIsZero() throws Exception {
-        mockMvc.perform(get("/api/auctions").param("pageSize", "0"))
+    @DisplayName("경매 전체 조회 실패 - size 0")
+    void getManyAuctionsPublic_fail_sizeIsZero() throws Exception {
+        mockMvc.perform(get("/api/auctions").param("size", "0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("페이지 크기는 1 이상이어야 합니다"));
     }
 
     @Test
-    @DisplayName("경매 전체 조회 실패 - pageSize 100 초과")
-    void getManyAuctionsPublic_fail_pageSizeTooLarge() throws Exception {
-        mockMvc.perform(get("/api/auctions").param("pageSize", "101"))
+    @DisplayName("경매 전체 조회 실패 - size 100 초과")
+    void getManyAuctionsPublic_fail_sizeTooLarge() throws Exception {
+        mockMvc.perform(get("/api/auctions").param("size", "101"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("페이지 크기는 100 이하여야 합니다"));
@@ -190,7 +190,7 @@ class AuctionControllerTest {
         mockMvc.perform(get("/api/me/auctions")
                         .header("Authorization", "Bearer accessToken")
                         .param("page", "0")
-                        .param("pageSize", "10"))
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("내 경매 목록을 조회했습니다"))
@@ -207,7 +207,7 @@ class AuctionControllerTest {
                                 parameterWithName("status").description("경매 상태 필터 (READY / ACTIVE / CLOSED / CANCELLED)").optional(),
                                 parameterWithName("categoryId").description("카테고리 식별자 (1 이상)").optional(),
                                 parameterWithName("page").description("페이지 번호 (0 이상)").optional(),
-                                parameterWithName("pageSize").description("페이지 크기 (1 ~ 100)").optional()
+                                parameterWithName("size").description("페이지 크기 (1 ~ 100)").optional()
                         )
                 ));
     }

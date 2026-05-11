@@ -1,6 +1,5 @@
 package com.example.auction.domain.auction.service;
 
-import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -57,8 +56,8 @@ public class AuctionCacheService {
         builder.append(condition.getPage());
         builder.append("]");
 
-        builder.append("pageSize=[");
-        builder.append(condition.getPageSize());
+        builder.append("size=[");
+        builder.append(condition.getSize());
         builder.append("]");
 
         return builder.toString();
