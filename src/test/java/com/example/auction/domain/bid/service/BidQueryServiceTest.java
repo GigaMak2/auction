@@ -297,7 +297,6 @@ class BidQueryServiceTest {
 
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
         given(bidCacheService.getCurrentMinPrice(auctionId)).willReturn(cached);
-        given(bidRepository.findById(cached.getBidId())).willReturn(Optional.of(minBid));
 
         // when
         BidResponse response = queryService.getCurrentMinBid(userDetails, auctionId);
