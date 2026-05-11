@@ -31,4 +31,15 @@ public class BidResponse {
 
         return bidResponse;
     }
+
+    public static BidResponse fromCached(BidCachedResponse cached) {
+        BidResponse bidResponse = new BidResponse();
+        bidResponse.bidId = cached.getBidId();
+        bidResponse.auctionId = cached.getAuctionId();
+        bidResponse.price = cached.getPrice();
+        bidResponse.description = cached.getDescription();
+        bidResponse.status = cached.getStatus();
+        bidResponse.createdAt = cached.getCreatedAt();
+        return bidResponse;
+    }
 }

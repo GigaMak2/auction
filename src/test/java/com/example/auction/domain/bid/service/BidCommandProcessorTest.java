@@ -6,6 +6,7 @@ import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.bid.dto.request.BidRequest;
+import com.example.auction.domain.bid.dto.response.BidCachedResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
@@ -53,6 +54,9 @@ class BidCommandProcessorTest {
     @Mock
     private NotificationMessagePublisher publisher;
 
+    @Mock
+    private BidCacheService bidCachedService;
+
     private CustomUserDetails userDetails;
     private Long auctionId;
     private Auction activeAuction;
@@ -97,7 +101,7 @@ class BidCommandProcessorTest {
         Bid savedBid = Bid.of(null, BigDecimal.valueOf(150_000), auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
 
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
-        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.empty());
+        given(bidCachedService.getCurrentMinPrice(auctionId)).willReturn(null);
         given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
 
         // when
@@ -118,7 +122,7 @@ class BidCommandProcessorTest {
         Bid savedBid = Bid.of(null, BigDecimal.valueOf(200_000), auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
 
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
-        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.empty());
+        given(bidCachedService.getCurrentMinPrice(auctionId)).willReturn(null);
         given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
 
         // when
@@ -142,9 +146,15 @@ class BidCommandProcessorTest {
         Bid savedBid = Bid.of(null, newBidPrice, auctionId, userDetails.getUserId(), BidAuctionStatus.ACTIVE);
         Bid mockCurrentMin = mock(Bid.class);
 
-        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
         given(mockCurrentMin.getPrice()).willReturn(currentMinPrice);
-        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.of(mockCurrentMin));
+        given(mockCurrentMin.getId()).willReturn(1L);
+        given(mockCurrentMin.getAuctionId()).willReturn(auctionId);
+        given(mockCurrentMin.getUserId()).willReturn(2L);
+
+        BidCachedResponse cachedMin = BidCachedResponse.of(mockCurrentMin);
+
+        given(bidCachedService.getCurrentMinPrice(auctionId)).willReturn(cachedMin);
+        given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
         given(bidRepository.save(any(Bid.class))).willReturn(savedBid);
 
         // when
@@ -168,7 +178,13 @@ class BidCommandProcessorTest {
         Bid mockCurrentMin = mock(Bid.class);
 
         given(mockCurrentMin.getPrice()).willReturn(currentMinPrice);
-        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.of(mockCurrentMin));
+        given(mockCurrentMin.getId()).willReturn(1L);
+        given(mockCurrentMin.getAuctionId()).willReturn(auctionId);
+        given(mockCurrentMin.getUserId()).willReturn(2L);
+
+        BidCachedResponse cachedMin = BidCachedResponse.of(mockCurrentMin);
+
+        given(bidCachedService.getCurrentMinPrice(auctionId)).willReturn(cachedMin);
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when & then
@@ -183,11 +199,17 @@ class BidCommandProcessorTest {
         // given
         BigDecimal currentMinPrice = BigDecimal.valueOf(150000);
         BidRequest request = new BidRequest(BigDecimal.valueOf(200_000), null);  // 최저가보다 높음
+
         Bid mockCurrentMin = mock(Bid.class);
 
-
         given(mockCurrentMin.getPrice()).willReturn(currentMinPrice);
-        given(bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId)).willReturn(Optional.of(mockCurrentMin));
+        given(mockCurrentMin.getId()).willReturn(1L);
+        given(mockCurrentMin.getAuctionId()).willReturn(auctionId);
+        given(mockCurrentMin.getUserId()).willReturn(2L);
+
+        BidCachedResponse cachedMin = BidCachedResponse.of(mockCurrentMin);
+
+        given(bidCachedService.getCurrentMinPrice(auctionId)).willReturn(cachedMin);
         given(auctionRepository.findById(auctionId)).willReturn(Optional.of(activeAuction));
 
         // when & then

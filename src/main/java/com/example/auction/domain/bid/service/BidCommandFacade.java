@@ -23,7 +23,7 @@ public class BidCommandFacade {
     private final RedissonClient redissonClient;
 
     private static final String BID_LOCK_PREFIX = "bid:lock:";
-    private static final long LOCK_WAIT_TIME = 3L;    // 락 획득 대기 시간 (초)
+    private static final long LOCK_WAIT_TIME = 20L;    // 락 획득 대기 시간 (초)
 
     // 입찰 생성 - 분산락
     public BidResponse placeBidDis(CustomUserDetails userDetails, Long auctionId, BidRequest request) {

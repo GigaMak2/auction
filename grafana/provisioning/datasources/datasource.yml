@@ -6,3 +6,9 @@ datasources:
     url: http://prometheus:9090
     isDefault: true
     uid: prometheus
+  - name: influxdb
+    type: influxdb
+    url: http://auction-influxdb:8086
+    uid: influxdb
+    jsonData:
+      dbName: k6

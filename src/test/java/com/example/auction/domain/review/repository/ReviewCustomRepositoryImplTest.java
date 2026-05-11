@@ -58,7 +58,7 @@ class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
     private Long user1Id = 1L;
     private Long user2Id = 2L;
     private Long user3Id = 3L;
-    
+
     private Long user2Auction1Id = 1L;
     private Long user2Auction2Id = 1L;
 
@@ -74,7 +74,7 @@ class ReviewCustomRepositoryImplTest extends BaseIntegrationTest {
         User user1 = userRepository.save(User.of("user1@test.com", "password"));
         User user2 = userRepository.save(User.of("user2@test.com", "password"));
         User user3 = userRepository.save(User.of("user3@test.com", "password"));
-        
+
         Auction user2Auction1 = createAuction(user2.getId(), category.getId());
         Auction user2Auction2 = createAuction(user2.getId(), category.getId());
 

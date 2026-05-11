@@ -7,6 +7,7 @@ import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
 import com.example.auction.domain.bid.dto.request.BidRequest;
+import com.example.auction.domain.bid.dto.response.BidCachedResponse;
 import com.example.auction.domain.bid.dto.response.BidResponse;
 import com.example.auction.domain.bid.entity.Bid;
 import com.example.auction.domain.bid.enums.BidAuctionStatus;
@@ -20,6 +21,7 @@ import com.example.auction.domain.user.exception.UserErrorEnum;
 import com.example.auction.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,9 +42,11 @@ public class BidCommandProcessor {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
     private final NotificationMessagePublisher notificationMessagePublisher;
+    private final BidCacheService bidCacheService;
 
     // requires_new를 붙여야 메서드가 끝날 때 커밋이 확정되어서 커밋 -> 락해제 순서가 보장됨
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(value = "currentMinBid", key = "#auctionId")
     public BidResponse placeBid(CustomUserDetails userDetails, Long auctionId, BidRequest request) {
 
         Long userId = userDetails.getUserId();
@@ -78,8 +82,8 @@ public class BidCommandProcessor {
         }
 
         // 현재 최저가보다 낮아야 함
-        Bid currentMin = bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId).orElse(null);
-        BigDecimal currentMinPrice = currentMin != null ? currentMin.getPrice() : null;
+        BidCachedResponse currentCachedMin = bidCacheService.getCurrentMinPrice(auctionId);
+        BigDecimal currentMinPrice = currentCachedMin != null ? currentCachedMin.getPrice() : null;
 
         // currentMinPrice 가 null일경우 bidPrice 가격검증 스킵됨
         if (currentMinPrice != null && bidPrice.compareTo(currentMinPrice) >= 0) {
@@ -94,6 +98,9 @@ public class BidCommandProcessor {
                 auctionId,
                 userId,
                 BidAuctionStatus.ACTIVE);
+
+        Bid prevMinBid = bidRepository.findFirstByAuctionIdOrderByPriceAsc(auctionId).orElse(null);
+
         Bid savedBid = bidRepository.save(bid);
 
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
@@ -105,9 +112,9 @@ public class BidCommandProcessor {
                 ));
 
                 // 최저가 갱신 알림
-                if (currentMinPrice != null) {
+                if (prevMinBid != null) {
                     notificationMessagePublisher.publish(new NotificationMessage(
-                            NotificationType.LOWEST_BID_UPDATED, currentMin.getUserId(), auctionId, auction.getItemName()
+                            NotificationType.LOWEST_BID_UPDATED, prevMinBid.getUserId(), auctionId, auction.getItemName()
                     ));
                 }
             }
