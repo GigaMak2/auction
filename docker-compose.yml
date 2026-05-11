@@ -202,6 +202,8 @@ services:
   k6:
     image: grafana/k6
     container_name: auction-k6
+    profiles:
+      - k6 # k6 돌릴때만 추가
     volumes:
       - ./k6:/scripts
     command: run --out influxdb=http://auction-influxdb:8086/k6 /scripts/stress-test.js
