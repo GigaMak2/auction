@@ -43,7 +43,6 @@ public class BidController {
     // 특정 경매의 입찰 조회
     @GetMapping("/v1")
     public ResponseEntity<BaseResponse<PageResponse<BidListResponse>>> getBids(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("auctionId") Long auctionId,
             @ModelAttribute @Valid BidPageRequest request
             ) {
@@ -53,7 +52,7 @@ public class BidController {
                 Sort.by(Sort.Direction.ASC, "price")
                         .and(Sort.by(Sort.Direction.DESC, "createdAt"))
         );
-        PageResponse<BidListResponse> data = queryService.getBids(userDetails, auctionId, pageable);
+        PageResponse<BidListResponse> data = queryService.getBids(auctionId, pageable);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(HttpStatus.OK.name(), "입찰 목록을 조회했습니다", data));
     }
@@ -61,10 +60,9 @@ public class BidController {
     // 입찰 결과 조회(1건)
     @GetMapping("/winner/v1")
     public ResponseEntity<BaseResponse<BidResponse>> getWinnerBid(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("auctionId") Long auctionId
     ) {
-        BidResponse data = queryService.getWinnerBid(userDetails, auctionId);
+        BidResponse data = queryService.getWinnerBid(auctionId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(HttpStatus.OK.name(), "입찰 결과를 조회했습니다", data));
     }
@@ -72,10 +70,9 @@ public class BidController {
     // (경매 진행중) 현재 최저가입찰 조회
     @GetMapping("/current/v1")
     public ResponseEntity<BaseResponse<BidResponse>> getCurrentMinBid(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("auctionId") Long auctionId
     ) {
-        BidResponse data = queryService.getCurrentMinBid(userDetails, auctionId);
+        BidResponse data = queryService.getCurrentMinBid(auctionId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(BaseResponse.success(HttpStatus.OK.name(), "현재 최저가 입찰을 조회했습니다", data));
     }

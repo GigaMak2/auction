@@ -193,7 +193,7 @@ class BidControllerTest {
                         new BidListResponse(2L, 1L, BigDecimal.valueOf(4000), now)
                 ), 0, 1, 2L, 20, true);
 
-        given(queryService.getBids(any(), eq(1L), any())).willReturn(response);
+        given(queryService.getBids(eq(1L), any())).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/auctions/{auctionId}/bids/v1", 1L)
@@ -263,7 +263,7 @@ class BidControllerTest {
         given(bid.getStatus()).willReturn(BidAuctionStatus.ACTIVE);
         BidResponse response = BidResponse.of(bid);
 
-        given(queryService.getWinnerBid(any(), eq(1L))).willReturn(response);
+        given(queryService.getWinnerBid(eq(1L))).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/auctions/{auctionId}/bids/winner/v1", 1L)
@@ -296,7 +296,7 @@ class BidControllerTest {
         given(bid.getStatus()).willReturn(BidAuctionStatus.ACTIVE);
         BidResponse response = BidResponse.of(bid);
 
-        given(queryService.getCurrentMinBid(any(), eq(1L))).willReturn(response);
+        given(queryService.getCurrentMinBid(eq(1L))).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/auctions/{auctionId}/bids/current/v1", 1L)
