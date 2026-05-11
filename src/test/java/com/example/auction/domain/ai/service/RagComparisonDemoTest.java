@@ -1,6 +1,6 @@
 package com.example.auction.domain.ai.service;
 
-import com.example.auction.domain.auction.eventBridge.AuctionEventBridgeService;
+import com.example.auction.domain.auction.eventBridge.service.AuctionEventBridgeService;
 import com.example.auction.testutils.BaseIntegrationTest;
 
 import org.junit.jupiter.api.AfterEach;
