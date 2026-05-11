@@ -17,6 +17,6 @@ public interface AuctionScheduleOutboxRepository extends JpaRepository<AuctionSc
 
     @Modifying
     @Transactional
-    @Query("UPDATE AuctionScheduleOutbox o SET o.status = 'PUBLISHED' WHERE o.auctionId = :auctionId  AND o.eventType = :eventType AND o.status = 'PENDING'")
+    @Query("UPDATE AuctionScheduleOutbox o SET o.status = 'PUBLISHED' WHERE o.auctionId = :auctionId AND o.eventType = :eventType AND o.status IN ('PENDING', 'FAILED')")
     void markPublished(@Param("auctionId") Long auctionId, @Param("eventType") String eventType);
 }

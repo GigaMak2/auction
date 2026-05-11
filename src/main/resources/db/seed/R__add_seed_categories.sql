@@ -37,7 +37,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO users (email, password, role, deleted, created_at, modified_at)
 SELECT
     'user' || i || '@test.com',
-    '$2b$10$AJg6EA0ZI8UIXOXmnFnBu.ABlb88prNJhKXeZCg8C2paX4ks6p0vS', --1234567890
+    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
     'USER',
     false,
     NOW(),
