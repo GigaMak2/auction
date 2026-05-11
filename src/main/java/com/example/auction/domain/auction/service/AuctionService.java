@@ -3,9 +3,11 @@ package com.example.auction.domain.auction.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import com.example.auction.domain.auction.eventBridge.AuctionCancelledEventBridge;
-import com.example.auction.domain.auction.eventBridge.AuctionCreatedEventBridge;
-import com.example.auction.domain.auction.eventBridge.AuctionEventBridgeService;
+import com.example.auction.domain.auction.eventBridge.entity.AuctionCancelledEventBridge;
+import com.example.auction.domain.auction.eventBridge.entity.AuctionCreatedEventBridge;
+import com.example.auction.domain.auction.eventBridge.entity.AuctionScheduleOutbox;
+import com.example.auction.domain.auction.eventBridge.repository.AuctionScheduleOutboxRepository;
+import com.example.auction.domain.auction.eventBridge.service.AuctionEventBridgeService;
 import com.example.auction.domain.category.exception.CategoryErrorEnum;
 import com.example.auction.domain.category.repository.CategoryRepository;
 
@@ -45,10 +47,11 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-    private final AuctionEventBridgeService auctionEventBridgeService;
+    private final AuctionScheduleOutboxRepository outboxRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final AuctionSearchService auctionSearchService;
     private final KoreanAnalyzerUtil koreanAnalyzerUtil;
+
 
     @Transactional(readOnly = true)
     @Cacheable(
@@ -145,6 +148,9 @@ public class AuctionService {
         );
 
         auction = auctionRepository.saveAndFlush(auction);
+
+        outboxRepository.save(AuctionScheduleOutbox.of(auction.getId(), "START", auction.getStartedAt()));
+        outboxRepository.save(AuctionScheduleOutbox.of(auction.getId(), "END", auction.getEndedAt()));
 
         // auction의 tsvector column들을 업데이트 합니다.
         // 주의: 반드시 saveAndFlush이후에 일어나야 합니다.
