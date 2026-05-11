@@ -90,7 +90,7 @@ class AuctionControllerTest {
         mockMvc.perform(get("/api/auctions/{auctionId}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("경매 단건조회를 하였습니다"))
+                .andExpect(jsonPath("$.message").value("경매를 조회했습니다"))
                 .andExpect(jsonPath("$.data.id").value(1L))
                 .andExpect(jsonPath("$.data.itemName").value("맥북 프로"))
                 .andDo(document("auction/get-auction",
@@ -124,7 +124,7 @@ class AuctionControllerTest {
                         .param("pageSize", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("경매 전체 조회를 하였습니다"))
+                .andExpect(jsonPath("$.message").value("경매 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("auction/get-many-auctions-public",
@@ -193,7 +193,7 @@ class AuctionControllerTest {
                         .param("pageSize", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("경매 전체 조회를 하였습니다"))
+                .andExpect(jsonPath("$.message").value("내 경매 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(1))
                 .andExpect(jsonPath("$.data.totalElements").value(1))
                 .andDo(document("auction/get-many-auctions-me",
@@ -252,7 +252,7 @@ class AuctionControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("경매를 생성 하였습니다"))
+                .andExpect(jsonPath("$.message").value("경매를 생성했습니다"))
                 .andExpect(jsonPath("$.data.id").value(1L))
                 .andExpect(jsonPath("$.data.itemName").value("맥북 프로"))
                 .andDo(document("auction/create-auction",

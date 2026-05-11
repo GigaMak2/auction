@@ -104,7 +104,7 @@ class BidControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("입찰이 완료되었습니다"))
+                .andExpect(jsonPath("$.message").value("입찰을 생성했습니다"))
                 .andDo(document("bid/place-bid",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -202,7 +202,7 @@ class BidControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("입찰 내역 조회가 완료되었습니다"))
+                .andExpect(jsonPath("$.message").value("입찰 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("bid/get-bids",
@@ -270,7 +270,7 @@ class BidControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("입찰 결과 조회가 완료되었습니다"))
+                .andExpect(jsonPath("$.message").value("입찰 결과를 조회했습니다"))
                 .andDo(document("bid/get-winner-bid",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -303,7 +303,7 @@ class BidControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("현재 최저가 입찰 조회가 완료되었습니다"))
+                .andExpect(jsonPath("$.message").value("현재 최저가 입찰을 조회했습니다"))
                 .andDo(document("bid/get-current-min-bid",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

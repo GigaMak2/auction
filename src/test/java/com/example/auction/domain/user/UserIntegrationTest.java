@@ -134,7 +134,7 @@ public class UserIntegrationTest extends BaseIntegrationTest {
                         .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("탈퇴 요청 성공"))
+                .andExpect(jsonPath("$.message").value("회원탈퇴했습니다"))
                 .andExpect(jsonPath("$.data.email").value("test@test.com"));
     }
 

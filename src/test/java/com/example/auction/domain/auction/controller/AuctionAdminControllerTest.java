@@ -87,7 +87,7 @@ class AuctionAdminControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("경매 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("경매 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(3))
                 .andExpect(jsonPath("$.data.totalElements").value(3))
                 .andDo(document("auction-admin/get-auction-list",
@@ -152,7 +152,7 @@ class AuctionAdminControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("경매 강제 취소 요청 성공"))
+                .andExpect(jsonPath("$.message").value("경매를 강제 취소했습니다"))
                 .andDo(document("auction-admin/force-cancel",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

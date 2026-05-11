@@ -87,7 +87,7 @@ class UserAdminControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("사용자 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("사용자 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("user-admin/get-user-list",
@@ -157,7 +157,7 @@ class UserAdminControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("사용자 상세 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("사용자를 조회했습니다"))
                 .andExpect(jsonPath("$.data.userId").value(1))
                 .andExpect(jsonPath("$.data.email").value("user@test.com"))
                 .andDo(document("user-admin/get-user-detail",
@@ -188,7 +188,7 @@ class UserAdminControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("사용자 강제 탈퇴 요청 성공"))
+                .andExpect(jsonPath("$.message").value("사용자를 강제 탈퇴했습니다"))
                 .andExpect(jsonPath("$.data.email").value("user@test.com"))
                 .andExpect(jsonPath("$.data.role").value("USER"))
                 .andDo(document("user-admin/force-withdraw",

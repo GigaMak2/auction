@@ -83,7 +83,7 @@ class AuctionResultAdminControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("경매 결과 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("경매 결과 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("auction-result-admin/get-auction-result-list",

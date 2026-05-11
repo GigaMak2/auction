@@ -63,7 +63,7 @@ class AuthAdminControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("관리자 회원가입 요청 성공"))
+                .andExpect(jsonPath("$.message").value("관리자 회원가입했습니다"))
                 .andExpect(jsonPath("$.data.email").value("admin@test.com"))
                 .andExpect(jsonPath("$.data.role").value("ADMIN"))
                 .andDo(document("auth-admin/signup",

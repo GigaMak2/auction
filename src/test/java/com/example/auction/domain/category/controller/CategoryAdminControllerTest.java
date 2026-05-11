@@ -68,7 +68,7 @@ public class CategoryAdminControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("카테고리 생성 요청 성공"))
+                .andExpect(jsonPath("$.message").value("카테고리를 생성했습니다"))
                 .andExpect(jsonPath("$.data.categoryId").value(1L))
                 .andExpect(jsonPath("$.data.name").value("전자기기"))
                 .andDo(document("category-admin/create-category",
@@ -133,7 +133,7 @@ public class CategoryAdminControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("카테고리 이름 수정 요청 성공"))
+                .andExpect(jsonPath("$.message").value("카테고리 이름을 수정했습니다"))
                 .andExpect(jsonPath("$.data.categoryId").value(1L))
                 .andExpect(jsonPath("$.data.name").value("가전제품"))
                 .andDo(document("category-admin/rename-category",
@@ -181,7 +181,7 @@ public class CategoryAdminControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("카테고리 이동 요청 성공"))
+                .andExpect(jsonPath("$.message").value("카테고리를 이동했습니다"))
                 .andExpect(jsonPath("$.data.categoryId").value(1L))
                 .andExpect(jsonPath("$.data.parentId").value(2L))
                 .andDo(document("category-admin/move-category",

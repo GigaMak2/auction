@@ -178,7 +178,7 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
                         .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("로그아웃 요청 성공"));
+                .andExpect(jsonPath("$.message").value("로그아웃했습니다"));
     }
 
 

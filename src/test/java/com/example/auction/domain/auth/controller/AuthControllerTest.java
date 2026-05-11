@@ -247,7 +247,7 @@ class AuthControllerTest {
                         .requestAttr("accessToken", "accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("로그아웃 요청 성공"))
+                .andExpect(jsonPath("$.message").value("로그아웃했습니다"))
                 .andDo(document("auth/logout",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

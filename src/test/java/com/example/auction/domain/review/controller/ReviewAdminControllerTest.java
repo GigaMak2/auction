@@ -84,7 +84,7 @@ class ReviewAdminControllerTest {
                         .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("리뷰 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.content.length()").value(2))
                 .andExpect(jsonPath("$.data.totalElements").value(2))
                 .andDo(document("review-admin/get-review-list",
@@ -151,7 +151,7 @@ class ReviewAdminControllerTest {
                         .header("Authorization", "Bearer accessToken"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 강제 삭제 요청 성공"))
+                .andExpect(jsonPath("$.message").value("리뷰를 강제 삭제했습니다"))
                 .andDo(document("review-admin/force-delete",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

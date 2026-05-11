@@ -144,7 +144,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 생성 요청 성공"))
+                .andExpect(jsonPath("$.message").value("리뷰를 생성했습니다"))
                 .andExpect(jsonPath("$.data.score").value(5))
                 .andExpect(jsonPath("$.data.auctionId").value(auctionId));
     }
@@ -201,7 +201,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
                         .header("Authorization", "Bearer " + buyerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("작성한 리뷰 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("작성한 리뷰 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.totalElements").value(1));
     }
 
@@ -221,7 +221,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
                         .header("Authorization", "Bearer " + sellerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("받은 리뷰 목록 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("받은 리뷰 목록을 조회했습니다"))
                 .andExpect(jsonPath("$.data.totalElements").value(1));
     }
 
@@ -241,7 +241,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
                         .header("Authorization", "Bearer " + buyerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 상세 조회 요청 성공"))
+                .andExpect(jsonPath("$.message").value("리뷰를 조회했습니다"))
                 .andExpect(jsonPath("$.data.score").value(5));
     }
 
@@ -264,7 +264,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 수정 요청 성공"))
+                .andExpect(jsonPath("$.message").value("리뷰를 수정했습니다"))
                 .andExpect(jsonPath("$.data.score").value(1));
     }
 
@@ -301,7 +301,7 @@ public class ReviewIntegrationTest extends BaseIntegrationTest {
                         .header("Authorization", "Bearer " + buyerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("리뷰 삭제 요청 성공"));
+                .andExpect(jsonPath("$.message").value("리뷰를 삭제했습니다"));
     }
 
     @Test
