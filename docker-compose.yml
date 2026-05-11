@@ -206,7 +206,7 @@ services:
       - k6 # k6 돌릴때만 추가
     volumes:
       - ./k6:/scripts
-    command: run --out influxdb=http://auction-influxdb:8086/k6 /scripts/stress-test.js
+    command: run --out influxdb=http://auction-influxdb:8086/k6 /scripts/smoke-test.js
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
