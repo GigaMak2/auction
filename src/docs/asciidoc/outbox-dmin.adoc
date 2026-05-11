@@ -1,0 +1,20 @@
+== Outbox 관리자 전용 API
+
+=== FAILED outbox 조회
+==== 요청 헤더
+include::{snippets}/outbox-admin/get-failed-outbox/request-headers.adoc[]
+==== 요청
+include::{snippets}/outbox-admin/get-failed-outbox/http-request.adoc[]
+==== 응답
+include::{snippets}/outbox-admin/get-failed-outbox/http-response.adoc[]
+include::{snippets}/outbox-admin/get-failed-outbox/response-fields.adoc[]
+
+=== outbox 재시도
+==== 요청 헤더
+include::{snippets}/outbox-admin/retry-outbox/request-headers.adoc[]
+==== Path Variable
+include::{snippets}/outbox-admin/retry-outbox/path-parameters.adoc[]
+==== 요청
+include::{snippets}/outbox-admin/retry-outbox/http-request.adoc[]
+==== 응답
+include::{snippets}/outbox-admin/retry-outbox/http-response.adoc[]
