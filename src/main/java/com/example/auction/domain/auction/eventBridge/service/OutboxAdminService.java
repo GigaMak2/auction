@@ -1,7 +1,9 @@
 package com.example.auction.domain.auction.eventBridge.service;
 
+import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.eventBridge.dto.OutboxAdminResponse;
 import com.example.auction.domain.auction.eventBridge.entity.AuctionScheduleOutbox;
+import com.example.auction.domain.auction.eventBridge.exception.OutboxErrorEnum;
 import com.example.auction.domain.auction.eventBridge.repository.AuctionScheduleOutboxRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +27,7 @@ public class OutboxAdminService {
     @Transactional
     public void retry(Long outboxId) {
         AuctionScheduleOutbox outbox = outboxRepository.findById(outboxId)
-                .orElseThrow(() -> new IllegalArgumentException("outbox not found: " + outboxId));
+                .orElseThrow(() -> new ServiceErrorException(OutboxErrorEnum.OUTBOX_NOT_FOUND));
         outbox.resetForRetry();
     }
 }
