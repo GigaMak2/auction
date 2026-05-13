@@ -1,4 +1,4 @@
-package com.example.auction.domain.auction.eventBridge.exception;
+package com.example.auction.domain.auction.eventbridge.exception;
 
 import com.example.auction.common.exception.ErrorEnumInterface;
 import lombok.Getter;

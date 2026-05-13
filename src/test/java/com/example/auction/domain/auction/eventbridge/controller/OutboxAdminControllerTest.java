@@ -1,9 +1,9 @@
-package com.example.auction.domain.auction.eventBridge.controller;
+package com.example.auction.domain.auction.eventbridge.controller;
 
 import com.example.auction.common.config.security.CustomUserDetails;
 import com.example.auction.common.exception.GlobalExceptionHandler;
-import com.example.auction.domain.auction.eventBridge.dto.OutboxAdminResponse;
-import com.example.auction.domain.auction.eventBridge.service.OutboxAdminService;
+import com.example.auction.domain.auction.eventbridge.dto.OutboxAdminResponse;
+import com.example.auction.domain.auction.eventbridge.service.OutboxAdminService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

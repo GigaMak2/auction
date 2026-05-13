@@ -1,6 +1,6 @@
-package com.example.auction.domain.auction.eventBridge.repository;
+package com.example.auction.domain.auction.eventbridge.repository;
 
-import com.example.auction.domain.auction.eventBridge.entity.AuctionScheduleOutbox;
+import com.example.auction.domain.auction.eventbridge.entity.AuctionScheduleOutbox;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

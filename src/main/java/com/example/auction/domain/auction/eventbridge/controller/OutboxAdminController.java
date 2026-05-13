@@ -1,8 +1,8 @@
-package com.example.auction.domain.auction.eventBridge.controller;
+package com.example.auction.domain.auction.eventbridge.controller;
 
 import com.example.auction.common.dto.BaseResponse;
-import com.example.auction.domain.auction.eventBridge.dto.OutboxAdminResponse;
-import com.example.auction.domain.auction.eventBridge.service.OutboxAdminService;
+import com.example.auction.domain.auction.eventbridge.dto.OutboxAdminResponse;
+import com.example.auction.domain.auction.eventbridge.service.OutboxAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

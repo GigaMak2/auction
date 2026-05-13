@@ -1,9 +1,8 @@
+package com.example.auction.domain.auction.eventbridge.service;
 
-package com.example.auction.domain.auction.eventBridge.service;
-
-import com.example.auction.domain.auction.eventBridge.entity.AuctionCancelledEventBridge;
-import com.example.auction.domain.auction.eventBridge.entity.AuctionCreatedEventBridge;
-import com.example.auction.domain.auction.eventBridge.repository.AuctionScheduleOutboxRepository;
+import com.example.auction.domain.auction.eventbridge.entity.AuctionCancelledEventBridge;
+import com.example.auction.domain.auction.eventbridge.entity.AuctionCreatedEventBridge;
+import com.example.auction.domain.auction.eventbridge.repository.AuctionScheduleOutboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

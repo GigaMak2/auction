@@ -1,4 +1,4 @@
-package com.example.auction.domain.auction.eventBridge.entity;
+package com.example.auction.domain.auction.eventbridge.entity;
 
 import com.example.auction.common.entity.CreatableEntity;
 import jakarta.persistence.*;
