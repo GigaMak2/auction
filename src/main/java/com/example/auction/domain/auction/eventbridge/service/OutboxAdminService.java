@@ -1,10 +1,10 @@
-package com.example.auction.domain.auction.eventBridge.service;
+package com.example.auction.domain.auction.eventbridge.service;
 
 import com.example.auction.common.exception.ServiceErrorException;
-import com.example.auction.domain.auction.eventBridge.dto.OutboxAdminResponse;
-import com.example.auction.domain.auction.eventBridge.entity.AuctionScheduleOutbox;
-import com.example.auction.domain.auction.eventBridge.exception.OutboxErrorEnum;
-import com.example.auction.domain.auction.eventBridge.repository.AuctionScheduleOutboxRepository;
+import com.example.auction.domain.auction.eventbridge.dto.OutboxAdminResponse;
+import com.example.auction.domain.auction.eventbridge.entity.AuctionScheduleOutbox;
+import com.example.auction.domain.auction.eventbridge.exception.OutboxErrorEnum;
+import com.example.auction.domain.auction.eventbridge.repository.AuctionScheduleOutboxRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,7 +1,7 @@
-package com.example.auction.domain.auction.eventBridge.service;
+package com.example.auction.domain.auction.eventbridge.service;
 
-import com.example.auction.domain.auction.eventBridge.entity.AuctionScheduleOutbox;
-import com.example.auction.domain.auction.eventBridge.repository.AuctionScheduleOutboxRepository;
+import com.example.auction.domain.auction.eventbridge.entity.AuctionScheduleOutbox;
+import com.example.auction.domain.auction.eventbridge.repository.AuctionScheduleOutboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;

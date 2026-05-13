@@ -1,6 +1,6 @@
-package com.example.auction.domain.auction.eventBridge.dto;
+package com.example.auction.domain.auction.eventbridge.dto;
 
-import com.example.auction.domain.auction.eventBridge.entity.AuctionScheduleOutbox;
+import com.example.auction.domain.auction.eventbridge.entity.AuctionScheduleOutbox;
 
 import java.time.LocalDateTime;
 
