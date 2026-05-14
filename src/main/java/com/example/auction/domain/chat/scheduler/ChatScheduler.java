@@ -3,6 +3,7 @@ package com.example.auction.domain.chat.scheduler;
 import com.example.auction.domain.chat.repository.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ public class ChatScheduler {
     // 시간 같은 경우는 나중에 비즈니스 로직 협의 이후 변경 예정
     @Transactional
     @Scheduled(cron = "0 0 0 * * *")
+    @SchedulerLock(name = "chatScheduler", lockAtMostFor = "PT10M", lockAtLeastFor = "PT1M")
     public void deleteOldMessages() {
         LocalDateTime threshold = LocalDateTime.now().minusDays(30);
         int deleted = chatMessageRepository.deleteAllByCreatedAtBefore(threshold);
