@@ -17,7 +17,6 @@ public class AiController {
 
     private final AiService aiService;
 
-    // AI 메시지 전송 (SSE 스트리밍)
     @PostMapping(
             value = "/rooms/{roomId}/messages",
             produces = MediaType.TEXT_EVENT_STREAM_VALUE
