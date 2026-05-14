@@ -21,33 +21,20 @@ public class RedisCacheConfig {
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 
-        // 기본 캐시 설정
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
-
-                // Prefix
                 .computePrefixWith(cacheName -> "auction::" + cacheName + "::")
-
-                // Key Serializer
                 .serializeKeysWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(
                                 new StringRedisSerializer()))
-
-                // Value Serializer (객체 -> JSON)
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(RedisSerializer.json()))
-
-                // 기본 TTL
                 .entryTtl(Duration.ofMinutes(10));
 
-        // 캐시별 설정 (검색)
+        // 캐시별 설정
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
-
         cacheConfigs.put("getManyAuctionsPublic", defaultConfig.entryTtl(Duration.ofMinutes(10)));
-
         cacheConfigs.put("getAuction", defaultConfig.entryTtl(Duration.ofMinutes(10)));
-
         cacheConfigs.put("getCategoryList", defaultConfig.entryTtl(Duration.ofHours(1)));
-
         cacheConfigs.put("currentMinBid", defaultConfig.entryTtl(Duration.ofSeconds(30)));
 
         return RedisCacheManager.builder(connectionFactory)

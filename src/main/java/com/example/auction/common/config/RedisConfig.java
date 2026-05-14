@@ -25,11 +25,9 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // 레디스-자바 타입 파싱
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(RedisSerializer.json()); // 알아서 타입 변경해줌
+        template.setValueSerializer(RedisSerializer.json());
 
-        //dto 타입 파싱
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(RedisSerializer.json());
 

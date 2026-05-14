@@ -35,7 +35,6 @@ public class JwtProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // Access Token 생성
     public String createAccessToken(Long userId, String role) {
         Date now = new Date();
         return Jwts.builder()
@@ -48,7 +47,6 @@ public class JwtProvider {
                 .compact();
     }
 
-    // Refresh Token 생성
     public String createRefreshToken(Long userId) {
         Date now = new Date();
         return Jwts.builder()

@@ -15,10 +15,10 @@ public class PgVectorStoreConfig {
     @Bean
     public PgVectorStore vectorStore(JdbcTemplate jdbcTemplate, EmbeddingModel embeddingModel) {
         return PgVectorStore.builder(jdbcTemplate, embeddingModel)
-                .dimensions(1536)             // text-embedding-3-small 출력 벡터 차원수
-                .distanceType(COSINE_DISTANCE) // 벡터 간 유사도 측정 방식 (코사인 거리)
-                .indexType(HNSW)              // 근사 최근접 이웃 검색 인덱스 (속도/정확도 균형)
-                .initializeSchema(true)       // 최초 실행 시 vector_store 테이블 자동 생성
+                .dimensions(1536)
+                .distanceType(COSINE_DISTANCE)
+                .indexType(HNSW)
+                .initializeSchema(true)
                 .build();
     }
 }
