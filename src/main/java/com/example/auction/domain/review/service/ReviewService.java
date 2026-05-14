@@ -43,7 +43,6 @@ public class ReviewService {
     private final AuctionResultRepository auctionResultRepository;
     private final ReviewEmbeddingService reviewEmbeddingService;
 
-    // CloudFront 도메인 — imageUrl이 우리 CDN에서 온 것인지 검증에 사용
     @Value("${aws.cloudfront.domain:}")
     private String cloudfrontDomain;
 

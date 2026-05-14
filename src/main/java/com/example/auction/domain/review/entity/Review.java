@@ -36,7 +36,6 @@ public class Review extends ModifiableEntity {
     @Column(length = 500)
     private String description;
 
-    // 리뷰 이미지 CloudFront URL — 선택 입력
     @Column(name = "image_url", length = 512)
     private String imageUrl;
 
