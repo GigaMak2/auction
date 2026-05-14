@@ -29,7 +29,6 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    // 채팅방 생성
     @PostMapping("/rooms")
     public ResponseEntity<BaseResponse<ChatRoomResponse>> createRoom(
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -42,7 +41,6 @@ public class ChatController {
                 ));
     }
 
-    // 내 채팅방 목록 조회
     @GetMapping("/rooms")
     public ResponseEntity<BaseResponse<List<ChatRoomResponse>>> getRooms(
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -55,7 +53,6 @@ public class ChatController {
                 ));
     }
 
-    // 채팅방 제목 수정
     @PatchMapping("/rooms/{roomId}")
     public ResponseEntity<BaseResponse<ChatRoomResponse>> updateRoom(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -70,7 +67,6 @@ public class ChatController {
                 ));
     }
 
-    // 채팅방 삭제
     @DeleteMapping("/rooms/{roomId}")
     public ResponseEntity<BaseResponse<Void>> deleteRoom(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -85,7 +81,6 @@ public class ChatController {
                 ));
     }
 
-    // 메시지 목록 조회 (커서 기반 페이징)
     @GetMapping("/rooms/{roomId}/messages")
     public ResponseEntity<BaseResponse<ChatMessageListResponse>> getMessages(
             @AuthenticationPrincipal CustomUserDetails userDetails,

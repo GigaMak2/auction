@@ -7,7 +7,5 @@ import java.util.List;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
-    // 내 채팅방 목록 최신순 조회
     List<ChatRoom> findAllByUserIdOrderByCreatedAtDesc(Long userId);
-
 }

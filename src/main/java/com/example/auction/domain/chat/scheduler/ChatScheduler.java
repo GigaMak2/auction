@@ -17,8 +17,6 @@ public class ChatScheduler {
 
     private final ChatMessageRepository chatMessageRepository;
 
-    // 매일 자정 30일 이전 메시지 자동 삭제
-    // 시간 같은 경우는 나중에 비즈니스 로직 협의 이후 변경 예정
     @Transactional
     @Scheduled(cron = "0 0 0 * * *")
     @SchedulerLock(name = "chatScheduler", lockAtMostFor = "PT10M", lockAtLeastFor = "PT1M")
