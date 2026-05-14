@@ -16,9 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-// 인덱스 이름이 좀 이상한 이유는 현재 spring한테 index중 auction- 으로 시작 하는 index만 쓰고 읽을 권한이 있기 때문입니다.
-// 
-// auction-notification, auction-user등 추가로 index가 만들어지면 덜 이상할 것입니다.
+// 인덱스명 "auction-auction" - Spring 보안 정책상 "auction-" 접두사 범위만 읽기/쓰기 권한이 있음
 @Document(indexName = "auction-auction")
 @NoArgsConstructor
 public class AuctionDocument {

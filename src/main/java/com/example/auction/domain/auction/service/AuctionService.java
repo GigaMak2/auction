@@ -43,6 +43,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AuctionService {
+
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
@@ -72,12 +73,10 @@ public class AuctionService {
     public PageResponse<GetManyAuctionsResponse> getManyAuctionsPublic (
             AuctionSearchCondition condition
     ) {
-        // 조회하고 싶은 status가 없는 경우 READY, ACTIVE한 경매만 조회하기
         condition.setDefaultStatusesIfEmpty(
                 AuctionStatus.READY, AuctionStatus.ACTIVE
         );
 
-        // 취소된 경매는 보여주지 말기
         if (
                 condition.getStatus() != null &&
                 condition.getStatus().contains(AuctionStatus.CANCELLED)
@@ -125,7 +124,6 @@ public class AuctionService {
             CustomUserDetails userDetails,
             CreateAuctionRequest req
     ) {
-        // 경매 생성은 중요한 작업이기 때문에 JWT만을 믿지 않고 DB에 유저가 있는지 확인
         userRepository.findByIdAndDeletedFalse(userDetails.getUserId()).orElseThrow(()->
             new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND)
         );
@@ -150,8 +148,7 @@ public class AuctionService {
         outboxRepository.save(AuctionScheduleOutbox.of(auction.getId(), "START", auction.getStartedAt()));
         outboxRepository.save(AuctionScheduleOutbox.of(auction.getId(), "END", auction.getEndedAt()));
 
-        // auction의 tsvector column들을 업데이트 합니다.
-        // 주의: 반드시 saveAndFlush이후에 일어나야 합니다.
+        // 주의: 반드시 saveAndFlush 이후에 일어나야 함
         String itemNameVector = koreanAnalyzerUtil.toTsVectorLiteral(auction.getItemName());
         String descriptionVector = koreanAnalyzerUtil.toTsVectorLiteral(auction.getDescription());
 
@@ -159,13 +156,11 @@ public class AuctionService {
                 auction.getId(), itemNameVector, descriptionVector, 1
         );
 
-        // 이벤트퍼블리셔를 활용하여 트랜잭션 밖으로 빼냄
-
         // 트랜잭션 커밋 이후 EventBridge 등록 (고아 스케줄 방지)
-        // 이 매서드의 트랜잭션 커밋이 끝나면 event가 발행되고, AuctionEventBridgeService의 handleAuctionCreated 가 실행됨
+        // AuctionEventBridgeService의 handleAuctionCreated() 호출
         eventPublisher.publishEvent(new AuctionCreatedEventBridge(auction.getId(), auction.getStartedAt(), auction.getEndedAt()));
 
-        // 이 매서드의 트랜잭션 커밋이 끝나면 event가 발행되고, AuctionSearchService의 handleAuctionCreated 가 실행됨
+        // AuctionSearchService의 handleAuctionCreated() 호출
         eventPublisher.publishEvent(AuctionCreatedDocument.from(auction));
 
         return GetAuctionResponse.from(auction);
@@ -188,19 +183,10 @@ public class AuctionService {
             Long auctionId,
             CustomUserDetails details
     ) {
-        // 경매를 취소 할 때 비관적 락을 걸지 않고 select를 합니다.
-        //
-        // 일단 저희가 경매 시작 직전에 취소를 막기 때문에 동시성 문제가 발생할 일이 없고
-        // 또 여러 사람이 같은 경매를 취소 할 일이 없기 때문입니다. 
-        //
-        // (현재 경매는 본인만 취소가 가능합니다.
-        // 그리고 설령 저희가 나중에 관리자가 남의 경매를 취소하게 변경하더라도 
-        // 경매자와 고객이 동시에 취소 할려고
-        // 해서 동시성 문제가 발생 할 거라 생각 하지는 않습니다)
-
+        // 경매를 취소할 때 비관적 락을 걸지 않고 select
+        // 경매 시작 직전에 취소를 막기 때문에 동시성 문제가 발생할 일이 없고 여러 사람이 같은 경매를 취소 할 일이 없음
         LocalDateTime now = LocalDateTime.now();
 
-        // 경매 취소는 중요한 작업이기 때문에 JWT만을 믿지 않고 DB에 유저가 있는지 확인
         userRepository.findByIdAndDeletedFalse(details.getUserId()).orElseThrow(()->
             new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND)
         );
@@ -209,24 +195,19 @@ public class AuctionService {
                 () -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND)
         );
 
-        // 경매 주인이 아니라면 에러를 던지기
         if (!auction.getUserId().equals(details.getUserId())) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_FORBIDDEN_FROM_CANCEL);
         }
 
-        // 경매가 이미 취소되어 있다면 noop
         if (auction.getStatus().equals(AuctionStatus.CANCELLED)) {
             return;
         }
 
-        // 경매가 준비 상태가 아니라면 에러를 던지기
         if (!auction.getStatus().equals(AuctionStatus.READY)) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_STATUS_NOT_CANCELLABLE);
         }
 
-        // 경매를 취소하기 너무 늦었다면 에러를 던지기
         LocalDateTime canCancelAfter = auction.getStartedAt().minus(Duration.ofMinutes(10));
-
         if (!now.isBefore(canCancelAfter)) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_TOO_LATE_TO_CANCEL);
         }
@@ -234,7 +215,7 @@ public class AuctionService {
         auction.cancel();
 
         auctionRepository.saveAndFlush(auction);
-        // auctionEventBridgeService 의 handleAuctionCancelled 호출
+        // auctionEventBridgeService의 handleAuctionCancelled() 호출
         eventPublisher.publishEvent(new AuctionCancelledEventBridge(auction.getId()));
     }
 }

@@ -53,22 +53,13 @@ public class Auction extends CreatableEntity {
     @Column(name="category_id", nullable = false)
     private Long categoryId;
 
-    // =======================================
-    //
-    // 아래는 JDBC를 통해 관리되는 column들입니다.
-    // 
-    // 검색은 tsvector를 통해 동작하는데 Hibernate를 통해
-    // 깔끔하게 tsvector를 관리할 방법이 없으므로 JDBC를 통해 관리합니다.
-    //
-    // 아래는 QueryDSL path를 위해서만 존재합니다.
-
+    // tsvector는 Hibernate로 관리 불가 - JDBC로 직접 업데이트
+    // 아래 필드는 QueryDSL path 전용
     @Column(columnDefinition = "tsvector", insertable = false, updatable = false)
     private String itemNameSearchVector;
 
     @Column(columnDefinition = "tsvector", insertable = false, updatable = false)
     private String descriptionSearchVector;
-
-    // =======================================
 
     private Integer searchVectorVersion;
 
@@ -100,29 +91,24 @@ public class Auction extends CreatableEntity {
         return auction;
     }
 
-    // auction 상태 변경 메서드들
-    // READY -> ACTIVE (경매 시작)
     public void activate() {
         if(this.status == AuctionStatus.READY) {
             this.status = AuctionStatus.ACTIVE;
         }
     }
 
-    // ACTIVE -> DONE (낙찰)
     public void close() {
         if(this.status == AuctionStatus.ACTIVE) {
             this.status = AuctionStatus.DONE;
         }
     }
 
-    // ACTIVE -> NO_BID (유찰)
     public void noBid() {
         if(this.status == AuctionStatus.ACTIVE) {
             this.status = AuctionStatus.NO_BID;
         }
     }
 
-    // READY -> CANCELLED (취소)
     public void cancel() {
         if(this.status == AuctionStatus.READY) {
             this.status = AuctionStatus.CANCELLED;
@@ -130,7 +116,6 @@ public class Auction extends CreatableEntity {
         }
     }
 
-    // 관리자 전용 강제 취소
     public void forceCancel() {
         if (this.status == AuctionStatus.READY || this.status == AuctionStatus.ACTIVE) {
             this.status = AuctionStatus.CANCELLED;

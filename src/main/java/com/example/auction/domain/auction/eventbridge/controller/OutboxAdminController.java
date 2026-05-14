@@ -17,14 +17,12 @@ public class OutboxAdminController {
 
     private final OutboxAdminService outboxAdminService;
 
-    // 실패한 outbox 목록 조회
     @GetMapping
     public ResponseEntity<BaseResponse<List<OutboxAdminResponse>>> getFailedOutbox() {
         return ResponseEntity.ok(BaseResponse.success(
                 HttpStatus.OK.name(), "FAILED outbox 조회에 성공했습니다", outboxAdminService.getFailedOutbox()));
     }
 
-    // 재시도
     @PostMapping("/{outboxId}/retry")
     public ResponseEntity<BaseResponse<Void>> retry(@PathVariable Long outboxId) {
         outboxAdminService.retry(outboxId);
