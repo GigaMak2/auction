@@ -3,6 +3,7 @@ package com.example.auction.domain.userchat.scheduler;
 import com.example.auction.domain.userchat.repository.UserChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class UserChatScheduler {
 
     @Transactional
     @Scheduled(cron = "0 0 0 * * *")
+    @SchedulerLock(name = "userChatScheduler", lockAtMostFor = "PT10M", lockAtLeastFor = "PT1M")
     public void deleteOldMessages() {
         LocalDateTime threshold = LocalDateTime.now().minusDays(30);
         int deleted = userChatMessageRepository.deleteAllByCreatedAtBefore(threshold);
