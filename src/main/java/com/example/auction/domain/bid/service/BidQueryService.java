@@ -20,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// 입찰 조회, 결과 조회, 내입찰조회
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -31,26 +30,20 @@ public class BidQueryService {
     private final AuctionRepository auctionRepository;
     private final AuctionResultRepository resultRepository;
 
-
-    // 내 입찰 조회(로그인한 본인만 가능하므로 삭제된 유저 처리 X)
     public PageResponse<BidListResponse> getMyBids(CustomUserDetails userDetails, Pageable pageable) {
 
         Long userId = userDetails.getUserId();
 
-        // 내 입찰 목록 조회 (페이징)
         Page<BidListResponse> myBidPage = bidRepository.findAllByUserId(userId, pageable)
                 .map(BidListResponse::from);
 
         return PageResponse.create(myBidPage);
     }
 
-    // 특정 경매의 입찰조회(삭제된 유저의 입찰 조회 가능)
     public PageResponse<BidListResponse> getBids(Long auctionId, Pageable pageable) {
-        // 경매 존재 여부 및 상태 확인
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));
 
-        // 취소면 조회 불가
         if (auction.getStatus() == AuctionStatus.CANCELLED) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND);
         }
@@ -61,19 +54,15 @@ public class BidQueryService {
         return PageResponse.create(bidPage);
     }
 
-    // 입찰 결과 조회(1건, 삭제된 유저의 입찰 조회 가능)
     public BidResponse getWinnerBid(Long auctionId) {
 
-        // 경매 존재 여부 및 상태 확인
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));
 
-        // done만 결과 조회 가능
         if (auction.getStatus() != AuctionStatus.DONE) {
             throw new ServiceErrorException(BidErrorEnum.AUCTION_RESULT_NOT_FOUND);
         }
 
-        // 입찰 결과 1건 조회
         AuctionResult auctionResult = resultRepository.findByAuctionId(auctionId)
                 .orElseThrow(() -> new ServiceErrorException(BidErrorEnum.AUCTION_RESULT_NOT_FOUND));
 
@@ -83,13 +72,10 @@ public class BidQueryService {
 
     }
 
-    // 현재 최저가 입찰 조회(삭제된 유저의 입찰 제외)
     public BidResponse getCurrentMinBid(Long auctionId) {
-        // 경매 존재 여부 및 상태 확인
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));
 
-        // 진행 중이 아니면 조회 불가
         if (auction.getStatus() != AuctionStatus.ACTIVE) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND);
         }

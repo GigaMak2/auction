@@ -8,7 +8,6 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// 경매별 입찰 조회
 @Getter
 @AllArgsConstructor
 public class BidListResponse {

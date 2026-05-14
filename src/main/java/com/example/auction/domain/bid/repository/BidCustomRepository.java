@@ -10,7 +10,6 @@ import java.util.Optional;
 
 public interface BidCustomRepository {
 
-    // 현재 최저가입찰 전체 조회(삭제된유저 제외)
     Optional<Bid> findFirstByAuctionIdOrderByPriceAsc(Long auctionId);
 
     Page<BidAdminListResponse> findBidWithConditions(Pageable pageable, BidAuctionStatus status, Long auctionId, Long userId);

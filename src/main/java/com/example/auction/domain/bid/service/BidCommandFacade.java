@@ -12,8 +12,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
-// 입찰 생성 - 락 획득만 담당, 비즈니스 로직은 프로세서
-// 이 클래스에 @Transactional 생기면 processor.placeBid 예외가 전파되지 않으니 주의 필요
+// 주의: @Transactional 추가 금지 - 예외 전파 실패
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,9 +22,8 @@ public class BidCommandFacade {
     private final RedissonClient redissonClient;
 
     private static final String BID_LOCK_PREFIX = "bid:lock:";
-    private static final long LOCK_WAIT_TIME = 20L;    // 락 획득 대기 시간 (초)
+    private static final long LOCK_WAIT_TIME = 20L;
 
-    // 입찰 생성 - 분산락
     public BidResponse placeBidDis(CustomUserDetails userDetails, Long auctionId, BidRequest request) {
 
         RLock lock = redissonClient.getLock(BID_LOCK_PREFIX + auctionId);
@@ -39,7 +37,6 @@ public class BidCommandFacade {
             throw new ServiceErrorException(BidErrorEnum.BID_LOCK_FAILED);
         }
 
-        // 락 획득 실패할 경우 에러
         if (!isLocked) {
             log.warn("[BidCommandFacade] 락 획득 실패 — auctionId={}, userId={}, price={}", auctionId, userDetails.getUserId(), request.getPrice()); // 동시 입찰 경합 또는 락 타임아웃 감지용
             throw new ServiceErrorException(BidErrorEnum.BID_LOCK_FAILED);
