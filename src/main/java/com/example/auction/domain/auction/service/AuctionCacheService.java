@@ -15,17 +15,14 @@ public class AuctionCacheService {
     public boolean shouldCacheGetManyAuctionsPublic(
             AuctionSearchCondition condition
     ) {
-        // 검색 키워드가 있을 경우 cache를 하는 것이 의미 없으므로 skip
         if (condition.getKeyword() != null) {
             return false;
         }
 
-        // 만약에 가격의 범위를 포함해 검색한다면 skip
         if (!(condition.getMaxPriceMin() == null && condition.getMaxPriceMax() == null)) {
             return false;
         }
 
-        // 만약에 페이지가 10 페이지를 넘어갔다면 skip
         if (condition.getPage() >= 9) {
             return false;
         }

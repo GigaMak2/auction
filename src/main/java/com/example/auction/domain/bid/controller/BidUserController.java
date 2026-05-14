@@ -25,7 +25,6 @@ public class BidUserController {
 
     private final BidQueryService queryService;
 
-    // 내 입찰 조회
     @GetMapping
     public ResponseEntity<BaseResponse<PageResponse<BidListResponse>>> getMyBids(
             @AuthenticationPrincipal CustomUserDetails userDetails,

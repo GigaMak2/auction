@@ -82,8 +82,6 @@ public class AiService {
             StringBuilder fullResponse = new StringBuilder();
 
             // 5. TOKEN 스트리밍 — 이전 대화 히스토리 + 현재 메시지, Tool Calling 포함
-            // Chapter 2의 stream().content() 패턴, messages()로 컨텍스트 전달
-            // 시스템 프롬프트: Chapter 3 역할 부여 + 퓨-샷 기법 적용
             Flux<ServerSentEvent<String>> tokenStream = chatClient.prompt()
                     .system("""
                             오늘 날짜는 %s입니다. 날짜 상대 표현은 이 날짜를 기준으로 계산하세요.

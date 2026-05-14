@@ -27,7 +27,6 @@ public class BidController {
     private final BidCommandFacade commandService;
     private final BidQueryService queryService;
 
-    // 특정 경매에 입찰 생성 - 분산락
     @PostMapping("/v2")
     public ResponseEntity<BaseResponse<BidResponse>> placeBidDis(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -39,8 +38,6 @@ public class BidController {
                 .body(BaseResponse.success(HttpStatus.CREATED.name(), "입찰을 생성했습니다", data));
     }
 
-
-    // 특정 경매의 입찰 조회
     @GetMapping("/v1")
     public ResponseEntity<BaseResponse<PageResponse<BidListResponse>>> getBids(
             @PathVariable("auctionId") Long auctionId,
@@ -57,7 +54,6 @@ public class BidController {
                 .body(BaseResponse.success(HttpStatus.OK.name(), "입찰 목록을 조회했습니다", data));
     }
 
-    // 입찰 결과 조회(1건)
     @GetMapping("/winner/v1")
     public ResponseEntity<BaseResponse<BidResponse>> getWinnerBid(
             @PathVariable("auctionId") Long auctionId
@@ -67,7 +63,6 @@ public class BidController {
                 .body(BaseResponse.success(HttpStatus.OK.name(), "입찰 결과를 조회했습니다", data));
     }
 
-    // (경매 진행중) 현재 최저가입찰 조회
     @GetMapping("/current/v1")
     public ResponseEntity<BaseResponse<BidResponse>> getCurrentMinBid(
             @PathVariable("auctionId") Long auctionId

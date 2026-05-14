@@ -48,7 +48,7 @@ public class AuctionElasticsearchService {
             try {
                 AuctionDocument doc = AuctionDocument.from(event);
                 elasticsearch.save(doc);
-                return; // 성공하면 종료
+                return;
             } catch (Exception e) {
                 log.warn("[AuctionSearch] AuctionDocument 등록 실패 {}/{}회 - auctionId={}",
                         attempt, maxAttempts, event.id(), e);
@@ -74,7 +74,6 @@ public class AuctionElasticsearchService {
 
         List<Query> mustQueries = new ArrayList<>();
 
-        // 최대 가격 조건
         if (condition.getMaxPriceMin() != null || condition.getMaxPriceMax() != null) {
             NumberRangeQuery.Builder nrqBuilder = new NumberRangeQuery.Builder().field("maxPrice");
 
@@ -91,7 +90,6 @@ public class AuctionElasticsearchService {
             mustQueries.add(priceRange);
         }
 
-        // 경매 상태 조건
         if (condition.getStatus() != null) {
             List<FieldValue> statusFieldValues = condition.getStatus().stream()
                 .map(s -> FieldValue.of(s.name()))
@@ -106,7 +104,6 @@ public class AuctionElasticsearchService {
             mustQueries.add(statusQuery);
         }
 
-        // 카테고리 조건
         if (condition.getCategoryId() != null) {
             Query categoryQuery = QueryBuilders.term()
                 .field("categoryId")
@@ -117,7 +114,6 @@ public class AuctionElasticsearchService {
             mustQueries.add(categoryQuery);
         }
 
-        // 이름 키워드 조건
         if (condition.getKeyword() != null && !condition.getKeyword().isBlank()) {
             Query nameQuery = QueryBuilders.match()
                 .query(condition.getKeyword())
@@ -128,7 +124,6 @@ public class AuctionElasticsearchService {
             mustQueries.add(nameQuery);
         }
 
-        // 유저 ID 조건
         if (userId != null) {
             Query userIdQuery = QueryBuilders.term()
                 .field("userId")
@@ -147,15 +142,6 @@ public class AuctionElasticsearchService {
             finalQuery = QueryBuilders.bool().must(mustQueries).build()._toQuery();
         }
 
-        // TODO:
-        // 
-        // 현재 검색 순위 로직은 keyword가 있을 경우
-        // keyword랑 비슷한 제목의 목록은 점수가 높아 올라가고
-        // 점수가 똑같을 경우 생성된 날을 기준으로 정렬합니다.
-        //
-        // 문제는 한 10년된 경매도 검색어랑 제일 비슷하면 위로 올라간다는 점입니다.
-        //
-        // 오래됬을 경우 penaltiy를 주는 logic이 필요합니다.
         List<SortOptions> sortOptions = new ArrayList<>();
         sortOptions.add(SortOptions.of(s -> s.score(sc -> sc.order(SortOrder.Desc))));
         sortOptions.add(SortOptions.of(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc))));
@@ -194,7 +180,6 @@ public class AuctionElasticsearchService {
     ) {
         List<Query> mustQueries = new ArrayList<>();
 
-        // 경매 상태 조건
         if (auctionStatus != null) {
             Query statusQuery = QueryBuilders.term()
                 .field("status")
@@ -205,7 +190,6 @@ public class AuctionElasticsearchService {
             mustQueries.add(statusQuery);
         }
 
-        // 이름 키워드 조건
         if (keyword != null && !keyword.isBlank()) {
             Query nameQuery = QueryBuilders.match()
                 .query(keyword)
@@ -224,16 +208,6 @@ public class AuctionElasticsearchService {
             finalQuery = QueryBuilders.bool().must(mustQueries).build()._toQuery();
         }
 
-        // TODO:
-        // 
-        // 현재 검색 순위 로직은 keyword가 있을 경우
-        // keyword랑 비슷한 제목의 목록은 점수가 높아 올라가고
-        // 점수가 똑같을 경우 생성된 날을 기준으로 정렬합니다.
-        //
-        // 문제는 한 10년된 경매도 검색어랑 제일 비슷하면 위로 올라간다는 점입니다.
-        //
-        // 보시다 시피 위와 똑같은 문제를 겪고 있지만 이 API는 관리자를 위한 API인 만큼
-        // 또 다른 조건이 필요할 수도 있을 듯 합니다.
         List<SortOptions> sortOptions = new ArrayList<>();
         sortOptions.add(SortOptions.of(s -> s.score(sc -> sc.order(SortOrder.Desc))));
         sortOptions.add(SortOptions.of(s -> s.field(f -> f.field("createdAt").order(SortOrder.Desc))));

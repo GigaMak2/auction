@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum BidErrorEnum implements ErrorEnumInterface {
 
-    // 입찰 관련 에러
     BID_NOT_FOUND(HttpStatus.NOT_FOUND, "입찰을 찾을 수 없습니다"),
     AUCTION_RESULT_NOT_FOUND(HttpStatus.NOT_FOUND, "경매 결과를 찾을 수 없습니다"),
     BID_FORBIDDEN_SELF_BID(HttpStatus.FORBIDDEN, "자신의 경매에는 입찰할 수 없습니다"),

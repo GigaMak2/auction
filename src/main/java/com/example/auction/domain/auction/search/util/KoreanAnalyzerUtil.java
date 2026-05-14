@@ -23,27 +23,22 @@ public class KoreanAnalyzerUtil {
         }
 
         List<String> tokens = getTokens(str);
-
-        // 토큰들을 tsvector literal로 변경
         
         StringBuilder sb = new StringBuilder();
 
-        for (int i=0; i<tokens.size(); i++) {
+        for (int i = 0; i < tokens.size(); i++) {
             String token = tokens.get(i);
 
             sb.append(prepareToken(token));
             sb.append(":");
-            sb.append(i+1);
+            sb.append(i + 1);
             sb.append(" ");
         }
 
         return sb.toString();
     }
 
-    /**
-     * 토큰이 없으면 null을 반환합니다.
-     * 호출부에서 null 체크 후 검색 조건에서 제외해야 합니다.
-     */
+    // 토큰 없으면 null 반환 - 호출부에서 null 체크 후 검색 조건 제외 필요
     public @Nullable String toTsQueryLiteral (String str) {
         if (str == null) {
             return null;
@@ -54,12 +49,10 @@ public class KoreanAnalyzerUtil {
         if (tokens.isEmpty()) {
             return null;
         }
-
-        // convert tokens to tsquery literal
         
         StringBuilder sb = new StringBuilder();
 
-        for (int i=0; i<tokens.size(); i++) {
+        for (int i = 0; i < tokens.size(); i++) {
             String token = tokens.get(i);
 
             sb.append(prepareToken(token));

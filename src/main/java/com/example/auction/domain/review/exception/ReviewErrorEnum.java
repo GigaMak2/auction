@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ReviewErrorEnum implements ErrorEnumInterface {
 
-    // 리뷰 관련
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다"),
     ALREADY_REVIEWED(HttpStatus.CONFLICT, "이미 해당 경매에 리뷰를 작성했습니다"),
     REVIEW_FORBIDDEN(HttpStatus.FORBIDDEN, "리뷰 작성자가 아닙니다"),

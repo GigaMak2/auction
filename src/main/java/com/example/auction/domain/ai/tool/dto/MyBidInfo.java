@@ -8,7 +8,7 @@ public record MyBidInfo(
         String itemName,
         String auctionStatus,
         LocalDateTime auctionEndedAt,
-        BigDecimal myLowestBidPrice,      // 해당 경매에서 내 최저 입찰가
-        BigDecimal currentLowestPrice,    // 현재 경매 최저가
-        boolean isMyBidLowest             // 내가 현재 1위인지
+        BigDecimal myLowestBidPrice,
+        BigDecimal currentLowestPrice,
+        boolean isMyBidLowest
 ) {}

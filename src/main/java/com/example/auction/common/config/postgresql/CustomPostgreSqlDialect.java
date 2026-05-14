@@ -8,14 +8,7 @@ import org.hibernate.type.BasicTypeRegistry;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.spi.TypeConfiguration;
 
-/**
- * PostgreSQL 전용 커스텀 Dialect.
- *
- * Hibernate의 JPQL/HQL에는 저희가 필요한 PostgreSQL 기능을 표현 할 문법이 없습니다.
- *
- * 그래서 이 클래스를 통해 JPQL 문법을 확장합니다.
- *
- */
+// Hibernate JPQL/HQL로 표현할 수 없는 PostgreSQL 전용 기능을 위한 커스텀 Dialect
 public class CustomPostgreSqlDialect extends PostgreSQLDialect {
     public CustomPostgreSqlDialect(DialectResolutionInfo info) {
         super(info);

@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum UserChatErrorEnum implements ErrorEnumInterface {
 
-    // 유저 채팅방
     USER_CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다"),
     USER_CHAT_ROOM_FORBIDDEN(HttpStatus.FORBIDDEN, "본인 채팅방만 이용할 수 있습니다");
 

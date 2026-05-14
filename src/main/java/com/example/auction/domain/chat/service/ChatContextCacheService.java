@@ -19,8 +19,8 @@ import java.util.List;
 public class ChatContextCacheService {
 
     private static final String KEY_PREFIX = "chat:context:";
-    private static final int MAX_MESSAGES = 20;      // AI 컨텍스트로 넘길 최대 메시지 수
-    private static final Duration TTL = Duration.ofHours(24); // 마지막 갱신 후 24시간 유지
+    private static final int MAX_MESSAGES = 20;
+    private static final Duration TTL = Duration.ofHours(24);
 
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;

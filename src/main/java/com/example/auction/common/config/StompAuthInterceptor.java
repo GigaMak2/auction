@@ -43,7 +43,6 @@ public class StompAuthInterceptor implements ChannelInterceptor {
 
             accessor.setUser(auth);
 
-            // 세션 attributes에 저장
             if (accessor.getSessionAttributes() != null) {
                 accessor.getSessionAttributes().put("auth", auth);
             } else {
@@ -53,7 +52,6 @@ public class StompAuthInterceptor implements ChannelInterceptor {
         } else if (StompCommand.SEND.equals(accessor.getCommand())
                 || StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
 
-            // SEND/SUBSCRIBE 시 세션 attributes에서 복원
             if (accessor.getSessionAttributes() != null) {
                 UsernamePasswordAuthenticationToken auth =
                         (UsernamePasswordAuthenticationToken) accessor.getSessionAttributes().get("auth");

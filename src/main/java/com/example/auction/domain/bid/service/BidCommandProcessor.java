@@ -31,7 +31,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// 입찰 생성- @Transactional
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -52,46 +51,38 @@ public class BidCommandProcessor {
         Long userId = userDetails.getUserId();
         BigDecimal bidPrice = request.getPrice();
 
-        // 유저 존재 및 삭제되지 않았는지 확인
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+        userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new ServiceErrorException(UserErrorEnum.USER_NOT_FOUND));
 
-        // 경매 존재 여부 확인
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new ServiceErrorException(AuctionErrorEnum.AUCTION_NOT_FOUND));
 
-        // 취소된 경매 입찰 불가
         if (auction.getStatus() == AuctionStatus.CANCELLED) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_INVALID_STATUS);
         }
 
-        // 경매 시간 검증(경매 시작 시간 <= 입찰 발생 시간 <= 경매 종료 시간)
         LocalDateTime now = LocalDateTime.now();
         if (now.isBefore(auction.getStartedAt()) || now.isAfter(auction.getEndedAt())) {
             throw new ServiceErrorException(AuctionErrorEnum.AUCTION_INVALID_STATUS);
         }
 
-        // 본인 경매 입찰 금지
         if (auction.getUserId().equals(userId)) {
             throw new ServiceErrorException(BidErrorEnum.BID_FORBIDDEN_SELF_BID);
         }
 
-        // 경매 최대 가격 초과 방지
         if (bidPrice.compareTo(auction.getMaxPrice()) > 0) {
             throw new ServiceErrorException(BidErrorEnum.BID_PRICE_EXCEEDS_MAX);
         }
 
-        // 현재 최저가보다 낮아야 함
         BidCachedResponse currentCachedMin = bidCacheService.getCurrentMinPrice(auctionId);
         BigDecimal currentMinPrice = currentCachedMin != null ? currentCachedMin.getPrice() : null;
 
-        // currentMinPrice 가 null일경우 bidPrice 가격검증 스킵됨
+        // currentMinPrice가 null일경우 bidPrice 가격 검증 스킵됨
         if (currentMinPrice != null && bidPrice.compareTo(currentMinPrice) >= 0) {
             log.warn("[BidCommandProcessor] 입찰 가격 검증 실패 — auctionId={}, userId={}, price={}, currentMin={}", auctionId, userId, bidPrice, currentMinPrice); // 현재 최저가보다 높은 입찰 시도 감지용
             throw new ServiceErrorException(BidErrorEnum.BID_PRICE_NOT_LOWER);
         }
 
-        // 입찰 생성 및 저장
         Bid bid = Bid.of(
                 request.getDescription(),
                 bidPrice,

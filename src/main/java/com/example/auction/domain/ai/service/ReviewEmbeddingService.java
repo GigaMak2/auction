@@ -24,7 +24,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-// 후기 텍스트 임베딩 저장 + 유사도 검색 — 판매자 신뢰도 RAG 분석에 활용
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -62,7 +61,6 @@ public class ReviewEmbeddingService {
             }
     );
 
-    // 후기 1건을 벡터로 변환해 pgvector에 저장 — 리뷰 생성/수정 시 호출
     // Contextual Retrieval: 별점을 텍스트에 prepend해 짧은 후기의 임베딩 품질 개선
     // reviewId를 Document ID로 고정해 동일 ID upsert로 수정 시 덮어쓰기 보장
     public void embed(Review review) {
@@ -85,7 +83,6 @@ public class ReviewEmbeddingService {
         vectorStore.add(List.of(document));
     }
 
-    // 후기 삭제 시 pgvector에서 해당 벡터 제거
     public void delete(Long reviewId) {
         vectorStore.delete(List.of(toDocId(reviewId)));
     }
@@ -94,8 +91,7 @@ public class ReviewEmbeddingService {
         return UUID.nameUUIDFromBytes(("review:" + reviewId).getBytes(StandardCharsets.UTF_8)).toString();
     }
 
-    // sellerId 필터 + 의미 유사도 기반 후기 텍스트 검색 — LLM 컨텍스트 주입용
-    // HyDE: 유저 질문으로 가상 후기를 생성한 뒤 그 임베딩으로 검색 — 질문↔후기 문체 차이 완화
+    // HyDE: 유저 질문으로 가상 후기를 생성한 뒤 그 임베딩으로 검색 — 질문 ↔ 후기 문체 차이 완화
     // 쿼리 방향성(긍정/부정) 감지 → score 필터로 감성 불일치 후기 사전 차단
     public List<String> search(Long sellerId, String query) {
         String searchQuery = generateHypotheticalReview(query);

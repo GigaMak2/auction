@@ -21,8 +21,6 @@ public class AuctionOutboxWorker {
 
     private static final int MAX_ATTEMPTS = 3;
 
-    // 30초마다 PENDING/FAILED 항목 재시도
-    // 락최대유지 Period Time 25 Seconds, 최소유지 5초
     @Scheduled(fixedDelay = 30000)
     @SchedulerLock(name = "outboxWorker", lockAtMostFor = "PT25S", lockAtLeastFor = "PT5S")
     @Transactional

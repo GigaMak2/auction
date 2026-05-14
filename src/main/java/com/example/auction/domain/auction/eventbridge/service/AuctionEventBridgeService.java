@@ -28,25 +28,18 @@ public class AuctionEventBridgeService {
     private final SchedulerClient schedulerClient;
     private final AuctionScheduleOutboxRepository outboxRepository;
 
-    // 이벤트브릿지가 어떤 람다 함수를 실행할지 찾을 때 쓰는 경로. 계정번호와 실제 람다함수이름이 필요함
     @Value("${aws.eventbridge.lambda-arn}")
     private String lambdaArn;
-    // 이벤트브릿지가 람다함수 실행권한이 있음을 증명할 때 사용
+
     @Value("${aws.eventbridge.role-arn}")
     private String roleArn;
-
-    @Value("${aws.eventbridge.legacy-lambda-arn}")
-    private String legacyLambdaArn;
 
     private static final DateTimeFormatter TARGET_TIME_FMT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private static final String newArnSuffix = "NEW";
-    private static final String legacyArnSuffix = "LEGACY";
 
-
-    // 트랜잭션 커밋 이후 eventBridge 스케줄 등록하여 고아 스케줄 방지(db에는 없고 aws 스케줄에만 있는 경우 방지)
-    // 3회 재시도
+    // 트랜잭션 커밋 이후 eventBridge 스케줄 등록하여 고아 스케줄 방지
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAuctionCreated(AuctionCreatedEventBridge event) {
         int maxAttempts = 3;
@@ -83,29 +76,22 @@ public class AuctionEventBridgeService {
         deleteSchedules(event.auctionId());
     }
 
-    // 경매 시작 스케줄 등록(5분 전)
     public void registerStartSchedule(Long auctionId, LocalDateTime startedAt) {
         if (isPast(startedAt.minusMinutes(5))) {
             log.warn("[EventBridge] 현재보다 과거로 시작 시간 등록: auctionId={}", auctionId);
             return;
         }
-        // 신규와 레거시 둘다 등록
         registerSchedule(auctionId, startedAt.minusMinutes(5), startedAt, "START", lambdaArn, newArnSuffix);
-        //registerSchedule(auctionId, startedAt, startedAt,"START", legacyLambdaArn, legacyArnSuffix);
     }
 
-    // 경매 종료 스케줄 등록(5분 전)
     public void registerEndSchedule(Long auctionId, LocalDateTime endedAt) {
         if (isPast(endedAt.minusMinutes(5))) {
             log.warn("[EventBridge] 현재보다 과거로 종료 시간 등록: auctionId={}", auctionId);
             return;
         }
         registerSchedule(auctionId, endedAt.minusMinutes(5), endedAt, "END", lambdaArn, newArnSuffix);
-        //registerSchedule(auctionId, endedAt, endedAt, "END", legacyLambdaArn, legacyArnSuffix);
-
     }
 
-    // KST 기준 시간이 현재 UTC보다 과거인지 확인
     private boolean isPast(LocalDateTime kstTime) {
         LocalDateTime utc = kstTime.atZone(ZoneId.of("Asia/Seoul"))
                 .withZoneSameInstant(ZoneId.of("UTC"))
@@ -122,7 +108,6 @@ public class AuctionEventBridgeService {
                     "{\"auctionId\":%d,\"action\":\"%s\",\"targetTime\":\"%s\"}",
                     auctionId, action, toUtcString(realTime)
             );
-
 
         try {
             schedulerClient.createSchedule(r -> r
@@ -154,9 +139,7 @@ public class AuctionEventBridgeService {
 
     public void deleteSchedules(Long auctionId) {
         deleteSchedule("auction-start-" + auctionId + "-NEW");
-        deleteSchedule("auction-start-" + auctionId + "-LEGACY");
         deleteSchedule("auction-end-" + auctionId + "-NEW");
-        deleteSchedule("auction-end-" + auctionId + "-LEGACY");
     }
 
     private void deleteSchedule(String scheduleName) {
@@ -179,7 +162,7 @@ public class AuctionEventBridgeService {
     }
 
 
-    // KST -> UTC 변환(우리나라시간-9)
+    // KST -> UTC 변환 (UTC는 KST-9)
     /**
      * at(yyyy-MM-ddTHH:mm:ss) 형식
      * at(2026-04-16T08:43:30) -> 2026년 4월 16일 08시 43분 30초에 1회 실행
