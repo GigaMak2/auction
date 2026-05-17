@@ -75,5 +75,10 @@ public class AuctionDocument {
 
         return auctionDoc;
     }
+
+    public void setCancelled(LocalDateTime cancelledAt) {
+        this.status = AuctionStatus.CANCELLED;
+        this.cancelledAt = cancelledAt;
+    }
 }
 
