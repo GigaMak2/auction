@@ -39,6 +39,18 @@ public class CustomAuctionRepositoryImpl implements CustomAuctionRepository{
     private final KoreanAnalyzerUtil koreanAnalyzerUtil;
 
     @Override
+    public List<Auction> findByCursor(Long auctionCursor, int size) {
+        List<Auction> auctions = queryFactory
+            .selectFrom(auction)
+            .where(auctionCursor != null ? auction.id.gt(auctionCursor) : null)
+            .orderBy(auction.id.asc())
+            .limit(size)
+            .fetch();
+
+        return auctions;
+    }
+
+    @Override
     public Page<@NonNull Auction> findByCondition(
             AuctionSearchCondition condition
     ) {

@@ -21,6 +21,9 @@ spring:
       hibernate:
         format_sql: true
 
+  elasticsearch:
+    create-auction-index: true
+
 aws:
   eventbridge:
     lambda-arn: ${LAMBDA_ARN:}

@@ -7,6 +7,9 @@ spring:
     cleanDisabled: false
     locations: classpath:db/migration
 
+  elasticsearch:
+    create-auction-index: true
+
 jwt:
   secret:
     key: TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEST
@@ -24,3 +27,7 @@ aws:
 
 admin:
   secret-key: TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEST
+
+scheduler:
+  auction-reindex-job:
+    cron: "-"
