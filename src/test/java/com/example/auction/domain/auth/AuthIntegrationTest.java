@@ -21,6 +21,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.flywaydb.core.Flyway;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -36,8 +38,14 @@ public class AuthIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
+    @Autowired
+    private Flyway flyway;
+
     @BeforeEach
     void setUp() throws Exception {
+        flyway.clean();
+        flyway.migrate();
+
         AuthSignupRequest signupRequest = new AuthSignupRequest("test@test.com", "password123");
         mockMvc.perform(post("/api/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
