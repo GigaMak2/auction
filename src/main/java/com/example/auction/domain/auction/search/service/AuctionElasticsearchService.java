@@ -21,11 +21,13 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.example.auction.domain.auction.dto.response.AuctionAdminListResponse;
+import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.search.document.AuctionDocument;
 import com.example.auction.domain.auction.search.dto.AuctionCreatedDocument;
 import com.example.auction.domain.auction.search.dto.AuctionSearchResult;
+import com.example.auction.domain.auction.search.exception.AuctionSearchErrorEnum;
 import com.example.auction.domain.auction.util.AuctionUtil;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.NumberRangeQuery;
@@ -84,7 +86,8 @@ public class AuctionElasticsearchService {
                 if (maybeDoc.isEmpty()) {
                     log.error("[AuctionSearch] AuctionDocument 취소 실패, elasticsearch에 경매 없음 - auctionId={}",
                         event.auctionId());
-                    break;
+
+                    throw new ServiceErrorException(AuctionSearchErrorEnum.AUCTION_DOCUMENT_NOT_FOUND);
                 }
 
                 AuctionDocument doc = maybeDoc.get();
