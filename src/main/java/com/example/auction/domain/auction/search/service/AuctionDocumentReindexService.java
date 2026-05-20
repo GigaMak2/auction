@@ -36,16 +36,16 @@ public class AuctionDocumentReindexService {
         log.info("[AuctionDocumentReindexService] elasticsearch document reindexing 작업 시작");
 
         LocalDateTime beganTime = LocalDateTime.now();
-        LocalDateTime monthAgo = beganTime.minusDays(30);
-
-        // 오래된 작업 내역 들을 삭제
-        helper.deleteOldReindexJobs(monthAgo);
 
         String newIndexName = AuctionDocumentUtil.getNewIndexName(beganTime);
 
         AuctionDocumentReindexJob job = helper.saveJob(AuctionDocumentReindexJob.of(newIndexName));
 
         try {
+            LocalDateTime monthAgo = beganTime.minusDays(30);
+            // 오래된 작업 내역 들을 삭제
+            helper.deleteOldReindexJobs(monthAgo);
+
             // 백업을 할 새 index 생성
             IndexCoordinates target = IndexCoordinates.of(newIndexName);
             var indexOps = elasticsearch.indexOps(AuctionDocument.class);
@@ -100,7 +100,9 @@ public class AuctionDocumentReindexService {
             }
 
             List<String> oldIndexes = helper.pointAliasAtNewIndex(AuctionDocumentUtil.ALIAS_NAME, newIndexName);
-            elasticsearch.indexOps(IndexCoordinates.of(oldIndexes.toArray(new String[0]))).delete();
+            if (!oldIndexes.isEmpty()) {
+                elasticsearch.indexOps(IndexCoordinates.of(oldIndexes.toArray(new String[0]))).delete();
+            }
 
             job.updateJobStatus(AuctionDocumentReindexJobStatus.DONE);
             helper.saveJob(job);
