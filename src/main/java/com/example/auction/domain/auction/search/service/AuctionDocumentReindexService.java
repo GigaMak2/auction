@@ -11,10 +11,12 @@ import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.search.document.AuctionDocument;
 import com.example.auction.domain.auction.search.dto.AuctionCreatedDocument;
 import com.example.auction.domain.auction.search.entity.AuctionDocumentReindexJob;
 import com.example.auction.domain.auction.search.enums.AuctionDocumentReindexJobStatus;
+import com.example.auction.domain.auction.search.exception.AuctionSearchErrorEnum;
 import com.example.auction.domain.auction.search.util.AuctionDocumentUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -34,83 +36,82 @@ public class AuctionDocumentReindexService {
         log.info("[AuctionDocumentReindexService] elasticsearch document reindexing 작업 시작");
 
         LocalDateTime beganTime = LocalDateTime.now();
-
         LocalDateTime monthAgo = beganTime.minusDays(30);
 
         // 오래된 작업 내역 들을 삭제
         helper.deleteOldReindexJobs(monthAgo);
 
-        AuctionDocumentReindexJob job;
-
         String newIndexName = AuctionDocumentUtil.getNewIndexName(beganTime);
-        job = helper.saveJob(AuctionDocumentReindexJob.of(newIndexName));
 
-        AuctionDocumentReindexJobStatus newStatus = AuctionDocumentReindexJobStatus.IN_PROGRESS;
+        AuctionDocumentReindexJob job = helper.saveJob(AuctionDocumentReindexJob.of(newIndexName));
 
-        // 백업을 할 새 index 생성
-        IndexCoordinates target = IndexCoordinates.of(newIndexName);
-        var indexOps = elasticsearch.indexOps(AuctionDocument.class);
-        elasticsearch.indexOps(target).create(
-                indexOps.createSettings(AuctionDocument.class),
-                indexOps.createMapping(AuctionDocument.class)
-        );
-        log.info("[AuctionDocumentReindexService] 새 elasticsearch index 생성 - newIndexName={}", newIndexName);
-
-        while(true) {
-            List<AuctionCreatedDocument> auctions = helper.findAuctionsByCursor(job.getAuctionIdCursor(), 1000);
-            if (auctions.size() <= 0) {
-                newStatus = AuctionDocumentReindexJobStatus.DONE;
-                break;
-            }
-
-            log.info(
-                "[AuctionDocumentReindexService] 경매 id {} - {} reindexing 작업 시작",
-                auctions.getFirst().id(), auctions.getLast().id()
+        try {
+            // 백업을 할 새 index 생성
+            IndexCoordinates target = IndexCoordinates.of(newIndexName);
+            var indexOps = elasticsearch.indexOps(AuctionDocument.class);
+            elasticsearch.indexOps(target).create(
+                    indexOps.createSettings(AuctionDocument.class),
+                    indexOps.createMapping(AuctionDocument.class)
             );
+            log.info("[AuctionDocumentReindexService] 새 elasticsearch index 생성 - newIndexName={}", newIndexName);
 
-            long minutesPassed = ChronoUnit.MINUTES.between(beganTime, LocalDateTime.now());
-            if (minutesPassed > 60) {
-                log.error("[AuctionDocumentReindexService] 시간이 모자라 reindexing 작업 실패");
-                newStatus = AuctionDocumentReindexJobStatus.FAILED;
-                break;
+            while(true) {
+                List<AuctionCreatedDocument> auctions = helper.findAuctionsByCursor(job.getAuctionIdCursor(), 1000);
+                if (auctions.size() <= 0) {
+                    break;
+                }
+
+                log.info(
+                    "[AuctionDocumentReindexService] 경매 id {} - {} reindexing 작업 시작",
+                    auctions.getFirst().id(), auctions.getLast().id()
+                );
+
+                long minutesPassed = ChronoUnit.MINUTES.between(beganTime, LocalDateTime.now());
+                if (minutesPassed > 60) {
+                    log.error("[AuctionDocumentReindexService] 시간이 모자라 reindexing 작업 실패");
+
+                    throw new ServiceErrorException(AuctionSearchErrorEnum.AUCTION_REINDEXING_OUT_OF_TIME);
+                }
+
+                // Auction을 Elasticsearch에 넣는 query 생성
+                List<IndexQuery> queries = new ArrayList<>();
+
+                Long newCursorPos = job.getAuctionIdCursor();
+
+                for (AuctionCreatedDocument auction : auctions) {
+                    AuctionDocument doc = AuctionDocument.from(auction);
+
+                    IndexQuery query = IndexQuery.builder()
+                        .withId(doc.getId().toString())
+                        .withObject(doc)
+                        .withOpType(IndexQuery.OpType.INDEX)
+                        .build();
+
+                    queries.add(query);
+
+                    newCursorPos = auction.id();
+                }
+
+                // 실제 query 진행
+                elasticsearch.bulkIndex(queries, IndexCoordinates.of(job.getNewIndexName()));
+
+                job.updateAuctionIdCursor(newCursorPos);
+                helper.saveJob(job);
             }
 
-            // Auction을 Elasticsearch에 넣는 query 생성
-            List<IndexQuery> queries = new ArrayList<>();
-
-            Long newCursorPos = job.getAuctionIdCursor();
-
-            for (AuctionCreatedDocument auction : auctions) {
-                AuctionDocument doc = AuctionDocument.from(auction);
-
-                IndexQuery query = IndexQuery.builder()
-                    .withId(doc.getId().toString())
-                    .withObject(doc)
-                    .withOpType(IndexQuery.OpType.INDEX)
-                    .build();
-
-                queries.add(query);
-
-                newCursorPos = auction.id();
-            }
-
-            // 실제 query 진행
-            elasticsearch.bulkIndex(queries, IndexCoordinates.of(job.getNewIndexName()));
-
-            job.updateAuctionIdCursor(newCursorPos);
-            helper.saveJob(job);
-        }
-
-        if (newStatus == AuctionDocumentReindexJobStatus.FAILED) {
-            job.updateJobStatus(newStatus);
-            helper.saveJob(job);
-        } else {
             List<String> oldInexes = helper.pointAliasAtNewIndex(AuctionDocumentUtil.ALIAS_NAME, newIndexName);
             elasticsearch.indexOps(IndexCoordinates.of(oldInexes.toArray(new String[0]))).delete();
-            job.updateJobStatus(newStatus);
-            helper.saveJob(job);
-        }
 
-        log.info("[AuctionDocumentReindexService] elasticsearch document reindexing 작업 성공");
+            job.updateJobStatus(AuctionDocumentReindexJobStatus.DONE);
+            helper.saveJob(job);
+            log.info("[AuctionDocumentReindexService] elasticsearch document reindexing 작업 성공");
+        } catch (Exception e) {
+            log.error("[AuctionDocumentReindexService] elasticsearch document reindexing 작업 실패", e);
+
+            job.updateJobStatus(AuctionDocumentReindexJobStatus.FAILED);
+            helper.saveJob(job);
+
+            throw e;
+        }
     }
 }
