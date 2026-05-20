@@ -99,8 +99,8 @@ public class AuctionDocumentReindexService {
                 helper.saveJob(job);
             }
 
-            List<String> oldInexes = helper.pointAliasAtNewIndex(AuctionDocumentUtil.ALIAS_NAME, newIndexName);
-            elasticsearch.indexOps(IndexCoordinates.of(oldInexes.toArray(new String[0]))).delete();
+            List<String> oldIndexes = helper.pointAliasAtNewIndex(AuctionDocumentUtil.ALIAS_NAME, newIndexName);
+            elasticsearch.indexOps(IndexCoordinates.of(oldIndexes.toArray(new String[0]))).delete();
 
             job.updateJobStatus(AuctionDocumentReindexJobStatus.DONE);
             helper.saveJob(job);

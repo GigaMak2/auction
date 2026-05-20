@@ -50,7 +50,7 @@ public class ElasticsearchIndexInitializer implements ApplicationRunner {
         // alias로 풀리진 않지만, auction-auction 이라는 '실제 index'가 존재하는 경우 -> 설정 오류
         if (aliasOps.exists()) {
             throw new IllegalStateException(
-                "%s 라는 이릉을 가진 실제 index가 존재 합니다. %s는 alias여야 합니다".formatted(alias, alias));
+                "%s 라는 이름을 가진 실제 index가 존재 합니다. %s는 alias여야 합니다".formatted(alias, alias));
         }
 
         // physical index를 생성
