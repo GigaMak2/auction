@@ -26,7 +26,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class AuctionServiceCancelTest {
@@ -59,6 +61,7 @@ class AuctionServiceCancelTest {
         );
         ReflectionTestUtils.setField(auction, "id", 1L);
         given(auctionRepository.findById(auction.getId())).willReturn(Optional.of(auction));
+        given(auctionRepository.saveAndFlush(any())).willAnswer(invocation -> invocation.getArgument(0));
 
         // WHEN & THEN (취소를 한 후 에러가 발생 안하는지만 확인)
         auctionService.cancelAuction(
@@ -174,6 +177,7 @@ class AuctionServiceCancelTest {
         ReflectionTestUtils.setField(auction, "status", status);
 
         given(auctionRepository.findById(auction.getId())).willReturn(Optional.of(auction));
+        lenient().when(auctionRepository.saveAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // WHEN & THEN
         if (status == AuctionStatus.READY || status == AuctionStatus.CANCELLED) {

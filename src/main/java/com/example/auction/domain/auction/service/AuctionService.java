@@ -30,6 +30,7 @@ import com.example.auction.domain.auction.entity.Auction;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.exception.AuctionErrorEnum;
 import com.example.auction.domain.auction.repository.AuctionRepository;
+import com.example.auction.domain.auction.search.dto.AuctionCancelledDocument;
 import com.example.auction.domain.auction.search.dto.AuctionCreatedDocument;
 import com.example.auction.domain.auction.search.dto.AuctionSearchResult;
 import com.example.auction.domain.auction.search.service.AuctionSearchService;
@@ -214,8 +215,12 @@ public class AuctionService {
 
         auction.cancel();
 
-        auctionRepository.saveAndFlush(auction);
+        auction = auctionRepository.saveAndFlush(auction);
+
         // auctionEventBridgeService의 handleAuctionCancelled() 호출
         eventPublisher.publishEvent(new AuctionCancelledEventBridge(auction.getId()));
+
+        // AuctionElasticsearchService의 handleAuctionCancelled() 호출
+        eventPublisher.publishEvent(AuctionCancelledDocument.from(auction));
     }
 }

@@ -2,8 +2,11 @@ package com.example.auction.domain.auction.search.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import co.elastic.clients.elasticsearch._types.*;
+import com.example.auction.domain.auction.search.dto.AuctionCancelledDocument;
+import com.example.auction.domain.auction.search.repository.AuctionDocumentRepository;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,11 +21,13 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.example.auction.domain.auction.dto.response.AuctionAdminListResponse;
+import com.example.auction.common.exception.ServiceErrorException;
 import com.example.auction.domain.auction.dto.request.AuctionSearchCondition;
 import com.example.auction.domain.auction.enums.AuctionStatus;
 import com.example.auction.domain.auction.search.document.AuctionDocument;
 import com.example.auction.domain.auction.search.dto.AuctionCreatedDocument;
 import com.example.auction.domain.auction.search.dto.AuctionSearchResult;
+import com.example.auction.domain.auction.search.exception.AuctionSearchErrorEnum;
 import com.example.auction.domain.auction.util.AuctionUtil;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.NumberRangeQuery;
@@ -35,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class AuctionElasticsearchService {
+    private final AuctionDocumentRepository auctionDocumentRepository;
     private final ElasticsearchOperations elasticsearch;
 
     @Async
@@ -55,6 +61,47 @@ public class AuctionElasticsearchService {
                 if (attempt == maxAttempts) {
                     log.error("[AuctionSearch] AuctionDocument 등록 최종 실패 - auctionId={}",
                             event.id(), e);
+                }else {
+                    try {
+                        Thread.sleep(backoffBaseMilli * (1L << attempt));
+                    } catch(InterruptedException ignored) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+        }
+    }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleAuctionCancelled(AuctionCancelledDocument event) {
+        int maxAttempts = 3;
+
+        int backoffBaseMilli = 500;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                Optional<AuctionDocument> maybeDoc = auctionDocumentRepository.findById(event.auctionId());
+
+                if (maybeDoc.isEmpty()) {
+                    log.error("[AuctionSearch] AuctionDocument 취소 실패, elasticsearch에 경매 없음 - auctionId={}",
+                        event.auctionId());
+
+                    throw new ServiceErrorException(AuctionSearchErrorEnum.AUCTION_DOCUMENT_NOT_FOUND);
+                }
+
+                AuctionDocument doc = maybeDoc.get();
+                doc.setCancelled(event.cancelledAt());
+
+                auctionDocumentRepository.save(doc);
+
+                return;
+            } catch (Exception e) {
+                log.warn("[AuctionSearch] AuctionDocument 취소 실패 {}/{}회 - auctionId={}",
+                        attempt, maxAttempts, event.auctionId(), e);
+                if (attempt == maxAttempts) {
+                    log.error("[AuctionSearch] AuctionDocument 취소 최종 실패 - auctionId={}",
+                            event.auctionId(), e);
                 }else {
                     try {
                         Thread.sleep(backoffBaseMilli * (1L << attempt));

@@ -3,6 +3,7 @@ package com.example.auction.domain.auction.search.document;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.example.auction.domain.auction.search.util.AuctionDocumentUtil;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -16,8 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-// 인덱스명 "auction-auction" - Spring 보안 정책상 "auction-" 접두사 범위만 읽기/쓰기 권한이 있음
-@Document(indexName = "auction-auction")
+@Document(indexName = AuctionDocumentUtil.ALIAS_NAME, createIndex = false)
 @NoArgsConstructor
 public class AuctionDocument {
     @Id
@@ -74,6 +74,11 @@ public class AuctionDocument {
         auctionDoc.createdAt = dto.createdAt();
 
         return auctionDoc;
+    }
+
+    public void setCancelled(LocalDateTime cancelledAt) {
+        this.status = AuctionStatus.CANCELLED;
+        this.cancelledAt = cancelledAt;
     }
 }
 

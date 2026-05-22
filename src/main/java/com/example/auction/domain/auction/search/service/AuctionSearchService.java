@@ -64,10 +64,31 @@ public class AuctionSearchService {
         return searchAuctionFromDbImpl(null, condition);
     }
 
+    private boolean conditionOnlyContainsReadyOrActive(AuctionSearchCondition condition) {
+        if (condition.getStatus() == null) {
+            return true;
+        }
+
+        for (AuctionStatus status : AuctionStatus.values()) {
+            if (status == AuctionStatus.READY || status == AuctionStatus.ACTIVE) {
+                continue;
+            }
+
+            if (condition.getStatus().contains(status)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public Page<AuctionSearchResult> searchAuction(
             AuctionSearchCondition condition
     ) {
-        if (!StringUtils.hasText(condition.getKeyword())) {
+        if (
+                !StringUtils.hasText(condition.getKeyword()) ||
+                conditionOnlyContainsReadyOrActive(condition)
+        ) {
             return searchAuctionFromDb(condition);
         }
 
@@ -85,7 +106,10 @@ public class AuctionSearchService {
             Long userId,
             AuctionSearchCondition condition
     ) {
-        if (!StringUtils.hasText(condition.getKeyword())) {
+        if (
+                !StringUtils.hasText(condition.getKeyword()) ||
+                conditionOnlyContainsReadyOrActive(condition)
+        ) {
             return searchAuctionFromDb(userId, condition);
         }
 
@@ -102,7 +126,10 @@ public class AuctionSearchService {
     public Page<AuctionAdminListResponse> searchAuctionWithConditions(
             Pageable pageable, AuctionStatus auctionStatus, String keyword
     ) {
-        if (!StringUtils.hasText(keyword)) {
+        if (
+                !StringUtils.hasText(keyword) ||
+                auctionStatus == AuctionStatus.READY || auctionStatus == AuctionStatus.ACTIVE
+        ) {
             return auctionRepository.findAuctionWithConditions(pageable, auctionStatus, keyword);
         }
 
